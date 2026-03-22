@@ -7,7 +7,9 @@ export function generatePresenter(
   outDir: string,
   title: string,
   format: "png" | "jpg",
-  hasImages: boolean
+  hasImages: boolean,
+  width: number,
+  height: number
 ): string {
   const total = results.length;
   const slideFiles = results.map((r) =>
@@ -90,7 +92,7 @@ export function generatePresenter(
     position: relative;
     height: 100%;
     max-height: calc(100dvh - 140px);
-    aspect-ratio: ${getAspectRatio(results)};
+    aspect-ratio: ${width} / ${height};
     transition: opacity 0.2s ease;
   }
 
@@ -430,11 +432,6 @@ export function generatePresenter(
   const outPath = join(outDir, "index.html");
   writeFileSync(outPath, html);
   return outPath;
-}
-
-function getAspectRatio(results: RenderResult[]): string {
-  // Default to 9/16 for portrait cards
-  return "9 / 16";
 }
 
 function escHtml(str: string): string {

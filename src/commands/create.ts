@@ -188,7 +188,8 @@ export async function createCommand(opts: CreateOptions) {
   spinner.start("Generating presentation viewer…");
   const presenterPath = generatePresenter(
     results, outDir, data.title ?? "Slide Presentation",
-    opts.format, !opts.noImages
+    opts.format, !opts.noImages,
+    template.manifest.width, template.manifest.height
   );
   spinner.succeed("Presentation viewer ready");
 
