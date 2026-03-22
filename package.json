@@ -32,6 +32,10 @@
     "bun"
   ],
   "author": "doum1004",
+  "funding": {
+    "type": "ko_fi",
+    "url": "https://ko-fi.com/doum1004"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/doum1004/slide-cli.git"

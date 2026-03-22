@@ -5,6 +5,7 @@
 [![CI](https://img.shields.io/github/actions/workflow/status/doum1004/slide-cli/ci.yml?branch=main&style=flat-square&label=CI&logo=github)](https://github.com/doum1004/slide-cli/actions/workflows/ci.yml)
 [![license](https://img.shields.io/npm/l/slide-cli?style=flat-square&color=blue)](./LICENSE)
 [![bun](https://img.shields.io/badge/powered%20by-bun-f9f1e1?style=flat-square&logo=bun)](https://bun.sh)
+[![ko-fi](https://img.shields.io/badge/donate-Ko--fi-FF5E5B?style=flat-square&logo=ko-fi&logoColor=white)](https://ko-fi.com/doum1004)
 
 A Bun/TypeScript CLI to create beautiful slide cards from JSON data + HTML templates.
 Supports **9:16** (Stories/Reels), **16:9** (presentations/YouTube), and **1:1** (feed) aspect ratios.
