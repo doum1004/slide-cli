@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+  }
+
+  body {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    font-family: 'Outfit', 'Helvetica Neue', Arial, sans-serif;
+  }
+
+  /* ── Full-bleed background image (optional, behind everything) ── */
+  .bg-image {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+  .bg-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .bg-image::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.52);
+  }
+
+  /* ── Gradient layer ── */
+  .gradient-layer {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(130deg, {{colorA}} 0%, {{colorB}} 100%);
+    z-index: 1;
+    mix-blend-mode: multiply;
+  }
+  body.has-image .gradient-layer {
+    opacity: 0.82;
+  }
+
+  /* Grid overlay */
+  .grid-layer {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 80px 80px;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  /* Radial glow */
+  .glow-layer {
+    position: absolute;
+    top: -160px; left: -160px;
+    width: 800px; height: 800px;
+    background: radial-gradient(circle, {{highlight}}22 0%, transparent 70%);
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  /* All content sits above the background layers */
+  .top-bar, .main, .bottom { position: relative; z-index: 3; }
+
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 48px 80px 0;
+  }
+
+  .brand-dot {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: {{highlight}};
+  }
+
+  .slide-counter {
+    font-size: 22px; font-weight: 300;
+    color: rgba(255,255,255,0.45);
+    letter-spacing: 0.12em;
+  }
+
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 0 80px;
+    gap: 80px;
+  }
+
+  /* Left column: eyebrow + title */
+  .main-left {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  /* Right column: subtitle */
+  .main-right {
+    flex: 0 0 540px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .eyebrow-line { width: 48px; height: 3px; background: {{highlight}}; }
+  .eyebrow-text {
+    font-family: 'Outfit', 'Noto Sans CJK', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 24px; font-weight: 700;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: {{highlight}};
+  }
+
+  .title {
+    font-family: 'Bebas Neue', 'Noto Sans CJK', Impact, 'Arial Narrow', sans-serif;
+    font-size: 148px;
+    font-weight: 900;
+    line-height: 0.95;
+    color: #ffffff;
+    text-wrap: balance;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+  }
+
+  .subtitle {
+    font-family: 'Outfit', 'Noto Sans CJK', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1.55;
+    color: rgba(255,255,255,0.72);
+    text-wrap: balance;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+  }
+
+  .bottom { padding: 0 80px 48px; }
+
+  .bottom-rule {
+    width: 100%; height: 1px;
+    background: linear-gradient(90deg, {{highlight}}88, transparent);
+    margin-bottom: 28px;
+  }
+
+  .cta-text {
+    font-size: 26px; font-weight: 700;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: rgba(255,255,255,0.92);
+  }
+
+  .bg-num {
+    position: absolute;
+    right: -10px; bottom: 40px;
+    font-family: 'Bebas Neue', Impact, 'Arial Narrow', sans-serif;
+    font-size: 380px; line-height: 1;
+    color: rgba(255,255,255,0.03);
+    pointer-events: none;
+    z-index: 3;
+    user-select: none;
+  }
+</style>
+</head>
+<body class="{{#if image}}has-image{{/if}}">
+
+  {{#if image}}
+  <div class="bg-image"><img src="{{image}}" alt=""></div>
+  {{/if}}
+
+  <div class="gradient-layer"></div>
+  <div class="grid-layer"></div>
+  <div class="glow-layer"></div>
+
+  <div class="top-bar">
+    <div class="brand-dot"></div>
+    <div class="slide-counter">{{slideIndex}} / {{totalSlides}}</div>
+  </div>
+
+  <div class="main">
+    <div class="main-left">
+      {{#if eyebrow}}
+      <div class="eyebrow">
+        <div class="eyebrow-line"></div>
+        <span class="eyebrow-text">{{eyebrow}}</span>
+      </div>
+      {{/if}}
+      <h1 class="title">{{title}}</h1>
+    </div>
+
+    {{#if subtitle}}
+    <div class="main-right">
+      <p class="subtitle">{{subtitle}}</p>
+    </div>
+    {{/if}}
+  </div>
+
+  <div class="bottom">
+    <div class="bottom-rule"></div>
+    {{#if cta}}<div class="cta-text">{{cta}}</div>{{/if}}
+  </div>
+
+  <div class="bg-num">{{slideIndex}}</div>
+</body>
+</html>

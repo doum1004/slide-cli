@@ -14,7 +14,7 @@ const program = new Command();
 program
   .name("slide")
   .description(
-    chalk.bold("slide-cli") + chalk.dim(" — create beautiful 9:16 slide cards from JSON data")
+    chalk.bold("slide-cli") + chalk.dim(" — create beautiful slide cards (9:16, 16:9, 1:1) from JSON data")
   )
   .version("1.0.0");
 

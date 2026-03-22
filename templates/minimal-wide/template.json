@@ -1,0 +1,76 @@
+{
+  "name": "Minimal Wide",
+  "id": "minimal-wide",
+  "version": "1.0.0",
+  "description": "Clean, typographic slide with a large heading and body text — 16:9 widescreen",
+  "author": "slide-cli",
+  "aspectRatio": "16:9",
+  "width": 1920,
+  "height": 1080,
+  "tags": ["minimal", "typography", "clean", "wide", "16:9"],
+  "slots": [
+    {
+      "id": "heading",
+      "type": "text",
+      "label": "Heading",
+      "required": true,
+      "description": "Main heading text"
+    },
+    {
+      "id": "body",
+      "type": "text",
+      "label": "Body text",
+      "required": false,
+      "default": "",
+      "description": "Supporting paragraph"
+    },
+    {
+      "id": "label",
+      "type": "text",
+      "label": "Label / tag",
+      "required": false,
+      "default": "",
+      "description": "Small label shown above the heading"
+    },
+    {
+      "id": "image",
+      "type": "image",
+      "label": "Image",
+      "required": false,
+      "default": "",
+      "description": "Optional image. File path (relative to data JSON) or https:// URL. In wide layout: placed right of text (default) or full-bleed."
+    },
+    {
+      "id": "imagePosition",
+      "type": "text",
+      "label": "Image position",
+      "required": false,
+      "default": "right",
+      "description": "Where to place the image: 'right' (beside text, half-width), 'top' (above text, full-width strip), or 'bottom' (below text). Default: right."
+    },
+    {
+      "id": "accent",
+      "type": "color",
+      "label": "Accent color",
+      "required": false,
+      "default": "#c8b89a",
+      "description": "Color for the label and decorative line"
+    },
+    {
+      "id": "bg",
+      "type": "color",
+      "label": "Background color",
+      "required": false,
+      "default": "#0f0e0c",
+      "description": "Slide background color"
+    },
+    {
+      "id": "footer",
+      "type": "text",
+      "label": "Footer text",
+      "required": false,
+      "default": "",
+      "description": "Small text at the bottom"
+    }
+  ]
+}

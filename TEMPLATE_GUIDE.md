@@ -101,9 +101,11 @@ Defines the template identity and every data slot the HTML can use.
 
 | Ratio | width | height | Use case |
 |---|---|---|---|
-| 9:16 (default) | 1080 | 1920 | Instagram Stories, TikTok, Reels |
-| 1:1 | 1080 | 1080 | Instagram feed, Twitter |
-| 16:9 | 1920 | 1080 | YouTube thumbnails, presentations |
+| 9:16 | 1080 | 1920 | Instagram Stories, TikTok, Reels |
+| 1:1 | 1080 | 1080 | Instagram feed, Twitter/X |
+| 16:9 | 1920 | 1080 | YouTube thumbnails, presentations, Google Slides export |
+
+Set `aspectRatio`, `width`, and `height` in `template.json` to match. The renderer crops the Puppeteer viewport to exactly these dimensions — the HTML must declare the same pixel size in CSS.
 
 ---
 
@@ -177,8 +179,16 @@ Slot values are injected via [Handlebars](https://handlebarsjs.com/) before rend
 
 1. **Fixed pixel dimensions** — `html` and `body` must be exactly `width × height` pixels
    from the manifest. Do not use `%`, `vw`, `vh`, or `auto` for the root size.
+   Match your manifest values precisely:
    ```css
+   /* 9:16 Stories/Reels */
    html, body { width: 1080px; height: 1920px; overflow: hidden; }
+
+   /* 16:9 Presentations/YouTube */
+   html, body { width: 1920px; height: 1080px; overflow: hidden; }
+
+   /* 1:1 Feed/Square */
+   html, body { width: 1080px; height: 1080px; overflow: hidden; }
    ```
 
 2. **No external network requests in production** — Google Fonts and CDN links
@@ -298,11 +308,25 @@ Slot values are injected via [Handlebars](https://handlebarsjs.com/) before rend
 
 ---
 
-## Design guidelines for good 9:16 cards
+## Design guidelines
 
-### Typography scale (1080×1920px canvas)
+### Choosing your aspect ratio
 
-These slides are rendered at 1080×1920px but displayed on a mobile screen at roughly 375–430px wide. The browser scales the image down by ~2.8×. A font that is 36px at render time appears as ~13px on screen — barely readable. Design for the final display size, not the render size.
+| Format | Ratio | Canvas | Primary display context |
+|---|---|---|---|
+| Stories, Reels, TikTok | 9:16 | 1080×1920 | Mobile, full-screen, held vertically |
+| Presentations, YouTube | 16:9 | 1920×1080 | Desktop/TV, projected, landscape |
+| Feed, Square posts | 1:1 | 1080×1080 | Mixed — mobile and desktop feeds |
+
+The aspect ratio shapes every design decision: how much vertical space you have, how text wraps, and whether a two-column layout makes sense. Choose before writing any CSS.
+
+---
+
+## Design guidelines for 9:16 cards (1080×1920px)
+
+### Typography scale
+
+These slides render at 1080×1920px but display on a mobile screen at roughly 375–430px wide. The browser scales the image down by ~2.8×. A font that is 36px at render time appears as ~13px on screen — barely readable. Design for the final display size, not the render size.
 
 | Role | Min render size | Approx on mobile | Notes |
 |---|---|---|---|
@@ -313,33 +337,7 @@ These slides are rendered at 1080×1920px but displayed on a mobile screen at ro
 | Label / eyebrow | 32px | ~11px | Uppercase + letter-spacing |
 | Footer / counter | 28px | ~10px | Absolute minimum — keep short |
 
-**Never go below 28px render size** for any text a user needs to read. At 1080px canvas → 375px mobile display, 28px renders at ~10px which is the absolute floor for legibility.
-
-### Mobile contrast rules
-
-A 9:16 card is viewed on a glowing screen in varied lighting. Contrast requirements are stricter than desktop.
-
-- **Primary text** (headings, quotes): use near-white on dark (`#f0ece4` or brighter), near-black on light (`#1a1714` or darker). No opacity reduction.
-- **Secondary text** (body, subtitle): minimum `opacity: 0.7` or equivalent solid colour. `rgba(255,255,255,0.55)` is the floor on dark backgrounds — below that, body text disappears on bright screens.
-- **Tertiary text** (labels, roles, counters): minimum `opacity: 0.35`. Lower than this becomes decoration, not information.
-- **Ghost text** (purely decorative numbers/watermarks): `opacity: 0.03–0.08` — fine because it carries no information.
-- **Avoid low-contrast combinations on muted backgrounds**: `#7a756e` text on `#0f0e0c` has ~3:1 contrast ratio — technically passing AA but failing on mobile in sunlight. Use `#a09890` or brighter.
-- **Font weight matters as much as colour**: thin/light weights (`font-weight: 200–300`) at small sizes lose legibility faster than regular weight. Use `font-weight: 400` minimum for body text, `700` for labels and eyebrows at small sizes.
-
-### Opacity pitfalls
-
-Using `opacity` on text elements applies to the entire element including background. For text-only contrast control, prefer solid colour values or `rgba()` directly on `color`:
-
-```css
-/* ✗ Risky — opacity affects background too if element has one */
-.secondary { color: #ffffff; opacity: 0.45; }
-
-/* ✓ Better — only the text colour is affected */
-.secondary { color: rgba(255,255,255,0.6); }
-
-/* ✓ Best for dark-on-light — use a concrete muted colour */
-.secondary { color: #6b6560; }
-```
+**Never go below 28px render size** for any text a user needs to read.
 
 ### Layout zones (for 1080×1920)
 
@@ -362,8 +360,100 @@ Using `opacity` on text elements applies to the entire element including backgro
 └─────────────────────────────┘  ← y=1920
 ```
 
-### Horizontal padding
-Use **80–120px** left/right padding. Cards are viewed on mobile — tight edges feel cramped.
+**Horizontal padding:** 80–120px left/right. Cards are viewed on mobile — tight edges feel cramped.
+
+**Layout direction:** `flex-direction: column`. 9:16 is a tall, narrow canvas — vertical stacking is natural. Two-column layouts can work for specific use cases (image beside text) but require careful width management.
+
+---
+
+## Design guidelines for 16:9 cards (1920×1080px)
+
+### Typography scale
+
+16:9 cards are typically viewed at full screen on a desktop (1920px native) or projected. Scale factors vary widely — a 1920px canvas on a 1280px laptop screen is ~0.67×; projected on a wall it may be 1× or larger. Design for comfortable legibility at native size: text that reads well at 1920px will scale gracefully.
+
+| Role | Recommended render size | Notes |
+|---|---|---|
+| Display / hero title | 120–160px | 1–4 words |
+| Large heading | 80–110px | 4–8 words |
+| Subheading / subtitle | 32–48px | 1–3 lines |
+| Body text | 28–36px | 4–8 lines max |
+| Label / eyebrow | 22–28px | Uppercase + letter-spacing |
+| Footer / counter | 20–24px | Minimum — keep very short |
+
+**Minimum:** 20px render size. Below that, text becomes illegible when projected or on a laptop.
+
+### Layout zones (for 1920×1080)
+
+```
+┌──────────────────────────────────────────────┐  ← y=0
+│  TOP BAR: 40–60px  · branding / counter      │
+├──────────┬───────────────────────────────────┤  ← y≈80
+│          │                                   │
+│  LEFT    │  RIGHT COLUMN                     │
+│  COLUMN  │  (image, subtitle, attribution)   │
+│  (title, │                                   │
+│  heading,│                                   │
+│  quote)  │                                   │
+│          │                                   │
+├──────────┴───────────────────────────────────┤  ← y≈1020
+│  BOTTOM BAR: 40–60px · CTA / footer / rule   │
+└──────────────────────────────────────────────┘  ← y=1080
+```
+
+**Layout direction:** `flex-direction: row` is often the right choice. A 16:9 canvas is wide and shallow — two-column layouts (title left, subtitle right; quote left, attribution right) use the space naturally and give each element room to breathe.
+
+**Horizontal padding:** 80–96px left/right.
+**Vertical padding:** 44–64px top/bottom.
+
+### Two-column layout patterns
+
+```css
+/* Split: content left + image/aside right */
+.main {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex: 1;
+  padding: 0 80px;
+  gap: 80px;
+}
+.main-left  { flex: 1 1 0; }           /* grows to fill */
+.main-right { flex: 0 0 540px; }       /* fixed right column */
+
+/* Equal split */
+.main-left  { flex: 1 1 0; }
+.main-right { flex: 1 1 0; }
+
+/* Image takes right half */
+.text-col  { flex: 0 0 900px; }
+.image-col { flex: 1 1 0; }
+```
+
+---
+
+## Shared design principles (all aspect ratios)
+
+### Mobile/display contrast rules
+
+- **Primary text** (headings, quotes): near-white on dark (`#f0ece4` or brighter), near-black on light (`#1a1714` or darker). No opacity reduction.
+- **Secondary text** (body, subtitle): minimum `opacity: 0.7` or equivalent solid colour.
+- **Tertiary text** (labels, roles, counters): minimum `opacity: 0.35`.
+- **Ghost text** (decorative numbers/watermarks): `opacity: 0.03–0.08`.
+- **Font weight matters as much as colour**: use `font-weight: 400` minimum for body text, `700` for labels and eyebrows at small sizes.
+
+### Opacity pitfalls
+
+```css
+/* ✗ Risky — opacity affects background too if element has one */
+.secondary { color: #ffffff; opacity: 0.45; }
+
+/* ✓ Better — only the text colour is affected */
+.secondary { color: rgba(255,255,255,0.6); }
+
+/* ✓ Best for dark-on-light — use a concrete muted colour */
+.secondary { color: #6b6560; }
+```
 
 ### Color palette strategies
 
@@ -458,7 +548,7 @@ personality while sharing the same layout:
 
 ## Complete worked example
 
-This is a fully working minimal template an LLM can use as a base and modify.
+This is a fully working minimal 16:9 template. The same structure applies to any ratio — just change `aspectRatio`, `width`, `height`, and the matching CSS dimensions.
 
 ### template.json
 ```json
@@ -467,16 +557,16 @@ This is a fully working minimal template an LLM can use as a base and modify.
   "id": "statement",
   "version": "1.0.0",
   "description": "Single bold statement card with a colored rule and optional caption.",
-  "aspectRatio": "9:16",
-  "width": 1080,
-  "height": 1920,
+  "aspectRatio": "16:9",
+  "width": 1920,
+  "height": 1080,
   "slots": [
-    { "id": "statement", "type": "text",  "label": "Statement",      "required": true,  "description": "The main statement. 3–10 words." },
-    { "id": "caption",   "type": "text",  "label": "Caption",        "required": false, "default": "", "description": "Small text below. Attribution, context, or source." },
-    { "id": "label",     "type": "text",  "label": "Top label",      "required": false, "default": "", "description": "Uppercase eyebrow tag at the top." },
-    { "id": "bg",        "type": "color", "label": "Background",     "required": false, "default": "#0f0e0c" },
-    { "id": "accent",    "type": "color", "label": "Accent color",   "required": false, "default": "#e8b86d" },
-    { "id": "ink",       "type": "color", "label": "Text color",     "required": false, "default": "#f0ece4" }
+    { "id": "statement", "type": "text",  "label": "Statement",    "required": true,  "description": "The main statement. 3–10 words." },
+    { "id": "caption",   "type": "text",  "label": "Caption",      "required": false, "default": "", "description": "Small text below. Attribution, context, or source." },
+    { "id": "label",     "type": "text",  "label": "Top label",    "required": false, "default": "", "description": "Uppercase eyebrow tag at the top." },
+    { "id": "bg",        "type": "color", "label": "Background",   "required": false, "default": "#0f0e0c" },
+    { "id": "accent",    "type": "color", "label": "Accent color", "required": false, "default": "#e8b86d" },
+    { "id": "ink",       "type": "color", "label": "Text color",   "required": false, "default": "#f0ece4" }
   ]
 }
 ```
@@ -489,37 +579,38 @@ This is a fully working minimal template an LLM can use as a base and modify.
 <meta charset="UTF-8">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { width: 1080px; height: 1920px; overflow: hidden; background: {{bg}}; }
+  html, body { width: 1920px; height: 1080px; overflow: hidden; background: {{bg}}; }
   body {
     display: flex; flex-direction: column; justify-content: center;
-    padding: 100px 96px;
+    padding: 80px 120px;
     font-family: Georgia, 'Times New Roman', serif;
     color: {{ink}};
     position: relative;
   }
   .label {
     font-family: 'Courier New', monospace;
-    font-size: 28px; font-weight: 400;
+    font-size: 22px; font-weight: 400;
     letter-spacing: 0.2em; text-transform: uppercase;
-    color: {{accent}}; margin-bottom: 48px;
+    color: {{accent}}; margin-bottom: 36px;
   }
-  .rule { width: 72px; height: 3px; background: {{accent}}; margin-bottom: 60px; }
+  .rule { width: 64px; height: 3px; background: {{accent}}; margin-bottom: 48px; }
   .statement {
-    font-size: 110px; font-weight: 400;
+    font-size: 96px; font-weight: 400;
     line-height: 1.1; letter-spacing: -0.02em;
-    color: {{ink}};
+    color: {{ink}}; max-width: 1400px;
+    text-wrap: pretty;
   }
   .caption {
-    margin-top: 64px;
+    margin-top: 48px;
     font-family: 'Courier New', monospace;
-    font-size: 36px; font-weight: 400;
+    font-size: 28px; font-weight: 400;
     line-height: 1.6; color: {{accent}};
     opacity: 0.8;
   }
   .counter {
-    position: absolute; bottom: 72px; right: 96px;
+    position: absolute; bottom: 52px; right: 96px;
     font-family: 'Courier New', monospace;
-    font-size: 26px; opacity: 0.3; letter-spacing: 0.1em;
+    font-size: 20px; opacity: 0.3; letter-spacing: 0.1em;
   }
 </style>
 </head>
@@ -539,7 +630,7 @@ This is a fully working minimal template an LLM can use as a base and modify.
   "_template": "statement",
   "_description": "Single bold statement card. Best for impactful one-liners, principles, or rules. Each slide should have its own 'bg' and 'accent' colors for visual variety across the deck.",
   "_slots": {
-    "statement": "REQUIRED — the main statement. 3–10 words works best at 110px font size.",
+    "statement": "REQUIRED — the main statement. 3–10 words works best at 96px font size.",
     "caption":   "optional — smaller text below: attribution, source, or elaboration.",
     "label":     "optional — short uppercase eyebrow tag above the rule (e.g. 'Rule 01').",
     "bg":        "optional — background hex color. Default #0f0e0c. Try dark near-blacks for editorial feel.",
@@ -560,8 +651,9 @@ This is a fully working minimal template an LLM can use as a base and modify.
 ## Checklist before running `slide add-template`
 
 - [ ] `template.json` has a unique kebab-case `id`
+- [ ] `aspectRatio`, `width`, and `height` are set correctly for your format (9:16, 16:9, or 1:1)
 - [ ] All slots used as `{{slotId}}` in the HTML are declared in `slots[]`
-- [ ] `html` and `body` are fixed at `width × height` px with `overflow: hidden`
+- [ ] `html` and `body` CSS dimensions exactly match `width × height` in the manifest, with `overflow: hidden`
 - [ ] Font stacks include system fallbacks (no network-only fonts)
 - [ ] `{{slideIndex}}` and `{{totalSlides}}` used for slide counter (optional but recommended)
 - [ ] `sample.json` has `_slots` with a description for every slot

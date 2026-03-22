@@ -1,16 +1,44 @@
 {
   "name": "slide-cli",
   "version": "1.0.0",
-  "description": "CLI to create beautiful slide cards (9:16) from JSON + templates",
+  "description": "CLI to create beautiful slide cards (9:16, 16:9, 1:1) from JSON + HTML templates",
   "module": "index.ts",
   "type": "module",
   "bin": { "slide": "./src/index.ts" },
   "scripts": {
     "postinstall": "node scripts/download-fonts.js",
     "start": "bun src/index.ts",
-    "dev": "bun --watch src/index.ts"
+    "dev": "bun --watch src/index.ts",
+    "prepublishOnly": "bun build ./src/index.ts --outdir ./dist --target node --format esm && cp -r templates dist/templates && cp -r scripts dist/scripts && cp TEMPLATE_GUIDE.md dist/TEMPLATE_GUIDE.md"
   },
-  "private": true,
+  "keywords": [
+    "slides",
+    "presentation",
+    "cli",
+    "card",
+    "template",
+    "instagram",
+    "stories",
+    "reels",
+    "youtube",
+    "thumbnail",
+    "json",
+    "html",
+    "puppeteer",
+    "bun"
+  ],
+  "author": "",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist/",
+    "templates/",
+    "scripts/",
+    "TEMPLATE_GUIDE.md",
+    "README.md"
+  ],
   "devDependencies": {
     "@types/bun": "latest"
   },

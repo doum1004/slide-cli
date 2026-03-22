@@ -1,6 +1,7 @@
 # slide-cli
 
-A Bun/TypeScript CLI to create beautiful 9:16 slide cards from JSON data + HTML templates.
+A Bun/TypeScript CLI to create beautiful slide cards from JSON data + HTML templates.
+Supports **9:16** (Stories/Reels), **16:9** (presentations/YouTube), and **1:1** (feed) aspect ratios.
 
 ```
 slide create        --data data.json --template minimal --out ./output
@@ -96,11 +97,14 @@ slide add-template ./my-template/ --force
 
 ## Built-in templates
 
-| id | Required slots | Style |
-|---|---|---|
-| `minimal` | `heading` | Dark typographic, Fraunces serif |
-| `bold-title` | `title` | Gradient editorial, Bebas Neue |
-| `quote-card` | `quote` | Light serif pull-quote card |
+| id | Ratio | Required slots | Style |
+|---|---|---|---|
+| `minimal` | 9:16 | `heading` | Dark typographic, Fraunces serif |
+| `bold-title` | 9:16 | `title` | Gradient editorial, Bebas Neue |
+| `quote-card` | 9:16 | `quote` | Light serif pull-quote card |
+| `minimal-wide` | 16:9 | `heading` | Dark typographic, two-column layout |
+| `bold-title-wide` | 16:9 | `title` | Gradient editorial, title left / subtitle right |
+| `quote-card-wide` | 16:9 | `quote` | Light serif pull-quote, quote left / attribution right |
 
 ---
 
@@ -109,22 +113,31 @@ slide add-template ./my-template/ --force
 ```
 my-template/
 ├── template.json    ← manifest + slot definitions
-└── template.html   ← Handlebars HTML (1080×1920px)
+└── template.html   ← Handlebars HTML at your chosen dimensions
 ```
 
 ### template.json
+
+Set `aspectRatio`, `width`, and `height` to match your target format:
+
+| `aspectRatio` | `width` | `height` | Use case |
+|---|---|---|---|
+| `"9:16"` | 1080 | 1920 | Instagram Stories, TikTok, Reels |
+| `"16:9"` | 1920 | 1080 | YouTube thumbnails, presentations |
+| `"1:1"` | 1080 | 1080 | Instagram feed, Twitter/X |
+
 ```json
 {
   "name": "My Template",
   "id": "my-template",
   "version": "1.0.0",
   "description": "Short description",
-  "aspectRatio": "9:16",
-  "width": 1080,
-  "height": 1920,
+  "aspectRatio": "16:9",
+  "width": 1920,
+  "height": 1080,
   "slots": [
-    { "id": "headline", "type": "text", "label": "Headline", "required": true },
-    { "id": "bg",       "type": "color","label": "Background","required": false, "default": "#fff" }
+    { "id": "headline", "type": "text",  "label": "Headline",   "required": true },
+    { "id": "bg",       "type": "color", "label": "Background", "required": false, "default": "#fff" }
   ]
 }
 ```
@@ -132,10 +145,13 @@ my-template/
 **Slot types:** `text` · `color` · `image` · `number` · `url`
 
 ### template.html
+
+Match `width` and `height` in CSS to the values in your manifest:
+
 ```html
 <!DOCTYPE html><html>
 <head><style>
-  html, body { width: 1080px; height: 1920px; background: {{bg}}; }
+  html, body { width: 1920px; height: 1080px; background: {{bg}}; }
 </style></head>
 <body>
   <h1>{{headline}}</h1>

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    background: {{bg}};
+  }
+
+  body {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    font-family: 'DM Mono', 'Courier New', monospace;
+  }
+
+  /* Noise texture */
+  body::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    opacity: 0.35;
+    z-index: 0;
+  }
+
+  /* ── Base layout: header + content row + footer ── */
+  .zone-header {
+    flex: 0 0 auto;
+    padding: 52px 88px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative; z-index: 1;
+  }
+
+  .zone-content {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: row;
+    min-height: 0;
+    position: relative; z-index: 1;
+  }
+
+  /* ── Text column ── */
+  .zone-text {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 32px 88px;
+  }
+
+  /* ── Image column / strip ── */
+  .zone-image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .slide-image {
+    display: block;
+    object-fit: contain;
+    object-position: center center;
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+  }
+
+  /* ── No image: text fills full width ── */
+  body.no-image .zone-image { display: none; }
+  body.no-image .zone-text  { padding: 32px 180px; }
+
+  /* ── img-right (default): image takes right half ── */
+  body.img-right .zone-text  { flex: 0 0 900px; }
+  body.img-right .zone-image {
+    flex: 1 1 0;
+    padding: 32px 48px 32px 0;
+  }
+  body.img-right .slide-image {
+    border-radius: 12px;
+    max-height: 900px;
+  }
+
+  /* ── img-top: thin strip above, text below ── */
+  body.img-top .zone-content { flex-direction: column; }
+  body.img-top .zone-image {
+    flex: 0 0 340px;
+    width: 100%;
+    padding: 0 88px 24px;
+  }
+  body.img-top .zone-text { flex: 1 1 0; }
+
+  /* ── img-bottom: text above, image strip below ── */
+  body.img-bottom .zone-content { flex-direction: column; }
+  body.img-bottom .zone-text  { flex: 1 1 0; }
+  body.img-bottom .zone-image {
+    flex: 0 0 320px;
+    width: 100%;
+    padding: 0 88px 32px;
+  }
+
+  /* ── Text elements ── */
+  .label {
+    font-size: 22px;
+    font-weight: 400;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: {{accent}};
+    margin-bottom: 28px;
+  }
+
+  .rule {
+    width: 64px;
+    height: 2px;
+    background: {{accent}};
+    margin-bottom: 36px;
+    opacity: 0.7;
+  }
+
+  .heading {
+    font-family: 'Fraunces', 'Noto Serif CJK', Georgia, 'Times New Roman', serif;
+    font-size: 88px;
+    font-weight: 600;
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    color: #f0ece4;
+    margin-bottom: 40px;
+    text-wrap: balance;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+  }
+
+  .body-text {
+    font-family: 'DM Mono', 'Noto Sans CJK', 'Courier New', monospace;
+    font-size: 30px;
+    font-weight: 400;
+    line-height: 1.65;
+    color: #a09890;
+    max-width: 760px;
+    text-wrap: balance;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+  }
+
+  /* ── Footer ── */
+  .footer {
+    position: absolute;
+    bottom: 40px;
+    left: 88px;
+    right: 88px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 3;
+  }
+
+  .footer-text {
+    font-size: 22px;
+    font-weight: 300;
+    letter-spacing: 0.08em;
+    color: #5a5550;
+  }
+
+  .slide-num {
+    font-size: 20px;
+    font-weight: 300;
+    color: #484440;
+    letter-spacing: 0.12em;
+  }
+</style>
+</head>
+<body class="{{#if image}}img-{{default imagePosition 'right'}}{{else}}no-image{{/if}}">
+
+  <div class="zone-header">
+    <span><!-- spacer --></span>
+  </div>
+
+  <div class="zone-content">
+    <div class="zone-text">
+      {{#if label}}<div class="label">{{label}}</div>{{/if}}
+      <div class="rule"></div>
+      <h1 class="heading">{{heading}}</h1>
+      {{#if body}}<p class="body-text">{{body}}</p>{{/if}}
+    </div>
+
+    {{#if image}}
+    <div class="zone-image">
+      <img class="slide-image" src="{{image}}" alt="">
+    </div>
+    {{/if}}
+  </div>
+
+  <footer class="footer">
+    {{#if footer}}<span class="footer-text">{{footer}}</span>{{else}}<span></span>{{/if}}
+    <span class="slide-num">{{slideIndex}} / {{totalSlides}}</span>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,76 @@
+{
+  "name": "Quote Card Wide",
+  "id": "quote-card-wide",
+  "version": "1.0.0",
+  "description": "Elegant pull-quote card with large quotation marks and attribution — 16:9 widescreen",
+  "author": "slide-cli",
+  "aspectRatio": "16:9",
+  "width": 1920,
+  "height": 1080,
+  "tags": ["quote", "elegant", "serif", "wide", "16:9"],
+  "slots": [
+    {
+      "id": "quote",
+      "type": "text",
+      "label": "Quote text",
+      "required": true,
+      "description": "The main quote (without quotation marks)"
+    },
+    {
+      "id": "author",
+      "type": "text",
+      "label": "Author name",
+      "required": false,
+      "default": "",
+      "description": "Who said it"
+    },
+    {
+      "id": "role",
+      "type": "text",
+      "label": "Author role / context",
+      "required": false,
+      "default": "",
+      "description": "e.g. CEO, Philosopher, 1984"
+    },
+    {
+      "id": "image",
+      "type": "image",
+      "label": "Author portrait",
+      "required": false,
+      "default": "",
+      "description": "Optional author portrait. Shown as a circle beside the author name. File path or https:// URL."
+    },
+    {
+      "id": "topic",
+      "type": "text",
+      "label": "Topic tag",
+      "required": false,
+      "default": "",
+      "description": "Short category label shown at top"
+    },
+    {
+      "id": "bg",
+      "type": "color",
+      "label": "Background",
+      "required": false,
+      "default": "#faf7f2",
+      "description": "Card background"
+    },
+    {
+      "id": "ink",
+      "type": "color",
+      "label": "Text color",
+      "required": false,
+      "default": "#1a1714",
+      "description": "Main text color"
+    },
+    {
+      "id": "accent",
+      "type": "color",
+      "label": "Accent color",
+      "required": false,
+      "default": "#c0392b",
+      "description": "Color for quotation marks and rule"
+    }
+  ]
+}

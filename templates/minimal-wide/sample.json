@@ -1,0 +1,53 @@
+{
+  "_template": "minimal-wide",
+  "_description": "Dark typographic card — 16:9 widescreen. Text on the left, optional image on the right (default) or as a top/bottom strip. Each slide needs a 'heading'. All other fields are optional.",
+  "_slots": {
+    "heading":       "REQUIRED — main large heading text",
+    "body":          "optional — supporting paragraph shown below the heading",
+    "label":         "optional — small uppercase tag shown above the heading (e.g. 'Chapter 01')",
+    "image":         "optional — path to a local image file or an https:// URL.",
+    "imagePosition": "optional — 'right' (beside text, default), 'top' (strip above), or 'bottom' (strip below).",
+    "bg":            "optional — hex background color (default: #0f0e0c)",
+    "footer":        "optional — small text anchored to the bottom-left corner"
+  },
+  "title": "Design Principles",
+  "slides": [
+    {
+      "layout": "minimal-wide",
+      "label": "Chapter 01",
+      "heading": "Less is more",
+      "body": "Simplicity is the ultimate sophistication. Remove everything that does not serve the message.",
+      "accent": "#c8b89a",
+      "bg": "#0f0e0c",
+      "footer": "Design Principles"
+    },
+    {
+      "layout": "minimal-wide",
+      "label": "Chapter 02",
+      "heading": "White space breathes",
+      "body": "Empty space is not wasted space. It gives the eye room to rest and the mind room to think.",
+      "accent": "#8eb8a0",
+      "bg": "#080f0c",
+      "footer": "Design Principles"
+    },
+    {
+      "layout": "minimal-wide",
+      "label": "Chapter 03",
+      "heading": "Type is voice",
+      "body": "Your choice of typeface communicates before anyone reads a word.",
+      "accent": "#a8b8d0",
+      "bg": "#090c14",
+      "footer": "Design Principles"
+    },
+    {
+      "layout": "minimal-wide",
+      "label": "Chapter 04",
+      "heading": "Image speaks first",
+      "image": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920",
+      "imagePosition": "right",
+      "accent": "#b0c4b8",
+      "bg": "#080d0a",
+      "footer": "Design Principles"
+    }
+  ]
+}
