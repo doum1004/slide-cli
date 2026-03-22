@@ -31,7 +31,15 @@
     "puppeteer",
     "bun"
   ],
-  "author": "",
+  "author": "doum1004",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/doum1004/slide-cli.git"
+  },
+  "homepage": "https://github.com/doum1004/slide-cli#readme",
+  "bugs": {
+    "url": "https://github.com/doum1004/slide-cli/issues"
+  },
   "license": "MIT",
   "publishConfig": {
     "access": "public"
@@ -41,7 +49,9 @@
     "templates/",
     "scripts/",
     "TEMPLATE_GUIDE.md",
-    "README.md"
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
   ],
   "devDependencies": {
     "@types/bun": "latest"

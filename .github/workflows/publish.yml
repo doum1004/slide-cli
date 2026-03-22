@@ -12,6 +12,10 @@ on:
           - patch
           - minor
           - major
+      note:
+        description: "Release note (optional — shown at the top of the GitHub Release and CHANGELOG)"
+        required: false
+        default: ""
 
 # Only one publish job at a time
 concurrency:
@@ -23,17 +27,16 @@ jobs:
     name: Test → Build → Publish
     runs-on: ubuntu-latest
     permissions:
-      contents: write   # push version-bump commit + tag
+      contents: write   # push version-bump commit + tag + create release
 
     steps:
       # ── 1. Checkout ─────────────────────────────────────────────────
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          # Fetch full history so `git log` and tagging work correctly
+          # Fetch full history so git log and tagging work correctly
           fetch-depth: 0
-          # Use a token that can push back to the repo
-          token: ${{ secrets.GIT_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       # ── 2. Set up Bun ───────────────────────────────────────────────
       - name: Set up Bun
@@ -50,17 +53,14 @@ jobs:
         run: bun test
 
       # ── 5. Bump version ─────────────────────────────────────────────
-      # npm version edits package.json and creates a git commit + tag,
-      # but we push them ourselves after the publish succeeds so a failed
-      # publish doesn't leave a dangling tag on the remote.
+      # npm version edits package.json but we commit/tag ourselves so a
+      # failed publish can't leave a dangling tag on the remote.
       - name: Bump version (${{ inputs.bump }})
         id: bump
         run: |
-          # Tell git who we are for the version commit
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          # --no-git-tag-version: we'll create the tag ourselves below
           NEW_VERSION=$(npm version ${{ inputs.bump }} --no-git-tag-version)
           echo "new_version=${NEW_VERSION}" >> "$GITHUB_OUTPUT"
           echo "Bumped to ${NEW_VERSION}"
@@ -69,21 +69,109 @@ jobs:
       - name: Build
         run: bun scripts/build.js
 
-      # ── 7. Publish to npm ────────────────────────────────────────────
+      # ── 7. Publish to npm ───────────────────────────────────────────
       - name: Publish to npm
         run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      # ── 8. Commit version bump + push tag ───────────────────────────
-      # Only runs if publish succeeded (steps are sequential and any
-      # failure exits the job, so reaching this step means npm publish
-      # went through).
-      - name: Commit version bump and push tag
+      # ── 8. Build changelog entry and update CHANGELOG.md ────────────
+      # Runs after publish (so a failed publish skips this entirely) but
+      # before the git commit so the file update lands in the same commit
+      # as the version bump.
+      - name: Update CHANGELOG.md
+        id: changelog
+        run: |
+          VERSION=${{ steps.bump.outputs.new_version }}
+          DATE=$(date -u +%Y-%m-%d)
+          NOTE="${{ inputs.note }}"
+
+          # Find the previous tag to diff against
+          PREV_TAG=$(git tag --sort=-version:refname | grep -v "^${VERSION}$" | head -1)
+
+          if [ -z "$PREV_TAG" ]; then
+            LOG=$(git log --pretty=format:"- %s (%h)" HEAD)
+          else
+            LOG=$(git log --pretty=format:"- %s (%h)" "${PREV_TAG}..HEAD")
+          fi
+
+          # Pass to later steps
+          {
+            echo "log<<EOF"
+            echo "$LOG"
+            echo "EOF"
+            echo "prev_tag=${PREV_TAG}"
+            echo "date=${DATE}"
+          } >> "$GITHUB_OUTPUT"
+
+          # Build the new CHANGELOG entry
+          ENTRY_FILE=$(mktemp)
+          {
+            echo "## ${VERSION} — ${DATE}"
+            echo ""
+            if [ -n "$NOTE" ]; then
+              echo "> ${NOTE}"
+              echo ""
+            fi
+            echo "### Changes"
+            echo ""
+            echo "$LOG"
+            echo ""
+            if [ -n "$PREV_TAG" ]; then
+              REPO_URL=$(git remote get-url origin \
+                | sed 's/\.git$//' \
+                | sed 's|git@github\.com:|https://github.com/|')
+              echo "**Full diff:** [${PREV_TAG}...${VERSION}](${REPO_URL}/compare/${PREV_TAG}...${VERSION})"
+            fi
+            echo ""
+            echo "---"
+            echo ""
+          } > "$ENTRY_FILE"
+
+          # Splice entry after the marker comment in CHANGELOG.md
+          MARKER="<!-- New entries are prepended automatically by the publish workflow -->"
+          awk -v entry_file="$ENTRY_FILE" -v marker="$MARKER" '
+            $0 == marker {
+              print
+              print ""
+              while ((getline line < entry_file) > 0) print line
+              next
+            }
+            { print }
+          ' CHANGELOG.md > CHANGELOG.md.tmp
+
+          mv CHANGELOG.md.tmp CHANGELOG.md
+          rm -f "$ENTRY_FILE"
+
+      # ── 9. Commit version bump + CHANGELOG + push tag ────────────────
+      - name: Commit and push
         run: |
           VERSION=${{ steps.bump.outputs.new_version }}
 
-          git add package.json
+          git add package.json CHANGELOG.md
           git commit -m "chore: release ${VERSION}"
           git tag "${VERSION}"
           git push origin HEAD:${{ github.ref_name }} --follow-tags
+
+      # ── 10. Create GitHub Release ────────────────────────────────────
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.bump.outputs.new_version }}
+          name: ${{ steps.bump.outputs.new_version }}
+          body: |
+            ${{ inputs.note && format('> {0}', inputs.note) || '' }}
+
+            ## What's changed
+            ${{ steps.changelog.outputs.log || '_No commits found._' }}
+
+            ## Install
+            ```sh
+            npm install -g slide-cli
+            # or
+            bunx slide-cli --help
+            ```
+
+            **Full diff:** ${{ steps.changelog.outputs.prev_tag && format('[{0}...{1}](../../compare/{0}...{2})', steps.changelog.outputs.prev_tag, steps.bump.outputs.new_version, steps.bump.outputs.new_version) || '_first release_' }}
+          draft: false
+          prerelease: false
