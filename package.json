@@ -10,7 +10,10 @@
     "start": "bun src/index.ts",
     "dev": "bun --watch src/index.ts",
     "build": "bun scripts/build.js",
-    "prepublishOnly": "bun scripts/build.js"
+    "prepublishOnly": "bun scripts/build.js",
+    "test": "bun test",
+    "test:watch": "bun test --watch",
+    "test:coverage": "bun test --coverage"
   },
   "keywords": [
     "slides",

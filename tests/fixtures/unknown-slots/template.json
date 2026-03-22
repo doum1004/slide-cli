@@ -1,0 +1,12 @@
+{
+  "name": "Unknown Slots",
+  "id": "unknown-slots",
+  "version": "1.0.0",
+  "description": "HTML references a slot not declared in manifest.",
+  "aspectRatio": "9:16",
+  "width": 1080,
+  "height": 1920,
+  "slots": [
+    { "id": "title", "type": "text", "label": "Title", "required": true }
+  ]
+}

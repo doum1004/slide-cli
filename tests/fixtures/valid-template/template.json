@@ -1,0 +1,15 @@
+{
+  "name": "Test Card",
+  "id": "test-card",
+  "version": "1.0.0",
+  "description": "A minimal template used in tests.",
+  "aspectRatio": "9:16",
+  "width": 1080,
+  "height": 1920,
+  "slots": [
+    { "id": "title",    "type": "text",  "label": "Title",      "required": true },
+    { "id": "subtitle", "type": "text",  "label": "Subtitle",   "required": false, "default": "" },
+    { "id": "bg",       "type": "color", "label": "Background", "required": false, "default": "#000" },
+    { "id": "image",    "type": "image", "label": "Image",      "required": false, "default": "" }
+  ]
+}

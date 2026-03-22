@@ -1,0 +1,9 @@
+[test]
+# Test file glob patterns
+include = ["tests/**/*.test.ts"]
+
+# Timeout per test (ms)
+timeout = 10000
+
+# Bail after first failure — set to false for CI to see all failures
+bail = false
