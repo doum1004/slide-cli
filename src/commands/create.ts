@@ -7,6 +7,30 @@ import { renderSlides, type ImageFailure } from "../core/renderer.js";
 import { generatePresenter } from "../core/presenter.js";
 import type { PresentationData, CreateOptions } from "../types.js";
 
+/**
+ * Derive a safe directory name from a presentation title.
+ * Lowercases, replaces spaces/special chars with hyphens, collapses runs, strips leading/trailing hyphens.
+ * e.g. "My Great Deck!" → "my-great-deck"
+ */
+function slugify(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 60) || "presentation";
+}
+
+/**
+ * Build an auto output path: output/<YYYY-MM-DD_HH-MM>-<slug>
+ * e.g. output/2025-06-03_14-22-my-great-deck
+ */
+function buildAutoOutDir(title: string): string {
+  const now = new Date();
+  const date = now.toISOString().slice(0, 10);                          // 2025-06-03
+  const time = now.toTimeString().slice(0, 5).replace(":", "-");        // 14-22
+  return join("output", `${date}_${time}-${slugify(title)}`);
+}
+
 export async function createCommand(opts: CreateOptions) {
   const spinner = ora({ color: "yellow" });
 
@@ -46,12 +70,14 @@ export async function createCommand(opts: CreateOptions) {
   const errors: string[] = [];
   for (let i = 0; i < data.slides.length; i++) {
     const slide = data.slides[i];
+    if (!slide) continue;
     for (const slot of requiredSlots) {
       if (slide[slot.id] === undefined || slide[slot.id] === null || slide[slot.id] === "") {
         errors.push(`Slide ${i + 1}: missing required slot "${slot.id}" (${slot.label})`);
       }
     }
   }
+  
   if (errors.length > 0) {
     console.error(chalk.red("\n✖ Validation errors:"));
     errors.forEach((e) => console.error(chalk.red(`  • ${e}`)));
@@ -59,11 +85,19 @@ export async function createCommand(opts: CreateOptions) {
   }
 
   // ── 4. Prepare output directory ────────────────────────────────────
-  const outDir = resolve(opts.out);
+  // --out is optional. When omitted, auto-generate: output/<date>_<time>-<title-slug>
+  const rawOut = opts.out?.trim();
+  const outDir = resolve(rawOut ? rawOut : buildAutoOutDir(data.title ?? "presentation"));
+
+  if (!rawOut) {
+    console.log(chalk.dim(`  No --out specified. Writing to auto-generated directory:`));
+    console.log(`  ${chalk.cyan(outDir)}\n`);
+  }
+
   mkdirSync(outDir, { recursive: true });
 
   const totalSlides = data.slides.length;
-  console.log(chalk.dim(`\n  ${totalSlides} slide${totalSlides !== 1 ? "s" : ""} → ${outDir}\n`));
+  console.log(chalk.dim(`  ${totalSlides} slide${totalSlides !== 1 ? "s" : ""} → ${outDir}\n`));
 
   // ── 5. Pre-flight image check (dry run — no screenshots yet) ───────
   // Run the render once without screenshots to surface image failures early.
@@ -100,13 +134,15 @@ export async function createCommand(opts: CreateOptions) {
     console.error(
       `  ${chalk.cyan("A)")} Fix the image paths/URLs in your data JSON and re-run.\n`
     );
+    // Use the explicit --out the user provided (or omit the flag to auto-generate again)
+    const outFlag = rawOut ? ` --out ${opts.out}` : "";
     console.error(
       `  ${chalk.cyan("B)")} Re-run with ${chalk.bold("--force")} to skip invalid images.\n` +
       chalk.dim(`     Affected slides will render without those images, using the\n`) +
       chalk.dim(`     template's text-only layout — which often looks cleaner anyway.\n`)
     );
     console.error(
-      `  ${chalk.dim("Example:")}  ${chalk.cyan(`slide create --data ${opts.data} --template ${opts.template} --out ${opts.out} --force`)}\n`
+      `  ${chalk.dim("Example:")}  ${chalk.cyan(`slide create --data ${opts.data} --template ${opts.template}${outFlag} --force`)}\n`
     );
     process.exit(1);
   }

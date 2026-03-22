@@ -24,7 +24,7 @@ program
   .description("Create slides from a data JSON file and a template")
   .requiredOption("-d, --data <file>", "Path to data JSON file")
   .requiredOption("-t, --template <id>", "Template id or name to use")
-  .option("-o, --out <dir>", "Output directory", "./output")
+  .option("-o, --out <dir>", "Output directory (default: output/<date>_<time>-<title>)")
   .option("-f, --format <png|jpg>", "Image format for screenshots", "jpg")
   .option("--no-images", "Skip Puppeteer screenshot step (HTML only)")
   .option("--force", "Skip unresolvable image slots and render without them", false)
