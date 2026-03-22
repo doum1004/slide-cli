@@ -26,7 +26,7 @@ function getFontCSS(): string {
 Handlebars.registerHelper("eq", (a, b) => a === b);
 Handlebars.registerHelper("add", (a, b) => Number(a) + Number(b));
 Handlebars.registerHelper("or", (a, b) => a || b);
-Handlebars.registerHelper("default", (val, fallback) => val ?? fallback);
+Handlebars.registerHelper("default", (val, fallback) => val || fallback);
 Handlebars.registerHelper("upper", (s) => String(s).toUpperCase());
 Handlebars.registerHelper("lower", (s) => String(s).toLowerCase());
 

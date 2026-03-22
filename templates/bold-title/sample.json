@@ -8,7 +8,7 @@
     "colorA":    "optional — hex color for top of the gradient background (default: #1a0533)",
     "colorB":    "optional — hex color for bottom of the gradient background (default: #0d1f3c)",
     "highlight": "optional — hex accent color used for the eyebrow text, dot, and rule (default: #ff6b35)",
-    "image":     "optional — path or https:// URL. Used as a full-bleed background image behind the gradient. Dark, atmospheric photos work best (landscapes, textures, cityscapes).",
+    "image":     "optional — path or https:// URL. Used as a full-bleed background image behind the gradient. Dark, atmospheric photos work best (landscapes, textures, cityscapes)."
   },
   "title": "The Future Deck",
   "slides": [
