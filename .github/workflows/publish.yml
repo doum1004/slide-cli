@@ -33,7 +33,7 @@ jobs:
           # Fetch full history so `git log` and tagging work correctly
           fetch-depth: 0
           # Use a token that can push back to the repo
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GIT_TOKEN }}
 
       # ── 2. Set up Bun ───────────────────────────────────────────────
       - name: Set up Bun
