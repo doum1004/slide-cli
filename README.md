@@ -10,6 +10,17 @@ slide add-template  <path>  [--force]
 
 ---
 
+# To get started:
+
+bash
+unzip slide-cli.zip && cd slide-cli
+bun install
+bun src/index.ts list --verbose
+bun src/index.ts create --data sample-quotes.json --template quote-card --out ./output
+open output/index.html
+
+---
+
 ## Installation
 
 ```bash
