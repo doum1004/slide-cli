@@ -16,7 +16,7 @@ bash
 unzip slide-cli.zip && cd slide-cli
 bun install
 bun src/index.ts list --verbose
-bun src/index.ts create --data sample-quotes.json --template quote-card --out ./output
+bun src/index.ts create --data samples/sample-quotes.json --template quote-card
 open output/index.html
 
 ---

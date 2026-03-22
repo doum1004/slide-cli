@@ -7,9 +7,6 @@ dist
 *.tgz
 output
 
-# test
-test
-
 # code coverage
 coverage
 *.lcov
