@@ -1,0 +1,76 @@
+{
+  "name": "Minimal",
+  "id": "minimal",
+  "version": "1.1.0",
+  "description": "Clean, typographic slide with a large heading and body text",
+  "author": "slide-cli",
+  "aspectRatio": "9:16",
+  "width": 1080,
+  "height": 1920,
+  "tags": ["minimal", "typography", "clean"],
+  "slots": [
+    {
+      "id": "heading",
+      "type": "text",
+      "label": "Heading",
+      "required": true,
+      "description": "Main heading text"
+    },
+    {
+      "id": "body",
+      "type": "text",
+      "label": "Body text",
+      "required": false,
+      "default": "",
+      "description": "Supporting paragraph"
+    },
+    {
+      "id": "label",
+      "type": "text",
+      "label": "Label / tag",
+      "required": false,
+      "default": "",
+      "description": "Small label shown above the heading"
+    },
+    {
+      "id": "image",
+      "type": "image",
+      "label": "Image",
+      "required": false,
+      "default": "",
+      "description": "Optional image. File path (relative to data JSON) or https:// URL. Displayed as a full-width block."
+    },
+    {
+      "id": "imagePosition",
+      "type": "text",
+      "label": "Image position",
+      "required": false,
+      "default": "bottom",
+      "description": "Where to place the image: 'top' (above heading, max 760px), 'middle' (rounded inset between heading and body, max 640px), or 'bottom' (fills remaining space below text). Images use object-fit:contain — never cropped. Default: bottom."
+    },
+    {
+      "id": "accent",
+      "type": "color",
+      "label": "Accent color",
+      "required": false,
+      "default": "#c8b89a",
+      "description": "Color for the label and decorative line"
+    },
+    {
+      "id": "bg",
+      "type": "color",
+      "label": "Background color",
+      "required": false,
+      "default": "#0f0e0c",
+      "description": "Slide background color"
+    },
+    {
+      "id": "footer",
+      "type": "text",
+      "label": "Footer text",
+      "required": false,
+      "default": "",
+      "description": "Small text at the bottom"
+    }
+  ]
+}

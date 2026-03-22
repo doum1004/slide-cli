@@ -1,0 +1,35 @@
+{
+  "title": "Words That Moved the World",
+  "slides": [
+    {
+      "layout": "quote-card",
+      "topic": "On Creation",
+      "quote": "Every child is an artist. The problem is how to remain an artist once we grow up.",
+      "author": "Pablo Picasso",
+      "role": "Painter & Sculptor",
+      "bg": "#faf7f2",
+      "ink": "#1a1714",
+      "accent": "#c0392b"
+    },
+    {
+      "layout": "quote-card",
+      "topic": "On Time",
+      "quote": "The two most powerful warriors are patience and time.",
+      "author": "Leo Tolstoy",
+      "role": "War and Peace, 1869",
+      "bg": "#f2f5fa",
+      "ink": "#141720",
+      "accent": "#2c5282"
+    },
+    {
+      "layout": "quote-card",
+      "topic": "On Design",
+      "quote": "Design is not just what it looks like and feels like. Design is how it works.",
+      "author": "Steve Jobs",
+      "role": "Apple Inc.",
+      "bg": "#fafaf8",
+      "ink": "#181818",
+      "accent": "#2d6a4f"
+    }
+  ]
+}

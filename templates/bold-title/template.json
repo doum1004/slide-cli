@@ -1,0 +1,76 @@
+{
+  "name": "Bold Title",
+  "id": "bold-title",
+  "version": "1.1.0",
+  "description": "High-contrast editorial card with large bold title and gradient background",
+  "author": "slide-cli",
+  "aspectRatio": "9:16",
+  "width": 1080,
+  "height": 1920,
+  "tags": ["bold", "editorial", "gradient", "impact"],
+  "slots": [
+    {
+      "id": "title",
+      "type": "text",
+      "label": "Title",
+      "required": true,
+      "description": "Main bold display title at 192px. text-wrap:balance keeps multi-line titles visually even. Context and detail belong in subtitle, not here."
+    },
+    {
+      "id": "subtitle",
+      "type": "text",
+      "label": "Subtitle",
+      "required": false,
+      "default": "",
+      "description": "Supporting line below the title"
+    },
+    {
+      "id": "eyebrow",
+      "type": "text",
+      "label": "Eyebrow text",
+      "required": false,
+      "default": "",
+      "description": "Small text above the title"
+    },
+    {
+      "id": "colorA",
+      "type": "color",
+      "label": "Gradient start",
+      "required": false,
+      "default": "#1a0533",
+      "description": "Top gradient color"
+    },
+    {
+      "id": "colorB",
+      "type": "color",
+      "label": "Gradient end",
+      "required": false,
+      "default": "#0d1f3c",
+      "description": "Bottom gradient color"
+    },
+    {
+      "id": "highlight",
+      "type": "color",
+      "label": "Highlight color",
+      "required": false,
+      "default": "#ff6b35",
+      "description": "Accent color for eyebrow and decorations"
+    },
+    {
+      "id": "image",
+      "type": "image",
+      "label": "Background image",
+      "required": false,
+      "default": "",
+      "description": "Optional full-bleed background image layered behind the gradient. Dark atmospheric photos work best. File path or https:// URL."
+    },
+    {
+      "id": "cta",
+      "type": "text",
+      "label": "CTA / bottom text",
+      "required": false,
+      "default": "",
+      "description": "Call-to-action or bottom tagline"
+    }
+  ]
+}
