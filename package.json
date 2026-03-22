@@ -4,12 +4,13 @@
   "description": "CLI to create beautiful slide cards (9:16, 16:9, 1:1) from JSON + HTML templates",
   "module": "index.ts",
   "type": "module",
-  "bin": { "slide": "./src/index.ts" },
+  "bin": { "slide": "./dist/index.js" },
   "scripts": {
     "postinstall": "node scripts/download-fonts.js",
     "start": "bun src/index.ts",
     "dev": "bun --watch src/index.ts",
-    "prepublishOnly": "bun build ./src/index.ts --outdir ./dist --target node --format esm && cp -r templates dist/templates && cp -r scripts dist/scripts && cp TEMPLATE_GUIDE.md dist/TEMPLATE_GUIDE.md"
+    "build": "bun scripts/build.js",
+    "prepublishOnly": "bun scripts/build.js"
   },
   "keywords": [
     "slides",
