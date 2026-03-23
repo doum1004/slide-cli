@@ -12,9 +12,8 @@ export function generatePresenter(
   height: number
 ): string {
   const total = results.length;
-  const slideFiles = results.map((r) =>
-    hasImages ? basename(r.imagePath) : basename(r.htmlPath)
-  );
+  const imageFiles = results.map((r) => basename(r.imagePath));
+  const htmlFiles  = results.map((r) => basename(r.htmlPath));
 
   const html = `<!DOCTYPE html>
 <html lang="en">
@@ -58,6 +57,7 @@ export function generatePresenter(
     border-bottom: 1px solid var(--border);
     backdrop-filter: blur(8px);
     z-index: 10;
+    gap: 12px;
   }
 
   .title {
@@ -69,7 +69,15 @@ export function generatePresenter(
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 40vw;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
   }
 
   .counter {
@@ -77,6 +85,38 @@ export function generatePresenter(
     color: var(--muted);
     letter-spacing: 0.12em;
   }
+
+  /* ── View mode toggle ── */
+  .mode-toggle {
+    display: flex;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .mode-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+  }
+  .mode-btn:hover { color: var(--text); }
+  .mode-btn.active {
+    background: var(--accent);
+    color: #0a0a0a;
+  }
+  .mode-btn:disabled {
+    opacity: 0.25;
+    cursor: not-allowed;
+  }
+
 
   /* ── Main stage ── */
   main {
@@ -108,6 +148,7 @@ export function generatePresenter(
       0 32px 80px rgba(0,0,0,0.6),
       0 8px 24px rgba(0,0,0,0.4);
     background: #000;
+    position: relative;
   }
 
   .slide-frame img {
@@ -117,12 +158,36 @@ export function generatePresenter(
     display: block;
   }
 
+  /* The iframe renders at the template's native pixel size (e.g. 1080×1920).
+     JS (scaleIframe + ResizeObserver) sets transform to fit it inside the
+     container. transform-origin: top left so translate+scale math is simple. */
   .slide-frame iframe {
-    width: 100%;
-    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: ${width}px;
+    height: ${height}px;
     border: none;
     pointer-events: none;
+    transform-origin: top left;
+    /* actual transform applied by scaleIframe() in JS */
   }
+
+  /* Pending-render badge on slide */
+  .render-badge {
+    display: none;
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    background: rgba(0,0,0,0.7);
+    color: var(--muted);
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    padding: 3px 7px;
+    border-radius: 4px;
+    pointer-events: none;
+  }
+  .needs-render .render-badge { display: block; }
 
   /* ── Nav buttons ── */
   .nav-btn {
@@ -193,10 +258,7 @@ export function generatePresenter(
     border: none;
     padding: 0;
   }
-  .dot.active {
-    background: var(--accent);
-    transform: scale(1.4);
-  }
+  .dot.active { background: var(--accent); transform: scale(1.4); }
   .dot:hover:not(.active) { background: var(--accent2); }
 
   .ctrl-btn {
@@ -257,6 +319,8 @@ export function generatePresenter(
     .nav-btn { width: 36px; height: 36px; }
     .nav-prev { left: 8px; }
     .nav-next { right: 8px; }
+    .header-right { gap: 6px; }
+    .mode-btn { padding: 5px 7px; }
   }
 </style>
 </head>
@@ -264,7 +328,18 @@ export function generatePresenter(
 
 <header>
   <div class="title">${escHtml(title)}</div>
-  <div class="counter"><span id="cur">1</span> / ${total}</div>
+  <div class="header-right">
+    <div class="mode-toggle" id="modeToggle" title="Switch between rendered images and live HTML">
+      <button class="mode-btn${hasImages ? " active" : ""}" id="btnModeImg"
+        onclick="setMode('img')" ${hasImages ? "" : "disabled title='No images — run without --no-images to generate them'"}>
+        ⬛ IMAGE
+      </button>
+      <button class="mode-btn${!hasImages ? " active" : ""}" id="btnModeHtml" onclick="setMode('html')">
+        ⟨/⟩ HTML
+      </button>
+    </div>
+<div class="counter"><span id="cur">1</span> / ${total}</div>
+  </div>
 </header>
 
 <main>
@@ -274,11 +349,16 @@ export function generatePresenter(
 
   <div class="slide-container" id="slideContainer">
     <div class="slide-frame" id="slideFrame">
-      ${hasImages
-        ? `<img id="slideImg" src="${slideFiles[0]}" alt="Slide 1" draggable="false">`
-        : `<iframe id="slideIframe" src="${slideFiles[0]}" sandbox="allow-scripts allow-same-origin"></iframe>`}
+      <img id="slideImg" src="${imageFiles[0]}" alt="Slide 1" draggable="false"
+        style="${hasImages ? "" : "display:none"}">
+      <iframe id="slideIframe" src="${htmlFiles[0]}"
+        sandbox="allow-scripts allow-same-origin"
+        style="${hasImages ? "display:none" : ""}"></iframe>
+      <div class="render-badge">no image</div>
     </div>
-    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width: ${(1/total*100).toFixed(1)}%"></div></div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill" style="width: ${(1/total*100).toFixed(1)}%"></div>
+    </div>
   </div>
 
   <button class="nav-btn nav-next" id="btnNext" onclick="go(1)" title="Next (→)">
@@ -289,7 +369,7 @@ export function generatePresenter(
 <footer>
   <button class="ctrl-btn" onclick="toggleFullscreen()" title="F">⛶ FULL</button>
   <div class="dot-track" id="dotTrack">
-    ${slideFiles.map((_, i) => `<button class="dot${i === 0 ? ' active' : ''}" onclick="goTo(${i})" title="Slide ${i+1}"></button>`).join('')}
+    ${htmlFiles.map((_, i) => `<button class="dot${i === 0 ? ' active' : ''}" onclick="goTo(${i})" title="Slide ${i+1}"></button>`).join('')}
   </div>
   <select class="speed-select" id="speedSelect" title="Autoplay speed">
     <option value="2000">2s</option>
@@ -303,40 +383,89 @@ export function generatePresenter(
 <div class="kbd-hint" id="kbdHint">← → to navigate · space to play · f for fullscreen · esc to exit</div>
 
 <script>
-  const SLIDES = ${JSON.stringify(slideFiles)};
-  const USE_IMG = ${hasImages};
+  const SLIDE_HTML   = ${JSON.stringify(htmlFiles)};
+  const SLIDE_IMAGES = ${JSON.stringify(imageFiles)};
+  const HAS_IMAGES   = ${hasImages};
+  const SLIDE_WIDTH  = ${width};
+  const SLIDE_HEIGHT = ${height};
+  const FORMAT       = "${format}";
+
   let current = 0;
+  let mode = HAS_IMAGES ? 'img' : 'html';  // 'img' | 'html'
   let playing = false;
   let timer = null;
+  const elCur      = document.getElementById('cur');
+  const elFill     = document.getElementById('progressFill');
+  const elDots     = document.querySelectorAll('.dot');
+  const elPrev     = document.getElementById('btnPrev');
+  const elNext     = document.getElementById('btnNext');
+  const elPlay     = document.getElementById('btnPlay');
+  const elImg      = document.getElementById('slideImg');
+  const elIframe   = document.getElementById('slideIframe');
+  const elContainer= document.getElementById('slideContainer');
+  const elHint     = document.getElementById('kbdHint');
+  const elBtnImg   = document.getElementById('btnModeImg');
+  const elBtnHtml  = document.getElementById('btnModeHtml');
 
-  const elCur = document.getElementById('cur');
-  const elFill = document.getElementById('progressFill');
-  const elDots = document.querySelectorAll('.dot');
-  const elPrev = document.getElementById('btnPrev');
-  const elNext = document.getElementById('btnNext');
-  const elPlay = document.getElementById('btnPlay');
-  const elImg = document.getElementById('slideImg');
-  const elIframe = document.getElementById('slideIframe');
-  const elContainer = document.getElementById('slideContainer');
-  const elHint = document.getElementById('kbdHint');
+  // ── Mode switch ──────────────────────────────────────────────────
+  function setMode(m) {
+    if (m === 'img' && elBtnImg.disabled) return;
+    mode = m;
+    elBtnImg.classList.toggle('active', m === 'img');
+    elBtnHtml.classList.toggle('active', m === 'html');
+    refreshSlide();
+    if (m === 'html') scaleIframe();
+  }
 
+  function refreshSlide() {
+    if (mode === 'img') {
+      elImg.style.display = '';
+      elIframe.style.display = 'none';
+      elImg.src = SLIDE_IMAGES[current];
+      elImg.alt = 'Slide ' + (current + 1);
+    } else {
+      elImg.style.display = 'none';
+      elIframe.style.display = '';
+      elIframe.src = SLIDE_HTML[current];
+      scaleIframe();
+    }
+  }
+
+  // Scale the iframe so its ${width}×${height}px content fits the container.
+  function scaleIframe() {
+    const frame = document.getElementById('slideFrame');
+    if (!frame || elIframe.style.display === 'none') return;
+    const containerW = frame.clientWidth;
+    const containerH = frame.clientHeight;
+    const scaleX = containerW / SLIDE_WIDTH;
+    const scaleY = containerH / SLIDE_HEIGHT;
+    const scale  = Math.min(scaleX, scaleY);
+    // Center the scaled iframe within the frame
+    const offsetX = (containerW - SLIDE_WIDTH  * scale) / 2;
+    const offsetY = (containerH - SLIDE_HEIGHT * scale) / 2;
+    elIframe.style.transform = \`translate(\${offsetX}px, \${offsetY}px) scale(\${scale})\`;
+  }
+
+  // Re-scale whenever the container resizes (e.g. window resize, fullscreen)
+  const resizeObserver = new ResizeObserver(() => {
+    if (mode === 'html') scaleIframe();
+  });
+  resizeObserver.observe(document.getElementById('slideFrame'));
+
+  // ── Navigation ───────────────────────────────────────────────────
   function updateUI() {
     elCur.textContent = current + 1;
-    elFill.style.width = ((current + 1) / SLIDES.length * 100).toFixed(1) + '%';
+    elFill.style.width = ((current + 1) / SLIDE_HTML.length * 100).toFixed(1) + '%';
     elPrev.disabled = current === 0;
-    elNext.disabled = current === SLIDES.length - 1;
+    elNext.disabled = current === SLIDE_HTML.length - 1;
     elDots.forEach((d, i) => d.classList.toggle('active', i === current));
   }
 
   function loadSlide(idx) {
     elContainer.classList.add('fading');
     setTimeout(() => {
-      if (USE_IMG) {
-        elImg.src = SLIDES[idx];
-        elImg.alt = 'Slide ' + (idx + 1);
-      } else {
-        elIframe.src = SLIDES[idx];
-      }
+      current = idx;
+      refreshSlide();
       elContainer.classList.remove('fading');
     }, 180);
     current = idx;
@@ -345,8 +474,8 @@ export function generatePresenter(
 
   function go(dir) {
     const next = current + dir;
-    if (next < 0 || next >= SLIDES.length) {
-      if (playing && next >= SLIDES.length) stopPlay();
+    if (next < 0 || next >= SLIDE_HTML.length) {
+      if (playing && next >= SLIDE_HTML.length) stopPlay();
       return;
     }
     loadSlide(next);
@@ -354,9 +483,8 @@ export function generatePresenter(
 
   function goTo(idx) { loadSlide(idx); }
 
-  function togglePlay() {
-    playing ? stopPlay() : startPlay();
-  }
+  // ── Autoplay ─────────────────────────────────────────────────────
+  function togglePlay() { playing ? stopPlay() : startPlay(); }
 
   function startPlay() {
     playing = true;
@@ -373,6 +501,7 @@ export function generatePresenter(
     clearInterval(timer);
   }
 
+  // ── Fullscreen ───────────────────────────────────────────────────
   function toggleFullscreen() {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen?.();
@@ -383,7 +512,7 @@ export function generatePresenter(
     }
   }
 
-  // Keyboard navigation
+  // ── Keyboard navigation ──────────────────────────────────────────
   let hintTimer;
   function showHint() {
     elHint.classList.add('show');
@@ -409,11 +538,11 @@ export function generatePresenter(
         }
         break;
       case 'Home': goTo(0); break;
-      case 'End':  goTo(SLIDES.length - 1); break;
+      case 'End':  goTo(SLIDE_HTML.length - 1); break;
     }
   });
 
-  // Touch/swipe
+  // ── Touch/swipe ──────────────────────────────────────────────────
   let touchX = 0;
   document.addEventListener('touchstart', (e) => { touchX = e.touches[0].clientX; }, { passive: true });
   document.addEventListener('touchend', (e) => {
@@ -421,11 +550,18 @@ export function generatePresenter(
     if (Math.abs(dx) > 50) go(dx < 0 ? 1 : -1);
   }, { passive: true });
 
-  // Initial state
+  // ── Init ─────────────────────────────────────────────────────────
   updateUI();
-  // Show hint briefly on load
+  // If starting in HTML mode (no images), scale the iframe once the
+  // iframe has loaded its content so the dimensions are correct.
+  if (mode === 'html') {
+    elIframe.addEventListener('load', () => scaleIframe(), { once: false });
+    // Also call immediately in case it's already loaded (cached)
+    scaleIframe();
+  }
   setTimeout(() => { elHint.classList.add('show'); setTimeout(() => elHint.classList.remove('show'), 2500); }, 800);
 </script>
+
 </body>
 </html>`;
 
