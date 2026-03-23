@@ -2,42 +2,6 @@ import Handlebars from "handlebars";
 import { writeFileSync, mkdirSync, existsSync, readFileSync, renameSync } from "fs";
 import { join, resolve, extname, isAbsolute } from "path";
 import type { Template, SlideData, RenderResult } from "../types.js";
-import { buildFontCSS } from "../utils/fonts.js";
-
-// ── Font CSS cache ───────────────────────────────────────────────────────────
-const _fontCSSCache = new Map<string, string>();
-
-// Only match fonts we actually ship as embedded base64.
-// System fonts (Helvetica, Arial, Courier, Noto Sans CJK, etc.) are NOT included.
-const CUSTOM_FONT_PATTERNS: Record<string, RegExp> = {
-  fraunces: /font-family:[^;]*fraunces/i,
-  dmMono: /font-family:[^;]*dm\s*mono/i,
-  bebasNeue: /font-family:[^;]*bebas\s*neue/i,
-  outfit: /font-family:[^;]*outfit/i,
-  playfairDisplay: /font-family:[^;]*playfair/i,
-  lato: /font-family:[^;]*\blato\b/i,
-};
-
-function getFontCSSForTemplate(template: Template): string {
-  const html = template.html;
-  const needed: Record<string, boolean> = {};
-  let anyNeeded = false;
-
-  for (const [key, pattern] of Object.entries(CUSTOM_FONT_PATTERNS)) {
-    const match = pattern.test(html);
-    needed[key] = match;
-    if (match) anyNeeded = true;
-  }
-
-  // No custom fonts referenced → return empty, skip all font embedding
-  if (!anyNeeded) return "";
-
-  const key = JSON.stringify(needed);
-  if (!_fontCSSCache.has(key)) {
-    _fontCSSCache.set(key, buildFontCSS({ ...needed, cjk: false } as any));
-  }
-  return _fontCSSCache.get(key)!;
-}
 
 // ── Handlebars helpers ───────────────────────────────────────────────────────
 Handlebars.registerHelper("eq", (a, b) => a === b);
@@ -110,7 +74,7 @@ function extractHeadStyles(html: string): string {
   let m;
   while ((m = re.exec(head)) !== null) {
     const content = m[1].trim();
-    if (content && !content.includes("Embedded fonts")) {
+    if (content) {
       blocks.push(content);
     }
   }
@@ -198,9 +162,7 @@ export async function renderSlides(
   console.log(`[perf] Resolve + write HTML: ${(performance.now() - resolveStart).toFixed(0)}ms`);
 
   if (generateImages) {
-    const fontCSS = getFontCSSForTemplate(template);
-    console.log(`[perf] Font CSS length: ${fontCSS.length} chars (${fontCSS ? "custom fonts" : "none — system fonts only"})`);
-    await screenshotSlides(results, template.manifest.width, template.manifest.height, format, fontCSS);
+    await screenshotSlides(results, template.manifest.width, template.manifest.height, format);
   }
 
   console.log(`[perf] Total renderSlides: ${(performance.now() - totalStart).toFixed(0)}ms`);
@@ -213,8 +175,7 @@ async function screenshotSlides(
   results: RenderResult[],
   width: number,
   height: number,
-  format: "png" | "jpg",
-  fontCSS: string
+  format: "png" | "jpg"
 ): Promise<void> {
   if (results.length === 0) return;
 
@@ -251,26 +212,19 @@ async function screenshotSlides(
     const page = await browser.newPage();
     await page.setViewport({ width, height, deviceScaleFactor: 1 });
 
-    // ── Shell page: fonts (if any) loaded exactly once ─────────────
+    // ── Shell page loaded once, slides swapped in via DOM ──────────
     const shellStart = performance.now();
-    const fontBlock = fontCSS
-      ? `<style id="font-styles">/* Embedded fonts */\n${fontCSS}</style>`
-      : "";
 
     const shellHtml = `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-${fontBlock}
 <style id="slide-styles"></style>
 </head>
 <body></body>
 </html>`;
 
     await page.setContent(shellHtml, { waitUntil: "load" });
-    if (fontCSS) {
-      await page.evaluate(() => document.fonts.ready);
-    }
     console.log(`[perf] Shell page ready: ${(performance.now() - shellStart).toFixed(0)}ms`);
 
     // ── Render each slide by swapping body ──────────────────────────

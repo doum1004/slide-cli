@@ -8,7 +8,6 @@
     "slide": "dist/index.js"
   },
   "scripts": {
-    "postinstall": "node scripts/download-fonts.js",
     "start": "node dist/index.js",
     "dev": "bun --watch src/index.ts",
     "build": "bun scripts/build.js",
