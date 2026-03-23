@@ -332,10 +332,10 @@ export function generatePresenter(
     <div class="mode-toggle" id="modeToggle" title="Switch between rendered images and live HTML">
       <button class="mode-btn${hasImages ? " active" : ""}" id="btnModeImg"
         onclick="setMode('img')" ${hasImages ? "" : "disabled title='No images — run without --no-images to generate them'"}>
-        ⬛ IMAGE
+        IMAGE
       </button>
       <button class="mode-btn${!hasImages ? " active" : ""}" id="btnModeHtml" onclick="setMode('html')">
-        ⟨/⟩ HTML
+        HTML
       </button>
     </div>
 <div class="counter"><span id="cur">1</span> / ${total}</div>
@@ -367,7 +367,7 @@ export function generatePresenter(
 </main>
 
 <footer>
-  <button class="ctrl-btn" onclick="toggleFullscreen()" title="F">⛶ FULL</button>
+  <button class="ctrl-btn" onclick="toggleFullscreen()" title="F">FULL</button>
   <div class="dot-track" id="dotTrack">
     ${htmlFiles.map((_, i) => `<button class="dot${i === 0 ? ' active' : ''}" onclick="goTo(${i})" title="Slide ${i+1}"></button>`).join('')}
   </div>
@@ -377,7 +377,7 @@ export function generatePresenter(
     <option value="5000">5s</option>
     <option value="8000">8s</option>
   </select>
-  <button class="ctrl-btn" id="btnPlay" onclick="togglePlay()">▶ PLAY</button>
+  <button class="ctrl-btn" id="btnPlay" onclick="togglePlay()">PLAY</button>
 </footer>
 
 <div class="kbd-hint" id="kbdHint"><- -> to navigate · space to play · f for fullscreen · esc to exit</div>
@@ -488,7 +488,7 @@ export function generatePresenter(
 
   function startPlay() {
     playing = true;
-    elPlay.textContent = '⏸ PAUSE';
+    elPlay.textContent = 'PAUSE';
     elPlay.classList.add('active');
     const speed = parseInt(document.getElementById('speedSelect').value);
     timer = setInterval(() => go(1), speed);
@@ -496,7 +496,7 @@ export function generatePresenter(
 
   function stopPlay() {
     playing = false;
-    elPlay.textContent = '▶ PLAY';
+    elPlay.textContent = 'PLAY';
     elPlay.classList.remove('active');
     clearInterval(timer);
   }
