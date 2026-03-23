@@ -107,7 +107,7 @@ export async function createCommand(opts: CreateOptions) {
     precheck = await renderSlides(
       template, data.slides, outDir, dirname(dataPath),
       opts.format, false,   // generateImages = false
-      opts.force
+      opts.allowMissingImages
     );
   } catch (err: any) {
     spinner.fail(`Pre-flight failed: ${err.message}`);
@@ -116,7 +116,7 @@ export async function createCommand(opts: CreateOptions) {
 
   const { failures } = precheck;
 
-  if (failures.length > 0 && !opts.force) {
+  if (failures.length > 0 && !opts.allowMissingImages) {
     // ── Abort + show clear error report + prompt ───────────────────
     spinner.fail(`Found ${failures.length} image slot${failures.length !== 1 ? "s" : ""} that could not be resolved:\n`);
 
@@ -137,20 +137,20 @@ export async function createCommand(opts: CreateOptions) {
     // Use the explicit --out the user provided (or omit the flag to auto-generate again)
     const outFlag = rawOut ? ` --out ${opts.out}` : "";
     console.error(
-      `  ${chalk.cyan("B)")} Re-run with ${chalk.bold("--force")} to skip invalid images.\n` +
+      `  ${chalk.cyan("B)")} Re-run with ${chalk.bold("--allow-missing-images")} to skip invalid images.\n` +
       chalk.dim(`     Affected slides will render without those images, using the\n`) +
       chalk.dim(`     template's text-only layout — which often looks cleaner anyway.\n`)
     );
     console.error(
-      `  ${chalk.dim("Example:")}  ${chalk.cyan(`slide create --data ${opts.data} --template ${opts.template}${outFlag} --force`)}\n`
+      `  ${chalk.dim("Example:")}  ${chalk.cyan(`slide create --data ${opts.data} --template ${opts.template}${outFlag} --allow-missing-images`)}\n`
     );
     process.exit(1);
   }
 
-  if (failures.length > 0 && opts.force) {
+  if (failures.length > 0 && opts.allowMissingImages) {
     // ── Continue with warning banner ───────────────────────────────
     spinner.warn(
-      chalk.yellow(`${failures.length} image slot${failures.length !== 1 ? "s" : ""} skipped (--force):`)
+      chalk.yellow(`${failures.length} image slot${failures.length !== 1 ? "s" : ""} skipped (--allow-missing-images):`)
     );
     for (const f of failures) {
       console.log(
@@ -171,7 +171,7 @@ export async function createCommand(opts: CreateOptions) {
     const render = await renderSlides(
       template, data.slides, outDir, dirname(dataPath),
       opts.format, !opts.noImages,
-      opts.force
+      opts.allowMissingImages
     );
     results = render.results;
     if (!opts.noImages) {

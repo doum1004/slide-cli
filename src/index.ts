@@ -27,7 +27,7 @@ program
   .option("-o, --out <dir>", "Output directory (default: output/<date>_<time>-<title>)")
   .option("-f, --format <png|jpg>", "Image format for screenshots", "jpg")
   .option("--no-images", "Skip Puppeteer screenshot step (HTML only)")
-  .option("--force", "Skip unresolvable image slots and render without them", false)
+  .option("--allow-missing-images", "Render slides without unresolvable image slots instead of aborting", false)
   .action(async (opts) => {
     await createCommand({
       data: opts.data,
@@ -35,7 +35,7 @@ program
       out: opts.out,
       format: opts.format as "png" | "jpg",
       noImages: !opts.images,
-      force: opts.force,
+      allowMissingImages: opts.allowMissingImages,
     });
   });
 

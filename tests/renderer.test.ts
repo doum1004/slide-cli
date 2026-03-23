@@ -130,7 +130,9 @@ describe("renderSlides (HTML only, no screenshots)", () => {
 
   it("returns a failure (not a throw) for an unresolvable image path", async () => {
     const template = validateTemplateDir(join(FIXTURES, "valid-template"));
-    const slides = [{ title: "With Image", image: "./nonexistent.jpg" }];
+    // Absolute path guaranteed not to exist (unique per test run)
+    const missingImg = join(outDir, `missing-${Date.now()}.jpg`);
+    const slides = [{ title: "With Image", image: missingImg }];
     const { failures } = await renderSlides(
       template, slides, outDir, outDir, "jpg", false, false
     );
@@ -139,9 +141,11 @@ describe("renderSlides (HTML only, no screenshots)", () => {
     expect(failures[0]?.slideIndex).toBe(1);
   });
 
-  it("clears the image slot and renders without it when force=true", async () => {
+  it("clears the image slot and renders without it when allowMissingImages=true", async () => {
     const template = validateTemplateDir(join(FIXTURES, "valid-template"));
-    const slides = [{ title: "Force Test", image: "./nonexistent.jpg" }];
+    // Absolute path guaranteed not to exist (unique per test run)
+    const missingImg = join(outDir, `missing-${Date.now()}.jpg`);
+    const slides = [{ title: "Force Test", image: missingImg }];
     const { results, failures } = await renderSlides(
       template, slides, outDir, outDir, "jpg", false, true
     );
@@ -151,7 +155,7 @@ describe("renderSlides (HTML only, no screenshots)", () => {
     expect(failures).toHaveLength(1);
     // HTML should not contain a broken img src
     const html = readFileSync(join(outDir, "slide-1.html"), "utf-8");
-    expect(html).not.toContain("nonexistent.jpg");
+    expect(html).not.toContain(missingImg);
   });
 
   it("does not create image files when generateImages=false", async () => {

@@ -49,5 +49,5 @@ export interface CreateOptions {
   out: string;
   format: "png" | "jpg";
   noImages: boolean;
-  force: boolean;
+  allowMissingImages: boolean;
 }

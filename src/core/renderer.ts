@@ -85,7 +85,7 @@ export async function renderSlides(
   dataDir: string,
   format: "png" | "jpg" = "jpg",
   generateImages = true,
-  force = false
+  allowMissingImages = false
 ): Promise<{ results: RenderResult[]; failures: ImageFailure[] }> {
   mkdirSync(outDir, { recursive: true });
 
@@ -115,9 +115,9 @@ export async function renderSlides(
             reason: outcome.error,
           });
           slideHasFailed = true;
-          // --force: clear the slot so {{#if image}} collapses the image section
-          // no --force: skip rendering this slide entirely
-          resolvedSlots[key] = force ? "" : val;
+          // Always clear the slot so {{#if image}} collapses the image section.
+          // The caller (create.ts) decides whether to abort or warn based on failures[].
+          resolvedSlots[key] = "";
         } else {
           resolvedSlots[key] = outcome.uri;
         }
@@ -125,9 +125,6 @@ export async function renderSlides(
         resolvedSlots[key] = val;
       }
     }
-
-    // Without --force, skip writing HTML and recording a result for this slide
-    if (slideHasFailed && !force) continue;
 
     const context = {
       ...resolvedSlots,
