@@ -3,23 +3,38 @@
 <head>
 <meta charset="UTF-8">
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  /* ── Reset ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  /* ── CJK font-face declarations ── */
+  @font-face {
+    font-family: 'Noto Serif CJK';
+    font-weight: 700;
+    src: local('Noto Serif CJK JP Bold'),
+         url('file:///usr/share/fonts/opentype/noto/NotoSerifCJK-Bold.ttc') format('truetype');
+  }
+  @font-face {
+    font-family: 'Noto Sans CJK';
+    font-weight: 700;
+    src: local('Noto Sans CJK JP'),
+         url('file:///usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc') format('truetype');
+  }
 
   html, body {
     width: 1080px;
     height: 1920px;
     overflow: hidden;
-    background: {{bg}};
+    background: {{default bg '#0f0e0c'}};
   }
 
   body {
     display: flex;
     flex-direction: column;
     position: relative;
-    font-family: 'DM Mono', 'Courier New', monospace;
+    font-family: 'DM Mono', 'Noto Sans CJK', 'Courier New', monospace;
   }
 
-  /* Noise texture */
+  /* ── Noise texture overlay ── */
   body::before {
     content: '';
     position: absolute;
@@ -30,104 +45,109 @@
     z-index: 0;
   }
 
-  /* ── Layout zones ── */
-  .zone-top    { flex: 0 0 auto; padding: 100px 96px 0; position: relative; z-index: 1; }
-  .zone-image  { flex: 1 1 auto; position: relative; z-index: 1; min-height: 0; }
-  .zone-bottom { flex: 0 0 auto; padding: 0 96px 140px; position: relative; z-index: 1; }
-
-  body.no-image { justify-content: center; }
-  body.no-image .zone-top    { padding-top: 0; }
-  body.no-image .zone-image  { display: none; }
-  body.no-image .zone-bottom { padding-bottom: 0; }
-
-  /* ── Image area ── */
-  .zone-image {
+  /* ── Content wrapper ── */
+  .content {
+    flex: 1 1 auto;
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    padding: 100px 0 140px;
+    min-height: 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* No image: center text vertically */
+  body.no-image .content {
+    justify-content: center;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  /* ── Zone: heading ── */
+  .zone-heading {
+    flex: 0 0 auto;
+    padding: 0 96px;
+  }
+
+  /* ── Zone: image ── */
+  .zone-image {
+    flex: 0 1 auto;
+    display: flex;
+    align-items: flex-start;
     justify-content: center;
     overflow: hidden;
+    padding: 32px 48px 0;
+    position: relative;
+    min-height: 0;
   }
 
   .slide-image {
     display: block;
     object-fit: contain;
-    object-position: center center;
+    object-position: center top;
     max-width: 100%;
     max-height: 100%;
     width: auto;
     height: auto;
+    border-radius: 12px;
+    flex-shrink: 1;
+    min-height: 0;
   }
 
-  body.img-top .zone-top    { order: 2; padding-top: 64px; }
-  body.img-top .zone-image  { order: 1; flex: 0 0 auto; max-height: 760px; min-height: 320px; width: 100%; padding: 0 48px; }
-  body.img-top .zone-bottom { order: 3; }
+  /* ── Zone: body ── */
+  .zone-body {
+    flex: 0 0 auto;
+    padding: 32px 96px 0;
+  }
 
-  body.img-middle .zone-top    { order: 1; }
-  body.img-middle .zone-image  { order: 2; flex: 0 0 auto; max-height: 640px; min-height: 240px; width: calc(100% - 192px); margin: 32px 96px; border-radius: 16px; background: rgba(255,255,255,0.04); }
-  body.img-middle .zone-bottom { order: 3; }
-  body.img-middle .slide-image { border-radius: 12px; }
-
-  body.img-bottom .zone-top   { order: 1; padding-bottom: 48px; }
-  body.img-bottom .zone-image { order: 2; flex: 1 1 auto; min-height: 320px; width: 100%; padding: 0 48px 48px; }
-  body.img-bottom .zone-bottom { display: none; }
-
-  body.img-bottom .zone-image::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 120px;
-    background: linear-gradient(to bottom, {{bg}}, transparent);
-    z-index: 2;
-    pointer-events: none;
+  /* ── Spacer: pushes remaining space below body ── */
+  .spacer {
+    flex: 1 1 auto;
   }
 
   /* ── Text elements ── */
-  /* label: increased size, full opacity, heavier weight */
   .label {
     font-size: 32px;
-    font-weight: 400;
+    font-weight: 700;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: {{accent}};
+    color: {{default accent '#c8b89a'}};
     margin-bottom: 48px;
   }
 
   .rule {
     width: 80px;
     height: 2px;
-    background: {{accent}};
-    margin-bottom: 56px;
+    background: {{default accent '#c8b89a'}};
+    margin-bottom: 48px;
     opacity: 0.7;
   }
 
-  /* heading: unchanged — already strong */
   .heading {
     font-family: 'Fraunces', 'Noto Serif CJK', Georgia, 'Times New Roman', serif;
     font-size: 118px;
-    font-weight: 600;
+    font-weight: 700;
     line-height: 1.08;
     letter-spacing: -0.02em;
     color: #f0ece4;
-    margin-bottom: 56px;
-    text-wrap: balance;
+    text-wrap: pretty;
     word-break: keep-all;
     overflow-wrap: break-word;
   }
 
-  /* body-text: bumped to 42px, brighter colour for contrast */
   .body-text {
     font-family: 'DM Mono', 'Noto Sans CJK', 'Courier New', monospace;
     font-size: 42px;
     font-weight: 400;
     line-height: 1.65;
-    color: #a09890;
+    color: {{default accent '#c8b89a'}};
     max-width: 820px;
-    text-wrap: balance;
+    text-wrap: pretty;
     word-break: keep-all;
     overflow-wrap: break-word;
   }
 
-  /* ── Footer: visually present but clearly secondary ── */
+  /* ── Footer ── */
   .footer {
     position: absolute;
     bottom: 64px;
@@ -139,39 +159,43 @@
     z-index: 3;
   }
 
-  /* footer-text: bigger, more contrast */
   .footer-text {
     font-size: 30px;
-    font-weight: 300;
+    font-weight: 400;
     letter-spacing: 0.08em;
-    color: #5a5550;
+    color: #6b6560;
   }
 
-  /* slide-num: slightly more visible */
   .slide-num {
     font-size: 28px;
-    font-weight: 300;
-    color: #484440;
+    font-weight: 400;
+    color: #5a5550;
     letter-spacing: 0.12em;
   }
 </style>
 </head>
-<body class="{{#if image}}img-{{default imagePosition 'bottom'}}{{else}}no-image{{/if}}">
+<body class="{{#if image}}has-image{{else}}no-image{{/if}}">
 
-  <div class="zone-top">
-    {{#if label}}<div class="label">{{label}}</div>{{/if}}
-    <div class="rule"></div>
-    <h1 class="heading">{{heading}}</h1>
-  </div>
+  <div class="content">
+    <div class="zone-heading">
+      {{#if label}}<div class="label">{{label}}</div>{{/if}}
+      <div class="rule"></div>
+      <h1 class="heading">{{heading}}</h1>
+    </div>
 
-  {{#if image}}
-  <div class="zone-image">
-    <img class="slide-image" src="{{image}}" alt="">
-  </div>
-  {{/if}}
+    {{#if image}}
+    <div class="zone-image">
+      <img class="slide-image" src="{{image}}" alt="">
+    </div>
+    {{/if}}
 
-  <div class="zone-bottom">
-    {{#if body}}<p class="body-text">{{body}}</p>{{/if}}
+    {{#if body}}
+    <div class="zone-body">
+      <p class="body-text">{{body}}</p>
+    </div>
+    {{/if}}
+
+    <div class="spacer"></div>
   </div>
 
   <footer class="footer">

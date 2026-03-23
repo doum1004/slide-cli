@@ -1,8 +1,8 @@
 {
   "name": "Minimal",
   "id": "minimal",
-  "version": "1.1.0",
-  "description": "Clean, typographic slide with a large heading and body text",
+  "version": "2.0.0",
+  "description": "Clean, typographic 9:16 slide with large serif heading, monospace body, and optional image.",
   "author": "slide-cli",
   "aspectRatio": "9:16",
   "width": 1080,
@@ -14,7 +14,7 @@
       "type": "text",
       "label": "Heading",
       "required": true,
-      "description": "Main heading text"
+      "description": "Main heading text. 1–8 words work best."
     },
     {
       "id": "body",
@@ -22,7 +22,7 @@
       "label": "Body text",
       "required": false,
       "default": "",
-      "description": "Supporting paragraph"
+      "description": "Supporting paragraph. 1–3 sentences."
     },
     {
       "id": "label",
@@ -30,7 +30,7 @@
       "label": "Label / tag",
       "required": false,
       "default": "",
-      "description": "Small label shown above the heading"
+      "description": "Short uppercase eyebrow tag above the heading (e.g. 'Chapter 01')."
     },
     {
       "id": "image",
@@ -38,15 +38,15 @@
       "label": "Image",
       "required": false,
       "default": "",
-      "description": "Optional image. File path (relative to data JSON) or https:// URL. Displayed as a full-width block."
+      "description": "Optional image. File path (relative to data JSON) or https:// URL."
     },
     {
-      "id": "imagePosition",
+      "id": "image-position",
       "type": "text",
       "label": "Image position",
       "required": false,
       "default": "bottom",
-      "description": "Where to place the image: 'top' (above heading, max 760px), 'middle' (rounded inset between heading and body, max 640px), or 'bottom' (fills remaining space below text). Images use object-fit:contain — never cropped. Default: bottom."
+      "description": "Where to place the image: 'top' (hero above text) or 'bottom' (below heading). Default: bottom."
     },
     {
       "id": "accent",
@@ -54,7 +54,7 @@
       "label": "Accent color",
       "required": false,
       "default": "#c8b89a",
-      "description": "Color for the label and decorative line"
+      "description": "Color for the label, rule, and body text. The only color you need to change per slide."
     },
     {
       "id": "bg",
@@ -62,7 +62,7 @@
       "label": "Background color",
       "required": false,
       "default": "#0f0e0c",
-      "description": "Slide background color"
+      "description": "Slide background. Keep dark — text colors are fixed for dark backgrounds."
     },
     {
       "id": "footer",
@@ -70,7 +70,7 @@
       "label": "Footer text",
       "required": false,
       "default": "",
-      "description": "Small text at the bottom"
+      "description": "Small text at the bottom-left corner."
     }
   ]
 }

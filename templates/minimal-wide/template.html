@@ -3,23 +3,38 @@
 <head>
 <meta charset="UTF-8">
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  /* ── Reset ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  /* ── CJK font-face declarations ── */
+  @font-face {
+    font-family: 'Noto Serif CJK';
+    font-weight: 700;
+    src: local('Noto Serif CJK JP Bold'),
+         url('file:///usr/share/fonts/opentype/noto/NotoSerifCJK-Bold.ttc') format('truetype');
+  }
+  @font-face {
+    font-family: 'Noto Sans CJK';
+    font-weight: 700;
+    src: local('Noto Sans CJK JP'),
+         url('file:///usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc') format('truetype');
+  }
 
   html, body {
     width: 1920px;
     height: 1080px;
     overflow: hidden;
-    background: {{bg}};
+    background: {{default bg '#0f0e0c'}};
   }
 
   body {
     display: flex;
     flex-direction: column;
     position: relative;
-    font-family: 'DM Mono', 'Courier New', monospace;
+    font-family: 'DM Mono', 'Noto Sans CJK', 'Courier New', monospace;
   }
 
-  /* Noise texture */
+  /* ── Noise texture overlay ── */
   body::before {
     content: '';
     position: absolute;
@@ -30,22 +45,14 @@
     z-index: 0;
   }
 
-  /* ── Base layout: header + content row + footer ── */
-  .zone-header {
-    flex: 0 0 auto;
-    padding: 52px 88px 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: relative; z-index: 1;
-  }
-
+  /* ── Content row ── */
   .zone-content {
     flex: 1 1 auto;
     display: flex;
     flex-direction: row;
     min-height: 0;
-    position: relative; z-index: 1;
+    position: relative;
+    z-index: 1;
   }
 
   /* ── Text column ── */
@@ -54,15 +61,16 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 32px 88px;
+    padding: 64px 88px;
   }
 
-  /* ── Image column / strip ── */
+  /* ── Image column ── */
   .zone-image {
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
+    position: relative;
   }
 
   .slide-image {
@@ -77,51 +85,62 @@
 
   /* ── No image: text fills full width ── */
   body.no-image .zone-image { display: none; }
-  body.no-image .zone-text  { padding: 32px 180px; }
+  body.no-image .zone-text  { padding: 64px 180px; }
 
-  /* ── img-right (default): image takes right half ── */
+  /* ── img-right (default): text left, image right ── */
   body.img-right .zone-text  { flex: 0 0 900px; }
   body.img-right .zone-image {
     flex: 1 1 0;
-    padding: 32px 48px 32px 0;
+    padding: 48px 48px 48px 0;
   }
   body.img-right .slide-image {
     border-radius: 12px;
-    max-height: 900px;
+  }
+  /* Fade left edge of image into bg */
+  body.img-right .zone-image::before {
+    content: '';
+    position: absolute;
+    top: 0; bottom: 0; left: 0;
+    width: 80px;
+    background: linear-gradient(to right, {{default bg '#0f0e0c'}}, transparent);
+    z-index: 2;
+    pointer-events: none;
   }
 
-  /* ── img-top: thin strip above, text below ── */
-  body.img-top .zone-content { flex-direction: column; }
-  body.img-top .zone-image {
-    flex: 0 0 340px;
-    width: 100%;
-    padding: 0 88px 24px;
+  /* ── img-left: image left, text right ── */
+  body.img-left .zone-content { flex-direction: row-reverse; }
+  body.img-left .zone-text  { flex: 0 0 900px; }
+  body.img-left .zone-image {
+    flex: 1 1 0;
+    padding: 48px 0 48px 48px;
   }
-  body.img-top .zone-text { flex: 1 1 0; }
-
-  /* ── img-bottom: text above, image strip below ── */
-  body.img-bottom .zone-content { flex-direction: column; }
-  body.img-bottom .zone-text  { flex: 1 1 0; }
-  body.img-bottom .zone-image {
-    flex: 0 0 320px;
-    width: 100%;
-    padding: 0 88px 32px;
+  body.img-left .slide-image {
+    border-radius: 12px;
+  }
+  body.img-left .zone-image::after {
+    content: '';
+    position: absolute;
+    top: 0; bottom: 0; right: 0;
+    width: 80px;
+    background: linear-gradient(to left, {{default bg '#0f0e0c'}}, transparent);
+    z-index: 2;
+    pointer-events: none;
   }
 
   /* ── Text elements ── */
   .label {
-    font-size: 22px;
-    font-weight: 400;
+    font-size: 24px;
+    font-weight: 700;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: {{accent}};
+    color: {{default accent '#c8b89a'}};
     margin-bottom: 28px;
   }
 
   .rule {
     width: 64px;
     height: 2px;
-    background: {{accent}};
+    background: {{default accent '#c8b89a'}};
     margin-bottom: 36px;
     opacity: 0.7;
   }
@@ -129,12 +148,12 @@
   .heading {
     font-family: 'Fraunces', 'Noto Serif CJK', Georgia, 'Times New Roman', serif;
     font-size: 88px;
-    font-weight: 600;
+    font-weight: 700;
     line-height: 1.08;
     letter-spacing: -0.02em;
     color: #f0ece4;
-    margin-bottom: 40px;
-    text-wrap: balance;
+    margin-bottom: 32px;
+    text-wrap: pretty;
     word-break: keep-all;
     overflow-wrap: break-word;
   }
@@ -144,9 +163,9 @@
     font-size: 30px;
     font-weight: 400;
     line-height: 1.65;
-    color: #a09890;
+    color: {{default accent '#c8b89a'}};
     max-width: 760px;
-    text-wrap: balance;
+    text-wrap: pretty;
     word-break: keep-all;
     overflow-wrap: break-word;
   }
@@ -165,24 +184,20 @@
 
   .footer-text {
     font-size: 22px;
-    font-weight: 300;
+    font-weight: 400;
     letter-spacing: 0.08em;
-    color: #5a5550;
+    color: #6b6560;
   }
 
   .slide-num {
     font-size: 20px;
-    font-weight: 300;
-    color: #484440;
+    font-weight: 400;
+    color: #5a5550;
     letter-spacing: 0.12em;
   }
 </style>
 </head>
-<body class="{{#if image}}img-{{default imagePosition 'right'}}{{else}}no-image{{/if}}">
-
-  <div class="zone-header">
-    <span><!-- spacer --></span>
-  </div>
+<body class="{{#if image}}img-{{default image-position 'right'}}{{else}}no-image{{/if}}">
 
   <div class="zone-content">
     <div class="zone-text">
