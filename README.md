@@ -74,6 +74,7 @@ slide create --data my-deck.json --template minimal --out ./output
 | `-o, --out <dir>` | `./output` | Output directory |
 | `-f, --format <png\|jpg>` | `jpg` | Screenshot format |
 | `--no-images` | off | Skip screenshots (HTML only) |
+| `--allow-missing-images` | off | Render slides without unresolvable image slots instead of aborting |
 
 **Output:**
 ```
@@ -203,6 +204,23 @@ The generated `index.html` has:
 | Path | Purpose |
 |---|---|
 | `~/.slide-cli/templates/` | User templates (via `add-template`) |
-| `<project>/templates/` | Built-in templates |
+| `<install>/dist/templates/` | Built-in templates (shipped with the package) |
 
 User templates take priority over built-ins on id collision.
+
+---
+
+## Docker
+
+**Production (installs from npm):**
+```bash
+docker build -t slide-cli .
+docker run --rm -v $(pwd)/output:/work/output slide-cli \
+  slide create --data data.json --template minimal
+```
+
+**Local dev (installs from local build):**
+```bash
+bun run build
+docker build -f Dockerfile.dev -t slide-cli-dev .
+```
