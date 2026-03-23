@@ -9,6 +9,17 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 <!-- New entries are prepended automatically by the publish workflow -->
 
+## v1.0.3 — 2026-03-23
+
+### Changes
+
+- fix: update BUILTIN_TEMPLATES_DIR logic to handle unbundled source fallback (2dbc6aa)
+
+**Full diff:** [v1.0.2...v1.0.3](https://github.com/doum1004/slide-cli/compare/v1.0.2...v1.0.3)
+
+---
+
+
 ## v1.0.2 — 2026-03-23
 
 ### Changes
