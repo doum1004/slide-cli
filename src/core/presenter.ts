@@ -13,24 +13,18 @@ import type { RenderResult } from "../types.js";
  */
 function stripEmbeddedFonts(htmlContent: string): string {
   let result = htmlContent
-    // Remove entire @font-face blocks (handles base64, url(), multi-line)
     .replace(/@font-face\s*\{[^}]*\}/gi, "")
-    // Remove @import url('...fonts.googleapis.com...')
     .replace(
       /@import\s+url\([^)]*fonts\.googleapis\.com[^)]*\)\s*;?/gi,
       ""
     )
-    // Remove <link ...fonts.googleapis.com...>
     .replace(/<link[^>]*fonts\.googleapis\.com[^>]*\/?>/gi, "")
-    // Remove <link ...fonts.gstatic.com...>
     .replace(/<link[^>]*fonts\.gstatic\.com[^>]*\/?>/gi, "")
-    // Remove preconnect links to google fonts domains
     .replace(
       /<link[^>]*preconnect[^>]*fonts\.(googleapis|gstatic)\.com[^>]*\/?>/gi,
       ""
     );
 
-  // Inject system font fallbacks before </head>
   const fontOverride = `<style data-system-fonts>
 :root {
   --sys-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -49,7 +43,6 @@ code, pre, kbd, samp, .mono, [class*="mono"] {
 </style>`;
 
   result = result.replace(/<\/head>/i, fontOverride + "\n</head>");
-
   return result;
 }
 
@@ -66,11 +59,9 @@ export function generatePresenter(
   const imageFiles = results.map((r) => basename(r.imagePath));
   const htmlFiles = results.map((r) => basename(r.htmlPath));
 
-  // ── Strip embedded fonts from every slide HTML for fast loading ──
   for (const result of results) {
     try {
       const content = readFileSync(result.htmlPath, "utf-8");
-      // Skip if already processed
       if (content.includes("data-system-fonts")) continue;
       const fast = stripEmbeddedFonts(content);
       if (fast !== content) {
@@ -320,9 +311,14 @@ export function generatePresenter(
     cursor: pointer;
     transition: all 0.15s ease;
     white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
   }
   .ctrl-btn:hover { border-color: var(--accent2); color: var(--accent); }
   .ctrl-btn.active { background: var(--accent); color: #0a0a0a; border-color: var(--accent); }
+  .ctrl-btn svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+  .ctrl-btn.active svg { stroke: #0a0a0a; }
 
   .speed-select {
     background: var(--surface);
@@ -338,20 +334,226 @@ export function generatePresenter(
   }
   .speed-select:focus { border-color: var(--accent2); }
 
-  .kbd-hint {
+  /* ── Hotkey overlay ── */
+  .hotkey-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+  }
+  .hotkey-overlay.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+  .hotkey-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  .hotkey-panel {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px 32px 24px;
+    width: 380px;
+    max-width: 92vw;
+    overflow: hidden;
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.03),
+      0 24px 80px rgba(0, 0, 0, 0.6),
+      0 8px 24px rgba(0, 0, 0, 0.4);
+    animation: panelIn 0.25s ease both;
+  }
+  @keyframes panelIn {
+    from { transform: scale(0.95) translateY(8px); opacity: 0; }
+    to   { transform: scale(1) translateY(0); opacity: 1; }
+  }
+  .hotkey-overlay:not(.visible) .hotkey-panel {
+    animation: none;
+  }
+  .hotkey-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .hotkey-title {
+    font-family: var(--font-serif);
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--accent);
+    letter-spacing: 0.02em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .hotkey-title svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: var(--accent2);
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    flex-shrink: 0;
+  }
+  .hotkey-close {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    transition: all 0.15s ease;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .hotkey-close:hover {
+    border-color: var(--accent2);
+    color: var(--text);
+    background: var(--border);
+  }
+
+  /* ── Single-column shortcut list ── */
+  .hotkey-list {
+    display: flex;
+    flex-direction: column;
+  }
+  .hotkey-section {
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--accent2);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    padding: 12px 0 6px;
+  }
+  .hotkey-section:first-child { padding-top: 0; }
+  .hotkey-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 4px 0;
+  }
+  .hotkey-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 0;
+    gap: 16px;
+  }
+  .hotkey-label {
+    font-size: 12px;
+    color: var(--text);
+    letter-spacing: 0.01em;
+    flex: 1;
+    min-width: 0;
+  }
+  .hotkey-keys {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 26px;
+    height: 24px;
+    padding: 0 7px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-bottom-width: 3px;
+    border-bottom-color: #2a2a2a;
+    border-radius: 5px;
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    line-height: 1;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  }
+  .hotkey-footer {
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+  }
+  .hotkey-footer kbd {
+    display: inline-flex;
+    vertical-align: middle;
+    margin: 0 2px;
+    min-width: 20px;
+    height: 20px;
+    font-size: 9px;
+    padding: 0 5px;
+  }
+
+  /* ── Intro toast ── */
+  .intro-toast {
     position: fixed;
     bottom: 72px;
     left: 50%;
-    transform: translateX(-50%);
-    font-size: 10px;
-    color: var(--muted);
-    letter-spacing: 0.1em;
+    transform: translateX(-50%) translateY(12px);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-size: 12px;
+    color: var(--text);
+    letter-spacing: 0.04em;
+    white-space: nowrap;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.3s ease;
-    white-space: nowrap;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    z-index: 50;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.4);
+    display: flex;
+    align-items: center;
+    gap: 10px;
   }
-  .kbd-hint.show { opacity: 1; }
+  .intro-toast svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    flex-shrink: 0;
+  }
+  .intro-toast kbd {
+    display: inline-flex;
+    vertical-align: middle;
+    margin: 0 3px;
+    min-width: 22px;
+    height: 20px;
+    font-size: 10px;
+    padding: 0 6px;
+    border-bottom-width: 2px;
+  }
+  .intro-toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+    pointer-events: auto;
+    cursor: pointer;
+  }
 
   body.fullscreen header,
   body.fullscreen footer { display: none; }
@@ -359,6 +561,44 @@ export function generatePresenter(
   body.fullscreen .nav-btn { opacity: 0; transition: opacity 0.3s ease; }
   body.fullscreen:hover .nav-btn { opacity: 1; }
   body.fullscreen .slide-container { max-height: 100dvh; }
+  body.fullscreen .shortcut-fab { display: flex; }
+
+  /* ── Floating shortcut button (fullscreen) ── */
+  .shortcut-fab {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+    transition: all 0.2s ease;
+    opacity: 0;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  }
+  .shortcut-fab svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .shortcut-fab:hover {
+    border-color: var(--accent2);
+    color: var(--accent);
+    background: var(--border);
+    opacity: 1 !important;
+  }
+  body.fullscreen:hover .shortcut-fab { opacity: 0.6; }
 
   .slide-frame.loading::after {
     content: '';
@@ -383,6 +623,10 @@ export function generatePresenter(
     .nav-next { right: 8px; }
     .header-right { gap: 6px; }
     .mode-btn { padding: 5px 7px; }
+    .hotkey-panel { padding: 20px 18px 18px; width: 100%; }
+    footer { gap: 10px; padding: 12px 16px; }
+    .ctrl-btn { padding: 6px 10px; font-size: 9px; }
+    .ctrl-btn .btn-label { display: none; }
   }
 </style>
 </head>
@@ -405,7 +649,7 @@ export function generatePresenter(
 </header>
 
 <main>
-  <button class="nav-btn nav-prev" id="btnPrev" onclick="go(-1)" title="Previous (<-)">
+  <button class="nav-btn nav-prev" id="btnPrev" onclick="go(-1)" title="Previous (\u2190)">
     <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
   </button>
 
@@ -420,13 +664,16 @@ export function generatePresenter(
     </div>
   </div>
 
-  <button class="nav-btn nav-next" id="btnNext" onclick="go(1)" title="Next (->)">
+  <button class="nav-btn nav-next" id="btnNext" onclick="go(1)" title="Next (\u2192)">
     <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
   </button>
 </main>
 
 <footer>
-  <button class="ctrl-btn" onclick="toggleFullscreen()" title="F">FULL</button>
+  <button class="ctrl-btn" onclick="toggleFullscreen()" title="Fullscreen (F)">
+    <svg viewBox="0 0 24 24"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+    <span class="btn-label">FULL</span>
+  </button>
   <div class="dot-track" id="dotTrack">
     ${htmlFiles.map((_, i) => `<button class="dot${i === 0 ? " active" : ""}" onclick="goTo(${i})" title="Slide ${i + 1}"></button>`).join("")}
   </div>
@@ -436,10 +683,85 @@ export function generatePresenter(
     <option value="5000">5s</option>
     <option value="8000">8s</option>
   </select>
-  <button class="ctrl-btn" id="btnPlay" onclick="togglePlay()">PLAY</button>
+  <button class="ctrl-btn" id="btnPlay" onclick="togglePlay()" title="Play/Pause (Space)">
+    <svg id="playIcon" viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+    <svg id="pauseIcon" viewBox="0 0 24 24" style="display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+    <span class="btn-label">PLAY</span>
+  </button>
+  <button class="ctrl-btn" id="btnShortcuts" onclick="toggleHotkeys()" title="Keyboard Shortcuts (?)">
+    <svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><line x1="6" y1="10" x2="6" y2="10"/><line x1="10" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="14" y2="10"/><line x1="18" y1="10" x2="18" y2="10"/><line x1="8" y1="14" x2="16" y2="14"/></svg>
+    <span class="btn-label">KEYS</span>
+  </button>
 </footer>
 
-<div class="kbd-hint" id="kbdHint">\u2190 \u2192 navigate \u00b7 space play \u00b7 f fullscreen \u00b7 esc exit</div>
+<!-- Floating shortcut button for fullscreen mode -->
+<button class="shortcut-fab" id="shortcutFab" onclick="toggleHotkeys()" title="Keyboard Shortcuts (?)">
+  <svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><line x1="6" y1="10" x2="6" y2="10"/><line x1="10" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="14" y2="10"/><line x1="18" y1="10" x2="18" y2="10"/><line x1="8" y1="14" x2="16" y2="14"/></svg>
+</button>
+
+<!-- Hotkey overlay panel -->
+<div class="hotkey-overlay" id="hotkeyOverlay">
+  <div class="hotkey-backdrop" onclick="toggleHotkeys()"></div>
+  <div class="hotkey-panel">
+    <div class="hotkey-header">
+      <div class="hotkey-title">
+        <svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><line x1="6" y1="10" x2="6" y2="10"/><line x1="10" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="14" y2="10"/><line x1="18" y1="10" x2="18" y2="10"/><line x1="8" y1="14" x2="16" y2="14"/></svg>
+        Keyboard Shortcuts
+      </div>
+      <button class="hotkey-close" onclick="toggleHotkeys()" title="Close (Esc)">&times;</button>
+    </div>
+    <div class="hotkey-list">
+      <div class="hotkey-section">Navigation</div>
+      <div class="hotkey-row">
+        <div class="hotkey-label">Previous slide</div>
+        <div class="hotkey-keys"><kbd>\u2190</kbd></div>
+      </div>
+      <div class="hotkey-row">
+        <div class="hotkey-label">Next slide</div>
+        <div class="hotkey-keys"><kbd>\u2192</kbd></div>
+      </div>
+      <div class="hotkey-row">
+        <div class="hotkey-label">First slide</div>
+        <div class="hotkey-keys"><kbd>Home</kbd></div>
+      </div>
+      <div class="hotkey-row">
+        <div class="hotkey-label">Last slide</div>
+        <div class="hotkey-keys"><kbd>End</kbd></div>
+      </div>
+      <div class="hotkey-divider"></div>
+      <div class="hotkey-section">Playback</div>
+      <div class="hotkey-row">
+        <div class="hotkey-label">Play / Pause</div>
+        <div class="hotkey-keys"><kbd>Space</kbd></div>
+      </div>
+      <div class="hotkey-row">
+        <div class="hotkey-label">Fullscreen</div>
+        <div class="hotkey-keys"><kbd>F</kbd></div>
+      </div>
+      <div class="hotkey-divider"></div>
+      <div class="hotkey-section">View</div>
+      <div class="hotkey-row">
+        <div class="hotkey-label">Image / HTML mode</div>
+        <div class="hotkey-keys"><kbd>M</kbd></div>
+      </div>
+      <div class="hotkey-row">
+        <div class="hotkey-label">Show shortcuts</div>
+        <div class="hotkey-keys"><kbd>?</kbd></div>
+      </div>
+      <div class="hotkey-row">
+        <div class="hotkey-label">Exit / Close</div>
+        <div class="hotkey-keys"><kbd>Esc</kbd></div>
+      </div>
+    </div>
+    <div class="hotkey-footer">Press <kbd>?</kbd> or <kbd>Esc</kbd> to dismiss</div>
+  </div>
+</div>
+
+<!-- Intro toast -->
+<div class="intro-toast" id="introToast" onclick="toggleHotkeys()">
+  <svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><line x1="6" y1="10" x2="6" y2="10"/><line x1="10" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="14" y2="10"/><line x1="18" y1="10" x2="18" y2="10"/><line x1="8" y1="14" x2="16" y2="14"/></svg>
+  Press <kbd>?</kbd> for shortcuts
+</div>
 
 <script>
   const SLIDE_HTML   = ${JSON.stringify(htmlFiles)};
@@ -454,6 +776,7 @@ export function generatePresenter(
   let playing = false;
   let timer = null;
   let loadingGeneration = 0;
+  let hotkeyOpen = false;
 
   const $ = (id) => document.getElementById(id);
   const elCur       = $('cur');
@@ -462,12 +785,24 @@ export function generatePresenter(
   const elPrev      = $('btnPrev');
   const elNext      = $('btnNext');
   const elPlay      = $('btnPlay');
+  const elPlayIcon  = $('playIcon');
+  const elPauseIcon = $('pauseIcon');
   const elImg       = $('slideImg');
   const elContainer = $('slideContainer');
   const elFrame     = $('slideFrame');
-  const elHint      = $('kbdHint');
   const elBtnImg    = $('btnModeImg');
   const elBtnHtml   = $('btnModeHtml');
+  const elHotkeyOverlay = $('hotkeyOverlay');
+  const elBtnShortcuts  = $('btnShortcuts');
+  const elIntroToast    = $('introToast');
+
+  /* ── Hotkey panel ── */
+  function toggleHotkeys() {
+    hotkeyOpen = !hotkeyOpen;
+    elHotkeyOverlay.classList.toggle('visible', hotkeyOpen);
+    elBtnShortcuts.classList.toggle('active', hotkeyOpen);
+    if (hotkeyOpen) elIntroToast.classList.remove('show');
+  }
 
   /* ── Image preload ── */
   const imgCache = new Map();
@@ -488,8 +823,6 @@ export function generatePresenter(
   /* ── Iframe LRU cache ── */
   const iframeCache = new Map();
   const IFRAME_CACHE_SIZE = 3;
-
-  /* Track which iframes have fully loaded at least once */
   const iframeLoaded = new Set();
 
   function getIframe(idx) {
@@ -511,7 +844,6 @@ export function generatePresenter(
     iframe.style.cssText = 'position:absolute;top:0;left:0;width:${width}px;height:${height}px;border:none;pointer-events:none;transform-origin:top left;';
     iframe.src = SLIDE_HTML[idx];
 
-    /* Mark loaded once the first load completes (or errors) */
     const markLoaded = () => { iframeLoaded.add(idx); };
     iframe.addEventListener('load', markLoaded, { once: true });
     iframe.addEventListener('error', markLoaded, { once: true });
@@ -529,7 +861,7 @@ export function generatePresenter(
     showSlide(current);
   }
 
-  /* ── Safely dismiss loading for a specific generation ── */
+  /* ── Loading guard ── */
   function dismissLoading(gen) {
     if (gen === loadingGeneration) {
       elFrame.classList.remove('loading');
@@ -538,7 +870,6 @@ export function generatePresenter(
 
   /* ── Show slide ── */
   function showSlide(idx) {
-    /* Bump generation so stale callbacks become no-ops */
     const gen = ++loadingGeneration;
 
     iframeCache.forEach((el) => { el.style.display = 'none'; });
@@ -553,11 +884,9 @@ export function generatePresenter(
     } else {
       elImg.style.display = 'none';
       const iframe = getIframe(idx);
-      const isNew = !iframe.parentNode;
-      if (isNew) elFrame.appendChild(iframe);
+      if (!iframe.parentNode) elFrame.appendChild(iframe);
       iframe.style.display = '';
 
-      /* If this iframe already loaded once (cached hit) → no spinner */
       if (iframeLoaded.has(idx)) {
         elFrame.classList.remove('loading');
       } else {
@@ -565,22 +894,19 @@ export function generatePresenter(
 
         const onReady = () => { dismissLoading(gen); };
 
-        /* Check synchronously first (handles already-complete iframes) */
         let alreadyComplete = false;
         try {
           alreadyComplete = iframe.contentDocument
             && iframe.contentDocument.readyState === 'complete'
             && iframe.contentDocument.body
             && iframe.contentDocument.body.childNodes.length > 0;
-        } catch (_) { /* cross-origin – ignore */ }
+        } catch (_) {}
 
         if (alreadyComplete) {
           elFrame.classList.remove('loading');
         } else {
           iframe.addEventListener('load', onReady, { once: true });
           iframe.addEventListener('error', onReady, { once: true });
-
-          /* Safety net: always dismiss after 8 s no matter what */
           setTimeout(() => { dismissLoading(gen); }, 8000);
         }
       }
@@ -619,7 +945,6 @@ export function generatePresenter(
   let fadeTimer = null;
   function loadSlide(idx) {
     if (idx === current) return;
-    /* Cancel any pending fade from a previous rapid navigation */
     if (fadeTimer !== null) {
       clearTimeout(fadeTimer);
       fadeTimer = null;
@@ -651,16 +976,24 @@ export function generatePresenter(
   function togglePlay() { playing ? stopPlay() : startPlay(); }
 
   function startPlay() {
+    if (current >= TOTAL - 1) {
+      current = -1;
+      loadSlide(0);
+    }
     playing = true;
-    elPlay.textContent = 'PAUSE';
+    elPlay.querySelector('.btn-label').textContent = 'PAUSE';
     elPlay.classList.add('active');
+    elPlayIcon.style.display = 'none';
+    elPauseIcon.style.display = '';
     timer = setInterval(() => go(1), parseInt($('speedSelect').value));
   }
 
   function stopPlay() {
     playing = false;
-    elPlay.textContent = 'PLAY';
+    elPlay.querySelector('.btn-label').textContent = 'PLAY';
     elPlay.classList.remove('active');
+    elPlayIcon.style.display = '';
+    elPauseIcon.style.display = 'none';
     clearInterval(timer);
   }
 
@@ -678,22 +1011,27 @@ export function generatePresenter(
   });
 
   /* ── Keyboard ── */
-  let hintTimer;
-  function showHint() {
-    elHint.classList.add('show');
-    clearTimeout(hintTimer);
-    hintTimer = setTimeout(() => elHint.classList.remove('show'), 2000);
-  }
-
   document.addEventListener('keydown', (e) => {
+    if (hotkeyOpen) {
+      if (e.key === 'Escape' || e.key === '?') {
+        e.preventDefault();
+        toggleHotkeys();
+      }
+      return;
+    }
+
     switch (e.key) {
-      case 'ArrowLeft':  go(-1); showHint(); break;
-      case 'ArrowRight': go(1);  showHint(); break;
+      case 'ArrowLeft':  go(-1); break;
+      case 'ArrowRight': go(1);  break;
       case ' ':          e.preventDefault(); togglePlay(); break;
       case 'f': case 'F': toggleFullscreen(); break;
-      case 'Escape':     if (document.fullscreenElement) document.exitFullscreen?.(); break;
+      case 'm': case 'M': setMode(mode === 'img' ? 'html' : 'img'); break;
+      case 'Escape':
+        if (document.fullscreenElement) document.exitFullscreen?.();
+        break;
       case 'Home':       goTo(0); break;
       case 'End':        goTo(TOTAL - 1); break;
+      case '?':          toggleHotkeys(); break;
     }
   });
 
@@ -711,7 +1049,10 @@ export function generatePresenter(
   if (HAS_IMAGES && typeof requestIdleCallback === 'function') {
     requestIdleCallback(() => { for (let i = 0; i < TOTAL; i++) preloadImage(i); });
   }
-  setTimeout(() => { elHint.classList.add('show'); setTimeout(() => elHint.classList.remove('show'), 2500); }, 800);
+  setTimeout(() => {
+    elIntroToast.classList.add('show');
+    setTimeout(() => elIntroToast.classList.remove('show'), 5000);
+  }, 600);
 </script>
 
 </body>
