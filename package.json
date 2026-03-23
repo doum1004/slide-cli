@@ -1,10 +1,10 @@
 {
   "name": "slide-cli",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "CLI to create beautiful slide cards (9:16, 16:9, 1:1) from JSON + HTML templates",
   "module": "index.ts",
   "type": "module",
-  "bin": { "slide": "./dist/index.js" },
+  "bin": { "slide": "dist/index.js" },
   "scripts": {
     "postinstall": "node scripts/download-fonts.js",
     "start": "node dist/index.js",
@@ -50,7 +50,6 @@
   },
   "files": [
     "dist/",
-    "templates/",
     "scripts/",
     "TEMPLATE_GUIDE.md",
     "README.md",
