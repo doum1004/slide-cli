@@ -102,14 +102,10 @@ export async function renderSlides(
   for (let i = 0; i < slides.length; i++) {
     const slide = slides[i];
     const resolvedSlots: Record<string, unknown> = {};
+    let slideHasFailed = false;
 
     for (const [key, val] of Object.entries(slide)) {
       if (imageSlotIds.has(key) && typeof val === "string" && val) {
-        if (!generateImages) {
-          resolvedSlots[key] = val;
-          continue;
-        }
-
         const outcome = await tryResolveImage(val, dataDir);
         if ("error" in outcome) {
           failures.push({
@@ -118,8 +114,9 @@ export async function renderSlides(
             value: val,
             reason: outcome.error,
           });
+          slideHasFailed = true;
           // --force: clear the slot so {{#if image}} collapses the image section
-          // no --force: keep original (caller will abort before we render anything)
+          // no --force: skip rendering this slide entirely
           resolvedSlots[key] = force ? "" : val;
         } else {
           resolvedSlots[key] = outcome.uri;
@@ -128,6 +125,9 @@ export async function renderSlides(
         resolvedSlots[key] = val;
       }
     }
+
+    // Without --force, skip writing HTML and recording a result for this slide
+    if (slideHasFailed && !force) continue;
 
     const context = {
       ...resolvedSlots,
@@ -191,14 +191,6 @@ async function screenshotSlides(
   const puppeteer = await import("puppeteer");
 
   const chromePaths = [
-    // Windows
-    "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-    "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
-    "C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe",
-    "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
-    // macOS
-    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-    // Linux
     "/opt/google/chrome/chrome",
     "/usr/bin/google-chrome",
     "/usr/bin/chromium",
