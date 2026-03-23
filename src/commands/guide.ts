@@ -1,8 +1,16 @@
 import { readFileSync, existsSync } from "fs";
-import { join } from "path";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
 import chalk from "chalk";
 
-const GUIDE_PATH = join(import.meta.dir, "..", "..", "TEMPLATE_GUIDE.md");
+// Works in both source (src/commands/) and bundled (dist/index.js) layouts.
+// build.js copies TEMPLATE_GUIDE.md into dist/, so one level up from dist/ is wrong —
+// it's right next to index.js in dist/.
+const __fileDir = (() => {
+  try { return dirname(fileURLToPath(import.meta.url)); } catch {}
+  return dirname(process.argv[1]);
+})();
+const GUIDE_PATH = join(__fileDir, "TEMPLATE_GUIDE.md");
 
 // Structured JSON summary — everything an LLM needs without parsing markdown
 const AGENT_GUIDE = {

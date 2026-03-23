@@ -2,7 +2,7 @@
 // Cross-platform build script (works on Windows, macOS, Linux)
 // Run with: bun scripts/build.js   OR   node scripts/build.js
 
-import { cpSync, mkdirSync, copyFileSync, rmSync, existsSync } from "fs";
+import { cpSync, mkdirSync, copyFileSync, rmSync, existsSync, readFileSync, writeFileSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import { execSync } from "child_process";
@@ -24,6 +24,14 @@ execSync(
   "bun build ./src/index.ts --outdir ./dist --target node --format esm",
   { cwd: root, stdio: "inherit" }
 );
+
+const outFile = join(dist, "index.js");
+const content = readFileSync(outFile, "utf-8");
+
+// Strip any shebang bun may have written, inject the correct one
+const stripped = content.replace(/^#!.*\n/, "");
+writeFileSync(outFile, "#!/usr/bin/env node\n" + stripped);
+console.log("🔧  Shebang set → #!/usr/bin/env node");
 
 // Copy static assets
 const copies = [

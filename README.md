@@ -4,10 +4,10 @@
 [![npm downloads](https://img.shields.io/npm/dm/slide-cli?style=flat-square&color=cb3837)](https://www.npmjs.com/package/slide-cli)
 [![CI](https://img.shields.io/github/actions/workflow/status/doum1004/slide-cli/ci.yml?branch=main&style=flat-square&label=CI&logo=github)](https://github.com/doum1004/slide-cli/actions/workflows/ci.yml)
 [![license](https://img.shields.io/npm/l/slide-cli?style=flat-square&color=blue)](./LICENSE)
-[![bun](https://img.shields.io/badge/powered%20by-bun-f9f1e1?style=flat-square&logo=bun)](https://bun.sh)
+[![bun](https://img.shields.io/badge/built%20with-bun-f9f1e1?style=flat-square&logo=bun)](https://bun.sh)
 [![ko-fi](https://img.shields.io/badge/donate-Ko--fi-FF5E5B?style=flat-square&logo=ko-fi&logoColor=white)](https://ko-fi.com/doum1004)
 
-A Bun/TypeScript CLI to create beautiful slide cards from JSON data + HTML templates.
+A TypeScript CLI to create beautiful slide cards from JSON data + HTML templates.
 Supports **9:16** (Stories/Reels), **16:9** (presentations/YouTube), and **1:1** (feed) aspect ratios.
 
 ```
@@ -18,27 +18,44 @@ slide add-template  <path>  [--force]
 
 ---
 
-# To get started:
+## Installation
 
-bash
-unzip slide-cli.zip && cd slide-cli
-bun install
-bun src/index.ts list --verbose
-bun src/index.ts create --data samples/sample-quotes.json --template quote-card
-open output/index.html
+### From npm (end users)
+
+```bash
+npm install -g slide-cli
+slide --help
+```
+
+> **Requires:** Node.js ≥ 18 · Chrome/Chromium (bundled via Puppeteer)
+
+### From source (contributors)
+
+```bash
+git clone https://github.com/doum1004/slide-cli.git
+cd slide-cli
+bun install       # Bun is required for building and running tests
+bun run build     # outputs to dist/
+npm link          # exposes the `slide` command globally
+slide --help
+```
+
+> **Requires:** Bun ≥ 1.0 (build + test only) · Node.js ≥ 18 (runtime)
+
+#### Why both Bun and Node?
+
+The published `dist/` runs on **Node** — so any end user with Node can install and use `slide` via npm without touching Bun. Bun is only needed locally to build (`bun build`) and run tests (`bun test`). This avoids the Windows issue where `npm link` detected Bun and generated a `.ps1` wrapper that caused Puppeteer to hang silently.
 
 ---
 
-## Installation
+## Quick start (from source)
 
 ```bash
-cd slide-cli
 bun install
-bun src/index.ts --help   # run directly
-bun link                  # or link globally as `slide`
+bun run build
+slide list --verbose
+slide create --data samples/sample-quotes.json --template quote-card
 ```
-
-> **Requires:** Bun ≥ 1.0 · Chrome or Chromium for screenshot rendering.
 
 ---
 
@@ -120,7 +137,7 @@ slide add-template ./my-template/ --force
 ```
 my-template/
 ├── template.json    ← manifest + slot definitions
-└── template.html   ← Handlebars HTML at your chosen dimensions
+└── template.html    ← Handlebars HTML at your chosen dimensions
 ```
 
 ### template.json
