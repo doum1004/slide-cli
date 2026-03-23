@@ -1,8 +1,8 @@
 import { existsSync, readFileSync } from "fs";
-import { join, dirname } from "path";
+import { join } from "path";
+import { NODE_MODULES_DIR, FONTS_DIR } from "./paths.js";
 
-const PKG_ROOT = join(dirname(import.meta.path), "..", "..", "node_modules");
-const FONTS_DIR = join(dirname(import.meta.path), "..", "..", "fonts");
+const PKG_ROOT = NODE_MODULES_DIR;
 
 /**
  * Read a font file and return a base64 data URI.
