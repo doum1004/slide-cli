@@ -21,7 +21,12 @@ export const CONFIG_DIR = join(homedir(), ".slide-cli");
 export const USER_TEMPLATES_DIR = join(CONFIG_DIR, "templates");
 
 // ── Built-in templates shipped with the package ────────────────────────────
-export const BUILTIN_TEMPLATES_DIR = join(PKG_ROOT, "templates");
+// build.js copies templates/ into dist/templates/, and dist/ is the only
+// directory published to npm. When running from source (unbundled), fall back
+// to the repo-level templates/ directory.
+export const BUILTIN_TEMPLATES_DIR = isBundled
+  ? join(__fileDir, "templates")   // dist/templates/
+  : join(PKG_ROOT, "templates");   // <root>/templates/
 
 // ── Node modules & fonts (used by fonts.ts) ────────────────────────────────
 export const NODE_MODULES_DIR = join(PKG_ROOT, "node_modules");
