@@ -63,9 +63,8 @@ program
 program
   .command("guide")
   .description("Show the full template authoring guide (--json for LLM-agent-friendly output)")
-  .option("-j, --json", "Output structured JSON instead of markdown (ideal for LLM agents)", false)
   .action((opts) => {
-    guideCommand({ json: opts.json });
+    guideCommand();
   });
 
 program.parse(process.argv);
