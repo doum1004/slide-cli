@@ -1,6 +1,57 @@
-import { writeFileSync } from "fs";
+import { writeFileSync, readFileSync } from "fs";
 import { join, basename } from "path";
 import type { RenderResult } from "../types.js";
+
+/**
+ * Strip all embedded fonts from slide HTML:
+ * - @font-face blocks (base64 data URIs, url() refs, any source)
+ * - Google Fonts @import statements
+ * - Google Fonts / gstatic <link> tags
+ * - <link rel="preconnect"> to Google Fonts domains
+ *
+ * Injects system font stacks so text still renders properly.
+ */
+function stripEmbeddedFonts(htmlContent: string): string {
+  let result = htmlContent
+    // Remove entire @font-face blocks (handles base64, url(), multi-line)
+    .replace(/@font-face\s*\{[^}]*\}/gi, "")
+    // Remove @import url('...fonts.googleapis.com...')
+    .replace(
+      /@import\s+url\([^)]*fonts\.googleapis\.com[^)]*\)\s*;?/gi,
+      ""
+    )
+    // Remove <link ...fonts.googleapis.com...>
+    .replace(/<link[^>]*fonts\.googleapis\.com[^>]*\/?>/gi, "")
+    // Remove <link ...fonts.gstatic.com...>
+    .replace(/<link[^>]*fonts\.gstatic\.com[^>]*\/?>/gi, "")
+    // Remove preconnect links to google fonts domains
+    .replace(
+      /<link[^>]*preconnect[^>]*fonts\.(googleapis|gstatic)\.com[^>]*\/?>/gi,
+      ""
+    );
+
+  // Inject system font fallbacks before </head>
+  const fontOverride = `<style data-system-fonts>
+:root {
+  --sys-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --sys-serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Noto Serif", serif;
+  --sys-mono: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, "DejaVu Sans Mono", monospace;
+}
+body, html, div, span, p, a, li, td, th, label, input, button, textarea, select {
+  font-family: var(--sys-sans) !important;
+}
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--sys-serif) !important;
+}
+code, pre, kbd, samp, .mono, [class*="mono"] {
+  font-family: var(--sys-mono) !important;
+}
+</style>`;
+
+  result = result.replace(/<\/head>/i, fontOverride + "\n</head>");
+
+  return result;
+}
 
 export function generatePresenter(
   results: RenderResult[],
@@ -13,7 +64,22 @@ export function generatePresenter(
 ): string {
   const total = results.length;
   const imageFiles = results.map((r) => basename(r.imagePath));
-  const htmlFiles  = results.map((r) => basename(r.htmlPath));
+  const htmlFiles = results.map((r) => basename(r.htmlPath));
+
+  // ── Strip embedded fonts from every slide HTML for fast loading ──
+  for (const result of results) {
+    try {
+      const content = readFileSync(result.htmlPath, "utf-8");
+      // Skip if already processed
+      if (content.includes("data-system-fonts")) continue;
+      const fast = stripEmbeddedFonts(content);
+      if (fast !== content) {
+        writeFileSync(result.htmlPath, fast);
+      }
+    } catch (_) {
+      // skip if file can't be read
+    }
+  }
 
   const html = `<!DOCTYPE html>
 <html lang="en">
@@ -22,8 +88,6 @@ export function generatePresenter(
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>${escHtml(title)}</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&display=swap');
-
   :root {
     --bg: #0a0a0a;
     --surface: #111111;
@@ -33,6 +97,8 @@ export function generatePresenter(
     --text: #d4cfc8;
     --muted: #5a5550;
     --radius: 12px;
+    --font-mono: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, "DejaVu Sans Mono", monospace;
+    --font-serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Noto Serif", serif;
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -40,7 +106,7 @@ export function generatePresenter(
   body {
     background: var(--bg);
     color: var(--text);
-    font-family: 'DM Mono', monospace;
+    font-family: var(--font-mono);
     height: 100dvh;
     display: grid;
     grid-template-rows: auto 1fr auto;
@@ -48,20 +114,18 @@ export function generatePresenter(
     user-select: none;
   }
 
-  /* ── Header ── */
   header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 16px 24px;
     border-bottom: 1px solid var(--border);
-    backdrop-filter: blur(8px);
     z-index: 10;
     gap: 12px;
   }
 
   .title {
-    font-family: 'Fraunces', serif;
+    font-family: var(--font-serif);
     font-size: 15px;
     font-weight: 300;
     color: var(--accent);
@@ -86,7 +150,6 @@ export function generatePresenter(
     letter-spacing: 0.12em;
   }
 
-  /* ── View mode toggle ── */
   .mode-toggle {
     display: flex;
     background: var(--surface);
@@ -99,7 +162,7 @@ export function generatePresenter(
     background: none;
     border: none;
     color: var(--muted);
-    font-family: 'DM Mono', monospace;
+    font-family: var(--font-mono);
     font-size: 9px;
     letter-spacing: 0.1em;
     padding: 5px 10px;
@@ -108,17 +171,9 @@ export function generatePresenter(
     white-space: nowrap;
   }
   .mode-btn:hover { color: var(--text); }
-  .mode-btn.active {
-    background: var(--accent);
-    color: #0a0a0a;
-  }
-  .mode-btn:disabled {
-    opacity: 0.25;
-    cursor: not-allowed;
-  }
+  .mode-btn.active { background: var(--accent); color: #0a0a0a; }
+  .mode-btn:disabled { opacity: 0.25; cursor: not-allowed; }
 
-
-  /* ── Main stage ── */
   main {
     display: flex;
     align-items: center;
@@ -133,7 +188,7 @@ export function generatePresenter(
     height: 100%;
     max-height: calc(100dvh - 140px);
     aspect-ratio: ${width} / ${height};
-    transition: opacity 0.2s ease;
+    transition: opacity 0.15s ease;
   }
 
   .slide-container.fading { opacity: 0; }
@@ -158,9 +213,6 @@ export function generatePresenter(
     display: block;
   }
 
-  /* The iframe renders at the template's native pixel size (e.g. 1080×1920).
-     JS (scaleIframe + ResizeObserver) sets transform to fit it inside the
-     container. transform-origin: top left so translate+scale math is simple. */
   .slide-frame iframe {
     position: absolute;
     top: 0;
@@ -170,10 +222,8 @@ export function generatePresenter(
     border: none;
     pointer-events: none;
     transform-origin: top left;
-    /* actual transform applied by scaleIframe() in JS */
   }
 
-  /* Pending-render badge on slide */
   .render-badge {
     display: none;
     position: absolute;
@@ -189,7 +239,6 @@ export function generatePresenter(
   }
   .needs-render .render-badge { display: block; }
 
-  /* ── Nav buttons ── */
   .nav-btn {
     position: absolute;
     top: 50%;
@@ -214,7 +263,6 @@ export function generatePresenter(
   .nav-prev { left: 16px; }
   .nav-next { right: 16px; }
 
-  /* ── Progress bar ── */
   .progress-track {
     position: absolute;
     bottom: 0;
@@ -229,7 +277,6 @@ export function generatePresenter(
     transition: width 0.3s ease;
   }
 
-  /* ── Footer controls ── */
   footer {
     display: flex;
     align-items: center;
@@ -265,7 +312,7 @@ export function generatePresenter(
     background: var(--surface);
     border: 1px solid var(--border);
     color: var(--text);
-    font-family: 'DM Mono', monospace;
+    font-family: var(--font-mono);
     font-size: 10px;
     letter-spacing: 0.1em;
     padding: 6px 14px;
@@ -281,7 +328,7 @@ export function generatePresenter(
     background: var(--surface);
     border: 1px solid var(--border);
     color: var(--muted);
-    font-family: 'DM Mono', monospace;
+    font-family: var(--font-mono);
     font-size: 10px;
     padding: 6px 8px;
     border-radius: 6px;
@@ -291,7 +338,6 @@ export function generatePresenter(
   }
   .speed-select:focus { border-color: var(--accent2); }
 
-  /* ── Keyboard hint ── */
   .kbd-hint {
     position: fixed;
     bottom: 72px;
@@ -303,16 +349,32 @@ export function generatePresenter(
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.3s ease;
+    white-space: nowrap;
   }
   .kbd-hint.show { opacity: 1; }
 
-  /* ── Fullscreen mode ── */
   body.fullscreen header,
   body.fullscreen footer { display: none; }
   body.fullscreen main { padding: 0; }
   body.fullscreen .nav-btn { opacity: 0; transition: opacity 0.3s ease; }
   body.fullscreen:hover .nav-btn { opacity: 1; }
   body.fullscreen .slide-container { max-height: 100dvh; }
+
+  .slide-frame.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 24px;
+    height: 24px;
+    margin: -12px 0 0 -12px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    z-index: 2;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
   @media (max-width: 600px) {
     main { padding: 12px 60px; }
@@ -338,7 +400,7 @@ export function generatePresenter(
         HTML
       </button>
     </div>
-<div class="counter"><span id="cur">1</span> / ${total}</div>
+    <div class="counter"><span id="cur">1</span> / ${total}</div>
   </div>
 </header>
 
@@ -349,15 +411,12 @@ export function generatePresenter(
 
   <div class="slide-container" id="slideContainer">
     <div class="slide-frame" id="slideFrame">
-      <img id="slideImg" src="${imageFiles[0]}" alt="Slide 1" draggable="false"
-        style="${hasImages ? "" : "display:none"}">
-      <iframe id="slideIframe" src="${htmlFiles[0]}"
-        sandbox="allow-scripts allow-same-origin"
-        style="${hasImages ? "display:none" : ""}"></iframe>
+      <img id="slideImg" src="" alt="Slide 1" draggable="false" style="display:none">
+      <iframe id="slideIframe" src="" sandbox="allow-scripts allow-same-origin" style="display:none"></iframe>
       <div class="render-badge">no image</div>
     </div>
     <div class="progress-track">
-      <div class="progress-fill" id="progressFill" style="width: ${(1/total*100).toFixed(1)}%"></div>
+      <div class="progress-fill" id="progressFill" style="width: ${(1 / total * 100).toFixed(1)}%"></div>
     </div>
   </div>
 
@@ -369,7 +428,7 @@ export function generatePresenter(
 <footer>
   <button class="ctrl-btn" onclick="toggleFullscreen()" title="F">FULL</button>
   <div class="dot-track" id="dotTrack">
-    ${htmlFiles.map((_, i) => `<button class="dot${i === 0 ? ' active' : ''}" onclick="goTo(${i})" title="Slide ${i+1}"></button>`).join('')}
+    ${htmlFiles.map((_, i) => `<button class="dot${i === 0 ? " active" : ""}" onclick="goTo(${i})" title="Slide ${i + 1}"></button>`).join("")}
   </div>
   <select class="speed-select" id="speedSelect" title="Autoplay speed">
     <option value="2000">2s</option>
@@ -380,7 +439,7 @@ export function generatePresenter(
   <button class="ctrl-btn" id="btnPlay" onclick="togglePlay()">PLAY</button>
 </footer>
 
-<div class="kbd-hint" id="kbdHint"><- -> to navigate · space to play · f for fullscreen · esc to exit</div>
+<div class="kbd-hint" id="kbdHint">\u2190 \u2192 navigate \u00b7 space play \u00b7 f fullscreen \u00b7 esc exit</div>
 
 <script>
   const SLIDE_HTML   = ${JSON.stringify(htmlFiles)};
@@ -388,110 +447,168 @@ export function generatePresenter(
   const HAS_IMAGES   = ${hasImages};
   const SLIDE_WIDTH  = ${width};
   const SLIDE_HEIGHT = ${height};
-  const FORMAT       = "${format}";
+  const TOTAL        = ${total};
 
   let current = 0;
-  let mode = HAS_IMAGES ? 'img' : 'html';  // 'img' | 'html'
+  let mode = HAS_IMAGES ? 'img' : 'html';
   let playing = false;
   let timer = null;
-  const elCur      = document.getElementById('cur');
-  const elFill     = document.getElementById('progressFill');
-  const elDots     = document.querySelectorAll('.dot');
-  const elPrev     = document.getElementById('btnPrev');
-  const elNext     = document.getElementById('btnNext');
-  const elPlay     = document.getElementById('btnPlay');
-  const elImg      = document.getElementById('slideImg');
-  const elIframe   = document.getElementById('slideIframe');
-  const elContainer= document.getElementById('slideContainer');
-  const elHint     = document.getElementById('kbdHint');
-  const elBtnImg   = document.getElementById('btnModeImg');
-  const elBtnHtml  = document.getElementById('btnModeHtml');
 
-  // ── Mode switch ──────────────────────────────────────────────────
+  const $ = (id) => document.getElementById(id);
+  const elCur       = $('cur');
+  const elFill      = $('progressFill');
+  const elDots      = document.querySelectorAll('.dot');
+  const elPrev      = $('btnPrev');
+  const elNext      = $('btnNext');
+  const elPlay      = $('btnPlay');
+  const elImg       = $('slideImg');
+  const elContainer = $('slideContainer');
+  const elFrame     = $('slideFrame');
+  const elHint      = $('kbdHint');
+  const elBtnImg    = $('btnModeImg');
+  const elBtnHtml   = $('btnModeHtml');
+
+  /* ── Image preload ── */
+  const imgCache = new Map();
+
+  function preloadImage(idx) {
+    if (imgCache.has(idx) || !HAS_IMAGES) return;
+    const img = new Image();
+    img.src = SLIDE_IMAGES[idx];
+    imgCache.set(idx, img);
+  }
+
+  function preloadNearby(idx) {
+    preloadImage(idx);
+    if (idx + 1 < TOTAL) preloadImage(idx + 1);
+    if (idx - 1 >= 0) preloadImage(idx - 1);
+  }
+
+  /* ── Iframe LRU cache ── */
+  const iframeCache = new Map();
+  const IFRAME_CACHE_SIZE = 3;
+
+  function getIframe(idx) {
+    if (iframeCache.has(idx)) {
+      const el = iframeCache.get(idx);
+      iframeCache.delete(idx);
+      iframeCache.set(idx, el);
+      return el;
+    }
+    if (iframeCache.size >= IFRAME_CACHE_SIZE) {
+      const oldest = iframeCache.keys().next().value;
+      const oldEl = iframeCache.get(oldest);
+      if (oldEl.parentNode) oldEl.remove();
+      iframeCache.delete(oldest);
+    }
+    const iframe = document.createElement('iframe');
+    iframe.sandbox = 'allow-scripts allow-same-origin';
+    iframe.style.cssText = 'position:absolute;top:0;left:0;width:${width}px;height:${height}px;border:none;pointer-events:none;transform-origin:top left;';
+    iframe.src = SLIDE_HTML[idx];
+    iframeCache.set(idx, iframe);
+    return iframe;
+  }
+
+  /* ── Mode ── */
   function setMode(m) {
     if (m === 'img' && elBtnImg.disabled) return;
     mode = m;
     elBtnImg.classList.toggle('active', m === 'img');
     elBtnHtml.classList.toggle('active', m === 'html');
-    refreshSlide();
-    if (m === 'html') scaleIframe();
+    showSlide(current);
   }
 
-  function refreshSlide() {
+  /* ── Show slide ── */
+  function showSlide(idx) {
+    iframeCache.forEach((el) => { el.style.display = 'none'; });
+
     if (mode === 'img') {
       elImg.style.display = '';
-      elIframe.style.display = 'none';
-      elImg.src = SLIDE_IMAGES[current];
-      elImg.alt = 'Slide ' + (current + 1);
+      const cached = imgCache.get(idx);
+      elImg.src = (cached && cached.complete) ? cached.src : SLIDE_IMAGES[idx];
+      elImg.alt = 'Slide ' + (idx + 1);
+      elFrame.classList.remove('loading');
+      preloadNearby(idx);
     } else {
       elImg.style.display = 'none';
-      elIframe.style.display = '';
-      elIframe.src = SLIDE_HTML[current];
-      scaleIframe();
+      const iframe = getIframe(idx);
+      if (!iframe.parentNode) elFrame.appendChild(iframe);
+      iframe.style.display = '';
+      elFrame.classList.add('loading');
+
+      const onReady = () => { elFrame.classList.remove('loading'); };
+      try {
+        if (iframe.contentDocument && iframe.contentDocument.readyState === 'complete') {
+          onReady();
+        } else {
+          iframe.addEventListener('load', onReady, { once: true });
+        }
+      } catch(e) {
+        iframe.addEventListener('load', onReady, { once: true });
+      }
+      scaleIframe(iframe);
     }
   }
 
-  // Scale the iframe so its ${width}×${height}px content fits the container.
-  function scaleIframe() {
-    const frame = document.getElementById('slideFrame');
-    if (!frame || elIframe.style.display === 'none') return;
-    const containerW = frame.clientWidth;
-    const containerH = frame.clientHeight;
-    const scaleX = containerW / SLIDE_WIDTH;
-    const scaleY = containerH / SLIDE_HEIGHT;
-    const scale  = Math.min(scaleX, scaleY);
-    // Center the scaled iframe within the frame
-    const offsetX = (containerW - SLIDE_WIDTH  * scale) / 2;
-    const offsetY = (containerH - SLIDE_HEIGHT * scale) / 2;
-    elIframe.style.transform = \`translate(\${offsetX}px, \${offsetY}px) scale(\${scale})\`;
+  function scaleIframe(iframe) {
+    if (!iframe || !elFrame) return;
+    const cw = elFrame.clientWidth;
+    const ch = elFrame.clientHeight;
+    if (cw === 0 || ch === 0) return;
+    const scale = Math.min(cw / SLIDE_WIDTH, ch / SLIDE_HEIGHT);
+    const ox = (cw - SLIDE_WIDTH * scale) / 2;
+    const oy = (ch - SLIDE_HEIGHT * scale) / 2;
+    iframe.style.transform = 'translate(' + ox + 'px,' + oy + 'px) scale(' + scale + ')';
   }
 
-  // Re-scale whenever the container resizes (e.g. window resize, fullscreen)
-  const resizeObserver = new ResizeObserver(() => {
-    if (mode === 'html') scaleIframe();
-  });
-  resizeObserver.observe(document.getElementById('slideFrame'));
+  new ResizeObserver(() => {
+    if (mode === 'html') {
+      const iframe = iframeCache.get(current);
+      if (iframe) scaleIframe(iframe);
+    }
+  }).observe(elFrame);
 
-  // ── Navigation ───────────────────────────────────────────────────
+  /* ── Nav ── */
   function updateUI() {
     elCur.textContent = current + 1;
-    elFill.style.width = ((current + 1) / SLIDE_HTML.length * 100).toFixed(1) + '%';
+    elFill.style.width = ((current + 1) / TOTAL * 100).toFixed(1) + '%';
     elPrev.disabled = current === 0;
-    elNext.disabled = current === SLIDE_HTML.length - 1;
+    elNext.disabled = current === TOTAL - 1;
     elDots.forEach((d, i) => d.classList.toggle('active', i === current));
   }
 
   function loadSlide(idx) {
+    if (idx === current) return;
     elContainer.classList.add('fading');
-    setTimeout(() => {
-      current = idx;
-      refreshSlide();
-      elContainer.classList.remove('fading');
-    }, 180);
     current = idx;
     updateUI();
+    setTimeout(() => {
+      showSlide(idx);
+      elContainer.classList.remove('fading');
+    }, 120);
   }
 
   function go(dir) {
     const next = current + dir;
-    if (next < 0 || next >= SLIDE_HTML.length) {
-      if (playing && next >= SLIDE_HTML.length) stopPlay();
+    if (next < 0 || next >= TOTAL) {
+      if (playing && next >= TOTAL) stopPlay();
       return;
     }
     loadSlide(next);
   }
 
-  function goTo(idx) { loadSlide(idx); }
+  function goTo(idx) {
+    if (idx >= 0 && idx < TOTAL) loadSlide(idx);
+  }
 
-  // ── Autoplay ─────────────────────────────────────────────────────
+  /* ── Autoplay ── */
   function togglePlay() { playing ? stopPlay() : startPlay(); }
 
   function startPlay() {
     playing = true;
     elPlay.textContent = 'PAUSE';
     elPlay.classList.add('active');
-    const speed = parseInt(document.getElementById('speedSelect').value);
-    timer = setInterval(() => go(1), speed);
+    timer = setInterval(() => go(1), parseInt($('speedSelect').value));
   }
 
   function stopPlay() {
@@ -501,18 +618,20 @@ export function generatePresenter(
     clearInterval(timer);
   }
 
-  // ── Fullscreen ───────────────────────────────────────────────────
+  /* ── Fullscreen ── */
   function toggleFullscreen() {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen?.();
       document.body.classList.add('fullscreen');
     } else {
       document.exitFullscreen?.();
-      document.body.classList.remove('fullscreen');
     }
   }
+  document.addEventListener('fullscreenchange', () => {
+    if (!document.fullscreenElement) document.body.classList.remove('fullscreen');
+  });
 
-  // ── Keyboard navigation ──────────────────────────────────────────
+  /* ── Keyboard ── */
   let hintTimer;
   function showHint() {
     elHint.classList.add('show');
@@ -524,25 +643,15 @@ export function generatePresenter(
     switch (e.key) {
       case 'ArrowLeft':  go(-1); showHint(); break;
       case 'ArrowRight': go(1);  showHint(); break;
-      case ' ':
-        e.preventDefault();
-        togglePlay();
-        break;
-      case 'f': case 'F':
-        toggleFullscreen();
-        break;
-      case 'Escape':
-        if (document.fullscreenElement) {
-          document.exitFullscreen?.();
-          document.body.classList.remove('fullscreen');
-        }
-        break;
-      case 'Home': goTo(0); break;
-      case 'End':  goTo(SLIDE_HTML.length - 1); break;
+      case ' ':          e.preventDefault(); togglePlay(); break;
+      case 'f': case 'F': toggleFullscreen(); break;
+      case 'Escape':     if (document.fullscreenElement) document.exitFullscreen?.(); break;
+      case 'Home':       goTo(0); break;
+      case 'End':        goTo(TOTAL - 1); break;
     }
   });
 
-  // ── Touch/swipe ──────────────────────────────────────────────────
+  /* ── Touch ── */
   let touchX = 0;
   document.addEventListener('touchstart', (e) => { touchX = e.touches[0].clientX; }, { passive: true });
   document.addEventListener('touchend', (e) => {
@@ -550,14 +659,11 @@ export function generatePresenter(
     if (Math.abs(dx) > 50) go(dx < 0 ? 1 : -1);
   }, { passive: true });
 
-  // ── Init ─────────────────────────────────────────────────────────
+  /* ── Init ── */
+  showSlide(0);
   updateUI();
-  // If starting in HTML mode (no images), scale the iframe once the
-  // iframe has loaded its content so the dimensions are correct.
-  if (mode === 'html') {
-    elIframe.addEventListener('load', () => scaleIframe(), { once: false });
-    // Also call immediately in case it's already loaded (cached)
-    scaleIframe();
+  if (HAS_IMAGES && typeof requestIdleCallback === 'function') {
+    requestIdleCallback(() => { for (let i = 0; i < TOTAL; i++) preloadImage(i); });
   }
   setTimeout(() => { elHint.classList.add('show'); setTimeout(() => elHint.classList.remove('show'), 2500); }, 800);
 </script>

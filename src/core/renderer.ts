@@ -1,28 +1,45 @@
 import Handlebars from "handlebars";
-import { writeFileSync, mkdirSync, existsSync, readFileSync } from "fs";
+import { writeFileSync, mkdirSync, existsSync, readFileSync, renameSync } from "fs";
 import { join, resolve, extname, isAbsolute } from "path";
 import type { Template, SlideData, RenderResult } from "../types.js";
 import { buildFontCSS } from "../utils/fonts.js";
 
-// Pre-build font CSS once per process — embedding as data URIs ensures
-// Puppeteer renders them correctly regardless of working directory or OS.
-let _fontCSSCache: string | null = null;
-function getFontCSS(): string {
-  if (_fontCSSCache === null) {
-    _fontCSSCache = buildFontCSS({
-      fraunces: true,
-      dmMono: true,
-      bebasNeue: true,
-      outfit: true,
-      playfairDisplay: true,
-      lato: true,
-      cjk: true,
-    });
+// ── Font CSS cache ───────────────────────────────────────────────────────────
+const _fontCSSCache = new Map<string, string>();
+
+// Only match fonts we actually ship as embedded base64.
+// System fonts (Helvetica, Arial, Courier, Noto Sans CJK, etc.) are NOT included.
+const CUSTOM_FONT_PATTERNS: Record<string, RegExp> = {
+  fraunces: /font-family:[^;]*fraunces/i,
+  dmMono: /font-family:[^;]*dm\s*mono/i,
+  bebasNeue: /font-family:[^;]*bebas\s*neue/i,
+  outfit: /font-family:[^;]*outfit/i,
+  playfairDisplay: /font-family:[^;]*playfair/i,
+  lato: /font-family:[^;]*\blato\b/i,
+};
+
+function getFontCSSForTemplate(template: Template): string {
+  const html = template.html;
+  const needed: Record<string, boolean> = {};
+  let anyNeeded = false;
+
+  for (const [key, pattern] of Object.entries(CUSTOM_FONT_PATTERNS)) {
+    const match = pattern.test(html);
+    needed[key] = match;
+    if (match) anyNeeded = true;
   }
-  return _fontCSSCache;
+
+  // No custom fonts referenced → return empty, skip all font embedding
+  if (!anyNeeded) return "";
+
+  const key = JSON.stringify(needed);
+  if (!_fontCSSCache.has(key)) {
+    _fontCSSCache.set(key, buildFontCSS({ ...needed, cjk: false } as any));
+  }
+  return _fontCSSCache.get(key)!;
 }
 
-// Register useful Handlebars helpers
+// ── Handlebars helpers ───────────────────────────────────────────────────────
 Handlebars.registerHelper("eq", (a, b) => a === b);
 Handlebars.registerHelper("add", (a, b) => Number(a) + Number(b));
 Handlebars.registerHelper("or", (a, b) => a || b);
@@ -38,16 +55,12 @@ const MIME: Record<string, string> = {
 };
 
 export interface ImageFailure {
-  slideIndex: number;  // 1-based
+  slideIndex: number;
   slotId: string;
-  value: string;       // original value from the data JSON
-  reason: string;      // human-readable explanation
+  value: string;
+  reason: string;
 }
 
-/**
- * Try to resolve an image value to a base64 data URI.
- * Returns { uri } on success or { error } on failure — never throws.
- */
 async function tryResolveImage(
   value: string,
   dataDir: string
@@ -69,14 +82,63 @@ async function tryResolveImage(
   }
 
   const absPath = isAbsolute(value) ? value : resolve(dataDir, value);
-  if (!existsSync(absPath)) {
-    return { error: `File not found: ${absPath}` };
-  }
+  if (!existsSync(absPath)) return { error: `File not found: ${absPath}` };
   const ext = extname(absPath).toLowerCase();
   const mime = MIME[ext] ?? "image/jpeg";
   const b64 = readFileSync(absPath).toString("base64");
   return { uri: `data:${mime};base64,${b64}` };
 }
+
+// ── HTML helpers ─────────────────────────────────────────────────────────────
+
+function extractBody(html: string): string {
+  const match = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+  return match ? match[1] : html;
+}
+
+function extractBodyAttrs(html: string): string {
+  const match = html.match(/<body([^>]*)>/i);
+  return match ? match[1].trim() : "";
+}
+
+function extractHeadStyles(html: string): string {
+  const headMatch = html.match(/<head[^>]*>([\s\S]*?)<\/head>/i);
+  if (!headMatch) return "";
+  const head = headMatch[1];
+  const blocks: string[] = [];
+  const re = /<style[^>]*>([\s\S]*?)<\/style>/gi;
+  let m;
+  while ((m = re.exec(head)) !== null) {
+    const content = m[1].trim();
+    if (content && !content.includes("Embedded fonts")) {
+      blocks.push(content);
+    }
+  }
+  return blocks.join("\n");
+}
+
+function wrapHtml(content: string, width: number, height: number): string {
+  if (content.trim().startsWith("<!DOCTYPE") || content.trim().startsWith("<html")) {
+    return content.replace(
+      /@import\s+url\(['"]https:\/\/fonts\.googleapis\.com[^'"]*['"]\);?\s*/g, ""
+    );
+  }
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=${width}, initial-scale=1.0">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: ${width}px; height: ${height}px; overflow: hidden; }
+</style>
+</head>
+<body>${content}</body>
+</html>`;
+}
+
+// ── Main entry point ─────────────────────────────────────────────────────────
 
 export async function renderSlides(
   template: Template,
@@ -87,6 +149,7 @@ export async function renderSlides(
   generateImages = true,
   allowMissingImages = false
 ): Promise<{ results: RenderResult[]; failures: ImageFailure[] }> {
+  const totalStart = performance.now();
   mkdirSync(outDir, { recursive: true });
 
   const imageSlotIds = new Set(
@@ -99,24 +162,16 @@ export async function renderSlides(
   const results: RenderResult[] = [];
   const failures: ImageFailure[] = [];
 
+  const resolveStart = performance.now();
   for (let i = 0; i < slides.length; i++) {
     const slide = slides[i];
     const resolvedSlots: Record<string, unknown> = {};
-    let slideHasFailed = false;
 
     for (const [key, val] of Object.entries(slide)) {
       if (imageSlotIds.has(key) && typeof val === "string" && val) {
         const outcome = await tryResolveImage(val, dataDir);
         if ("error" in outcome) {
-          failures.push({
-            slideIndex: i + 1,
-            slotId: key,
-            value: val,
-            reason: outcome.error,
-          });
-          slideHasFailed = true;
-          // Always clear the slot so {{#if image}} collapses the image section.
-          // The caller (create.ts) decides whether to abort or warn based on failures[].
+          failures.push({ slideIndex: i + 1, slotId: key, value: val, reason: outcome.error });
           resolvedSlots[key] = "";
         } else {
           resolvedSlots[key] = outcome.uri;
@@ -138,53 +193,32 @@ export async function renderSlides(
     const slideImagePath = join(outDir, `slide-${i + 1}.${format}`);
 
     writeFileSync(slideHtmlPath, wrapHtml(html, template.manifest.width, template.manifest.height));
-
-    results.push({
-      slideIndex: i + 1,
-      htmlPath: slideHtmlPath,
-      imagePath: slideImagePath,
-    });
+    results.push({ slideIndex: i + 1, htmlPath: slideHtmlPath, imagePath: slideImagePath });
   }
+  console.log(`[perf] Resolve + write HTML: ${(performance.now() - resolveStart).toFixed(0)}ms`);
 
   if (generateImages) {
-    await screenshotSlides(results, template.manifest.width, template.manifest.height, format);
+    const fontCSS = getFontCSSForTemplate(template);
+    console.log(`[perf] Font CSS length: ${fontCSS.length} chars (${fontCSS ? "custom fonts" : "none — system fonts only"})`);
+    await screenshotSlides(results, template.manifest.width, template.manifest.height, format, fontCSS);
   }
 
+  console.log(`[perf] Total renderSlides: ${(performance.now() - totalStart).toFixed(0)}ms`);
   return { results, failures };
 }
 
-function wrapHtml(content: string, width: number, height: number): string {
-  const fontCSS = getFontCSS();
-  const fontBlock = `<style>\n/* ── Embedded fonts (portable, no network required) ── */\n${fontCSS}\n</style>`;
-
-  if (content.trim().startsWith("<!DOCTYPE") || content.trim().startsWith("<html")) {
-    // Full document: strip @import Google Fonts lines (network-dependent)
-    // and inject embedded fonts right after <head> or before first <style>
-    const cleaned = content.replace(/@import\s+url\(['"]https:\/\/fonts\.googleapis\.com[^'"]*['"]\);?\s*/g, "");
-    return cleaned.replace(/(<head[^>]*>)/, `$1\n${fontBlock}`);
-  }
-
-  return `<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=${width}, initial-scale=1.0">
-${fontBlock}
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body { width: ${width}px; height: ${height}px; overflow: hidden; }
-</style>
-</head>
-<body>${content}</body>
-</html>`;
-}
+// ── Screenshot ───────────────────────────────────────────────────────────────
 
 async function screenshotSlides(
   results: RenderResult[],
   width: number,
   height: number,
-  format: "png" | "jpg"
+  format: "png" | "jpg",
+  fontCSS: string
 ): Promise<void> {
+  if (results.length === 0) return;
+
+  const launchStart = performance.now();
   const puppeteer = await import("puppeteer");
 
   const chromePaths = [
@@ -203,27 +237,96 @@ async function screenshotSlides(
   const browser = await puppeteer.default.launch({
     executablePath,
     headless: true,
-    args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", "--disable-gpu", "--font-render-hinting=none"],
+    args: [
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-dev-shm-usage",
+      "--disable-gpu",
+      "--font-render-hinting=none",
+    ],
   });
+  console.log(`[perf] Browser launch: ${(performance.now() - launchStart).toFixed(0)}ms`);
 
   try {
     const page = await browser.newPage();
     await page.setViewport({ width, height, deviceScaleFactor: 1 });
 
-    for (const result of results) {
-      const fileUrl = `file://${resolve(result.htmlPath)}`;
-      await page.goto(fileUrl, { waitUntil: "networkidle0", timeout: 15000 });
+    // ── Shell page: fonts (if any) loaded exactly once ─────────────
+    const shellStart = performance.now();
+    const fontBlock = fontCSS
+      ? `<style id="font-styles">/* Embedded fonts */\n${fontCSS}</style>`
+      : "";
+
+    const shellHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+${fontBlock}
+<style id="slide-styles"></style>
+</head>
+<body></body>
+</html>`;
+
+    await page.setContent(shellHtml, { waitUntil: "load" });
+    if (fontCSS) {
       await page.evaluate(() => document.fonts.ready);
-      await page.evaluate(() => new Promise<void>((resolve) => {
-        requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
-      }));
-      await new Promise((r) => setTimeout(r, 150));
+    }
+    console.log(`[perf] Shell page ready: ${(performance.now() - shellStart).toFixed(0)}ms`);
 
-      const isJpeg = format === "jpg";
+    // ── Render each slide by swapping body ──────────────────────────
+    const isJpeg = format === "jpg";
 
-      // Puppeteer uses the file extension to infer type, but .jpg is not
-      // recognised — only .jpeg is. We screenshot to a .jpeg temp path then
-      // rename to the user-visible .jpg path to avoid any ambiguity.
+    for (const result of results) {
+      const slideStart = performance.now();
+
+      const slideHtml = readFileSync(result.htmlPath, "utf-8");
+      const bodyContent = extractBody(slideHtml);
+      const bodyAttrs = extractBodyAttrs(slideHtml);
+      const headStyles = extractHeadStyles(slideHtml);
+
+      const t0 = performance.now();
+      await page.evaluate(
+        ({ styles, body, attrs }: { styles: string; body: string; attrs: string }) => {
+          const styleEl = document.getElementById("slide-styles");
+          if (styleEl) styleEl.textContent = styles;
+
+          // Apply body attributes (class="has-bg-image" etc.)
+          const temp = document.createElement("div");
+          temp.innerHTML = `<div ${attrs}></div>`;
+          const src = temp.firstElementChild;
+          while (document.body.attributes.length > 0) {
+            document.body.removeAttribute(document.body.attributes[0].name);
+          }
+          if (src) {
+            for (const attr of Array.from(src.attributes)) {
+              document.body.setAttribute(attr.name, attr.value);
+            }
+          }
+
+          document.body.innerHTML = body;
+        },
+        { styles: headStyles, body: bodyContent, attrs: bodyAttrs }
+      );
+      console.log(`[perf]   slide ${result.slideIndex} swap: ${(performance.now() - t0).toFixed(0)}ms`);
+
+      // Wait for base64 images to decode
+      await page.evaluate(() =>
+        Promise.all(
+          Array.from(document.images)
+            .filter((img) => !img.complete)
+            .map((img) => new Promise<void>((res) => {
+              img.onload = () => res();
+              img.onerror = () => res();
+            }))
+        )
+      );
+
+      // One rAF for layout
+      await page.evaluate(() =>
+        new Promise<void>((r) => requestAnimationFrame(() => r()))
+      );
+
+      const t2 = performance.now();
       const screenshotPath = isJpeg
         ? result.imagePath.replace(/\.jpg$/, ".jpeg")
         : result.imagePath;
@@ -234,12 +337,13 @@ async function screenshotSlides(
         quality: isJpeg ? 95 : undefined,
         clip: { x: 0, y: 0, width, height },
       });
+      console.log(`[perf]   slide ${result.slideIndex} screenshot: ${(performance.now() - t2).toFixed(0)}ms`);
 
-      // Rename .jpeg → .jpg so the output matches what the user asked for
       if (isJpeg && screenshotPath !== result.imagePath) {
-        const { renameSync } = await import("fs");
         renameSync(screenshotPath, result.imagePath);
       }
+
+      console.log(`[perf]   slide ${result.slideIndex} total: ${(performance.now() - slideStart).toFixed(0)}ms`);
     }
   } finally {
     await browser.close();
