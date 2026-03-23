@@ -83,7 +83,17 @@ output/
 ├── slide-2.html   slide-2.jpg
 │   …
 ├── index.html     ← presentation viewer
-└── data.json      ← copy of your input
+├── data.json      ← copy of your input
+└── manifest.json  ← machine-readable index (slideIndex, htmlPath, imagePath)
+```
+
+Backends and agents should read `manifest.json` to get the ordered image paths:
+
+```ts
+const manifest = JSON.parse(fs.readFileSync(`${outDir}/manifest.json`, "utf-8"));
+const images = manifest.slides
+  .filter(s => s.imagePath)
+  .map(s => path.join(outDir, s.imagePath));
 ```
 
 ### `slide list`

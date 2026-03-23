@@ -1,16 +1,8 @@
 import { readFileSync, existsSync } from "fs";
-import { join, dirname } from "path";
-import { fileURLToPath } from "url";
+import { join } from "path";
 import chalk from "chalk";
 
-// Works in both source (src/commands/) and bundled (dist/index.js) layouts.
-// build.js copies TEMPLATE_GUIDE.md into dist/, so one level up from dist/ is wrong —
-// it's right next to index.js in dist/.
-const __fileDir = (() => {
-  try { return dirname(fileURLToPath(import.meta.url)); } catch {}
-  return dirname(process.argv[1]);
-})();
-const GUIDE_PATH = join(__fileDir, "TEMPLATE_GUIDE.md");
+const GUIDE_PATH = join(import.meta.dir, "..", "..", "TEMPLATE_GUIDE.md");
 
 // Structured JSON summary — everything an LLM needs without parsing markdown
 const AGENT_GUIDE = {
@@ -284,6 +276,26 @@ const AGENT_GUIDE = {
     "sample.json slides array passes slide create without errors",
     "sample.json has 2+ slides showing different content and color combos"
   ],
+
+  output_files: {
+    summary: "slide create writes these files to the output directory after a successful run.",
+    files: {
+      "slide-N.html":  "Rendered HTML for slide N (1-based). One file per slide.",
+      "slide-N.jpg":   "Screenshot of slide N. Format matches --format flag (jpg or png). null when --no-images is set.",
+      "index.html":    "Presentation viewer — keyboard nav, autoplay, fullscreen, swipe support.",
+      "data.json":     "Copy of the input data JSON.",
+      "manifest.json": "Machine-readable index of all output files. Intended for programmatic consumers (backends, agents)."
+    },
+    manifest_schema: {
+      title:       "Top-level title from the data JSON.",
+      template:    "Template id used to generate the slides.",
+      format:      "Image format: jpg or png.",
+      totalSlides: "Number of slides successfully rendered.",
+      skipped:     "Number of image slots cleared due to --allow-missing-images.",
+      slides:      "Array of { slideIndex, htmlPath, imagePath } — imagePath is null when --no-images was used."
+    },
+    backend_usage: "After running slide create, read manifest.json to get the ordered image paths without parsing the directory yourself. Example: const m = JSON.parse(fs.readFileSync(outDir + '/manifest.json')); const images = m.slides.filter(s => s.imagePath).map(s => path.join(outDir, s.imagePath));"
+  },
 
   workflow: [
     "1. Run: slide list --verbose   (to see existing templates for inspiration)",

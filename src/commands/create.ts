@@ -1,5 +1,5 @@
 import { readFileSync, existsSync, mkdirSync } from "fs";
-import { join, resolve, dirname } from "path";
+import { join, resolve, dirname, basename } from "path";
 import chalk from "chalk";
 import ora from "ora";
 import { loadTemplate } from "../core/template.js";
@@ -197,7 +197,24 @@ export async function createCommand(opts: CreateOptions) {
   const { writeFileSync } = await import("fs");
   writeFileSync(join(outDir, "data.json"), JSON.stringify(data, null, 2));
 
-  // ── 9. Summary ────────────────────────────────────────────────────
+  // ── 9. Write manifest.json for programmatic consumers ─────────────
+  writeFileSync(
+    join(outDir, "manifest.json"),
+    JSON.stringify({
+      title:       data.title ?? "Slide Presentation",
+      template:    template.manifest.id,
+      format:      opts.format,
+      totalSlides: results.length,
+      skipped:     failures.length,
+      slides:      results.map((r) => ({
+        slideIndex: r.slideIndex,
+        htmlPath:   basename(r.htmlPath),
+        imagePath:  opts.noImages ? null : basename(r.imagePath),
+      })),
+    }, null, 2)
+  );
+
+  // ── 10. Summary ────────────────────────────────────────────────────
   const skippedNote = failures.length > 0
     ? chalk.yellow(`\n  ${chalk.bold("⚠")}  ${failures.length} image slot${failures.length !== 1 ? "s" : ""} were skipped — those slides use text-only layout.\n`)
     : "";
@@ -208,6 +225,7 @@ ${skippedNote}
   ${chalk.dim("Slides")}       ${results.map((r) => `slide-${r.slideIndex}.html`).join("  ")}
   ${opts.noImages ? "" : chalk.dim("Images") + "       " + results.map((r) => `slide-${r.slideIndex}.${opts.format}`).join("  ") + "\n  "}${chalk.dim("Viewer")}       ${chalk.underline("index.html")}
   ${chalk.dim("Data")}         data.json
+  ${chalk.dim("Manifest")}     manifest.json
 
   Open the viewer:  ${chalk.cyan(`open ${join(outDir, "index.html")}`)}
 `);
