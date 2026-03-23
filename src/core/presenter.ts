@@ -453,6 +453,7 @@ export function generatePresenter(
   let mode = HAS_IMAGES ? 'img' : 'html';
   let playing = false;
   let timer = null;
+  let loadingGeneration = 0;
 
   const $ = (id) => document.getElementById(id);
   const elCur       = $('cur');
@@ -488,6 +489,9 @@ export function generatePresenter(
   const iframeCache = new Map();
   const IFRAME_CACHE_SIZE = 3;
 
+  /* Track which iframes have fully loaded at least once */
+  const iframeLoaded = new Set();
+
   function getIframe(idx) {
     if (iframeCache.has(idx)) {
       const el = iframeCache.get(idx);
@@ -500,11 +504,18 @@ export function generatePresenter(
       const oldEl = iframeCache.get(oldest);
       if (oldEl.parentNode) oldEl.remove();
       iframeCache.delete(oldest);
+      iframeLoaded.delete(oldest);
     }
     const iframe = document.createElement('iframe');
     iframe.sandbox = 'allow-scripts allow-same-origin';
     iframe.style.cssText = 'position:absolute;top:0;left:0;width:${width}px;height:${height}px;border:none;pointer-events:none;transform-origin:top left;';
     iframe.src = SLIDE_HTML[idx];
+
+    /* Mark loaded once the first load completes (or errors) */
+    const markLoaded = () => { iframeLoaded.add(idx); };
+    iframe.addEventListener('load', markLoaded, { once: true });
+    iframe.addEventListener('error', markLoaded, { once: true });
+
     iframeCache.set(idx, iframe);
     return iframe;
   }
@@ -518,8 +529,18 @@ export function generatePresenter(
     showSlide(current);
   }
 
+  /* ── Safely dismiss loading for a specific generation ── */
+  function dismissLoading(gen) {
+    if (gen === loadingGeneration) {
+      elFrame.classList.remove('loading');
+    }
+  }
+
   /* ── Show slide ── */
   function showSlide(idx) {
+    /* Bump generation so stale callbacks become no-ops */
+    const gen = ++loadingGeneration;
+
     iframeCache.forEach((el) => { el.style.display = 'none'; });
 
     if (mode === 'img') {
@@ -532,20 +553,38 @@ export function generatePresenter(
     } else {
       elImg.style.display = 'none';
       const iframe = getIframe(idx);
-      if (!iframe.parentNode) elFrame.appendChild(iframe);
+      const isNew = !iframe.parentNode;
+      if (isNew) elFrame.appendChild(iframe);
       iframe.style.display = '';
-      elFrame.classList.add('loading');
 
-      const onReady = () => { elFrame.classList.remove('loading'); };
-      try {
-        if (iframe.contentDocument && iframe.contentDocument.readyState === 'complete') {
-          onReady();
+      /* If this iframe already loaded once (cached hit) → no spinner */
+      if (iframeLoaded.has(idx)) {
+        elFrame.classList.remove('loading');
+      } else {
+        elFrame.classList.add('loading');
+
+        const onReady = () => { dismissLoading(gen); };
+
+        /* Check synchronously first (handles already-complete iframes) */
+        let alreadyComplete = false;
+        try {
+          alreadyComplete = iframe.contentDocument
+            && iframe.contentDocument.readyState === 'complete'
+            && iframe.contentDocument.body
+            && iframe.contentDocument.body.childNodes.length > 0;
+        } catch (_) { /* cross-origin – ignore */ }
+
+        if (alreadyComplete) {
+          elFrame.classList.remove('loading');
         } else {
           iframe.addEventListener('load', onReady, { once: true });
+          iframe.addEventListener('error', onReady, { once: true });
+
+          /* Safety net: always dismiss after 8 s no matter what */
+          setTimeout(() => { dismissLoading(gen); }, 8000);
         }
-      } catch(e) {
-        iframe.addEventListener('load', onReady, { once: true });
       }
+
       scaleIframe(iframe);
     }
   }
@@ -577,12 +616,19 @@ export function generatePresenter(
     elDots.forEach((d, i) => d.classList.toggle('active', i === current));
   }
 
+  let fadeTimer = null;
   function loadSlide(idx) {
     if (idx === current) return;
+    /* Cancel any pending fade from a previous rapid navigation */
+    if (fadeTimer !== null) {
+      clearTimeout(fadeTimer);
+      fadeTimer = null;
+    }
     elContainer.classList.add('fading');
     current = idx;
     updateUI();
-    setTimeout(() => {
+    fadeTimer = setTimeout(() => {
+      fadeTimer = null;
       showSlide(idx);
       elContainer.classList.remove('fading');
     }, 120);
