@@ -105,6 +105,11 @@ export async function renderSlides(
 
     for (const [key, val] of Object.entries(slide)) {
       if (imageSlotIds.has(key) && typeof val === "string" && val) {
+        if (!generateImages) {
+          resolvedSlots[key] = val;
+          continue;
+        }
+
         const outcome = await tryResolveImage(val, dataDir);
         if ("error" in outcome) {
           failures.push({
@@ -186,6 +191,14 @@ async function screenshotSlides(
   const puppeteer = await import("puppeteer");
 
   const chromePaths = [
+    // Windows
+    "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+    "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
+    "C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe",
+    "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+    // macOS
+    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+    // Linux
     "/opt/google/chrome/chrome",
     "/usr/bin/google-chrome",
     "/usr/bin/chromium",
