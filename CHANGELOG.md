@@ -9,6 +9,28 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 <!-- New entries are prepended automatically by the publish workflow -->
 
+## v1.0.4 — 2026-03-23
+
+### Changes
+
+- feat: add sample data for bold metric layout showcasing airline baggage incident (f7cd522)
+- feat: add hotkey overlay and shortcut button for improved navigation (dd4bf72)
+- feat: enhance iframe loading management with loading state and timeout handling (a42eb42)
+- refactor: remove font handling logic and associated utilities to simplify rendering process (6a3ab13)
+- refactor: remove CJK font-face declarations from templates to streamline code (a1aba39)
+- refactor: simplify guide command options by removing JSON output option (8f65b5c)
+- feat: update minimal and minimal-wide templates with enhanced descriptions, improved layout, and CJK font support (fd8930c)
+- feat: add bold-metric and bold-metric-wide templates with JSON and HTML files for enhanced presentation layouts (5b177cb)
+- feat: implement embedded font stripping and optimize HTML rendering for slides (620e669)
+- feat: enhance guide path resolution for Bun and Node environments (3019616)
+- feat: add manifest.json output for programmatic consumers and update documentation (62111c6)
+- feat: add Docker support with Dockerfile and Dockerfile.dev, include .dockerignore (dc5df5e)
+
+**Full diff:** [v1.0.3...v1.0.4](https://github.com/doum1004/slide-cli/compare/v1.0.3...v1.0.4)
+
+---
+
+
 ## v1.0.3 — 2026-03-23
 
 ### Changes
