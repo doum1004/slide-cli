@@ -200,49 +200,7 @@ Slot values are injected via [Handlebars](https://handlebarsjs.com/) before rend
    font-family: 'DM Mono', 'Courier New', monospace;
    ```
 
-3. **Unicode support (CJK, French, accented Latin)** — Latin display fonts like Bebas Neue
-   have no CJK glyphs. If a user supplies Japanese, Korean, Chinese, or French-accented text,
-   the primary font silently falls back to a system sans-serif, which may not be bold or
-   match the design. Solve this by adding a Noto CJK font as the second entry in the stack:
-   ```css
-   /* Display title — Latin gets Bebas Neue, CJK/accented Latin gets Noto Sans Black */
-   @font-face {
-     font-family: 'Noto Sans CJK';
-     font-weight: 900;
-     src: local('Noto Sans CJK JP Black'),
-          url('file:///usr/share/fonts/opentype/noto/NotoSansCJK-Black.ttc') format('truetype');
-   }
-   @font-face {
-     font-family: 'Noto Sans CJK';
-     font-weight: 700;
-     src: local('Noto Sans CJK JP'),
-          url('file:///usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc') format('truetype');
-   }
-   @font-face {
-     font-family: 'Noto Serif CJK';
-     font-weight: 700;
-     src: local('Noto Serif CJK JP Bold'),
-          url('file:///usr/share/fonts/opentype/noto/NotoSerifCJK-Bold.ttc') format('truetype');
-   }
-
-   /* Font stacks with CJK fallback */
-   .title    { font-family: 'Bebas Neue', 'Noto Sans CJK', Impact, sans-serif; font-weight: 900; }
-   .subtitle { font-family: 'Outfit', 'Noto Sans CJK', Arial, sans-serif;      font-weight: 700; }
-   .heading  { font-family: 'Fraunces', 'Noto Serif CJK', Georgia, serif;      font-weight: 200; }
-   .quote    { font-family: 'Playfair Display', 'Noto Serif CJK', Georgia, serif; font-weight: 700; }
-   ```
-   The `local()` hint resolves on the user's system if Noto is installed. The `url()` path
-   resolves in the slide-cli Puppeteer renderer on machines where Noto is at the standard
-   Linux path. On macOS/Windows, remove the `url()` and rely on `local()` or bundle the font.
-
-   **Noto CJK font weights available on Linux:**
-   | File | Font weight | Use for |
-   |---|---|---|
-   | `NotoSansCJK-Black.ttc` | 900 | Display titles |
-   | `NotoSansCJK-Bold.ttc` | 700 | Subtitles, body, labels |
-   | `NotoSerifCJK-Bold.ttc` | 700 | Serif quotes, headings |
-
-4. **Use bold weights for legibility** — at the 1080px→mobile scale factor (~2.8×),
+3. **Use bold weights for legibility** — at the 1080px→mobile scale factor (~2.8×),
    light and thin font weights lose legibility faster than colour does. Apply these minimums:
    - Display titles (`font-size ≥ 140px`): `font-weight: 700–900`
    - Subtitles and subheadings (`font-size 50–100px`): `font-weight: 700`
@@ -250,14 +208,14 @@ Slot values are injected via [Handlebars](https://handlebarsjs.com/) before rend
    - Labels and eyebrows (`font-size 30–40px`): `font-weight: 700`
    - Footers and counters (`font-size 28–32px`): `font-weight: 400`, never lighter
 
-5. **No `<script>` side effects that block rendering** — Puppeteer waits for
+4. **No `<script>` side effects that block rendering** — Puppeteer waits for
    `networkidle0` then `document.fonts.ready`. Avoid long JS loops or timers
    that prevent the page from settling.
 
-4. **Colors must be hardcoded or from slots** — CSS variables like `var(--accent)`
+5. **Colors must be hardcoded or from slots** — CSS variables like `var(--accent)`
    will not be set unless you define them yourself in `<style>`.
 
-5. **Slot values in CSS** — you CAN use slot values directly inside `<style>` blocks:
+6. **Slot values in CSS** — you CAN use slot values directly inside `<style>` blocks:
    ```css
    body { background: {{bg}}; }
    h1   { color: {{accent}}; }

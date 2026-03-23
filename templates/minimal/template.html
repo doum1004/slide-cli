@@ -6,20 +6,6 @@
   /* ── Reset ── */
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  /* ── CJK font-face declarations ── */
-  @font-face {
-    font-family: 'Noto Serif CJK';
-    font-weight: 700;
-    src: local('Noto Serif CJK JP Bold'),
-         url('file:///usr/share/fonts/opentype/noto/NotoSerifCJK-Bold.ttc') format('truetype');
-  }
-  @font-face {
-    font-family: 'Noto Sans CJK';
-    font-weight: 700;
-    src: local('Noto Sans CJK JP'),
-         url('file:///usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc') format('truetype');
-  }
-
   html, body {
     width: 1080px;
     height: 1920px;
@@ -45,67 +31,14 @@
     z-index: 0;
   }
 
-  /* ── Content wrapper ── */
-  .content {
-    flex: 1 1 auto;
-    display: flex;
-    flex-direction: column;
-    padding: 100px 0 140px;
-    min-height: 0;
+  /* ── Top label + rule (pinned to top) ── */
+  .zone-label {
+    flex: 0 0 auto;
+    padding: 100px 96px 0;
     position: relative;
     z-index: 1;
   }
 
-  /* No image: center text vertically */
-  body.no-image .content {
-    justify-content: center;
-    padding-top: 0;
-    padding-bottom: 0;
-  }
-
-  /* ── Zone: heading ── */
-  .zone-heading {
-    flex: 0 0 auto;
-    padding: 0 96px;
-  }
-
-  /* ── Zone: image ── */
-  .zone-image {
-    flex: 0 1 auto;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    overflow: hidden;
-    padding: 32px 48px 0;
-    position: relative;
-    min-height: 0;
-  }
-
-  .slide-image {
-    display: block;
-    object-fit: contain;
-    object-position: center top;
-    max-width: 100%;
-    max-height: 100%;
-    width: auto;
-    height: auto;
-    border-radius: 12px;
-    flex-shrink: 1;
-    min-height: 0;
-  }
-
-  /* ── Zone: body ── */
-  .zone-body {
-    flex: 0 0 auto;
-    padding: 32px 96px 0;
-  }
-
-  /* ── Spacer: pushes remaining space below body ── */
-  .spacer {
-    flex: 1 1 auto;
-  }
-
-  /* ── Text elements ── */
   .label {
     font-size: 32px;
     font-weight: 700;
@@ -119,8 +52,25 @@
     width: 80px;
     height: 2px;
     background: {{default accent '#c8b89a'}};
-    margin-bottom: 48px;
     opacity: 0.7;
+  }
+
+  /* ── Content wrapper (optically above center) ── */
+  .content {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 40px 0 200px;
+    min-height: 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── Zone: heading ── */
+  .zone-heading {
+    flex: 0 0 auto;
+    padding: 0 96px;
   }
 
   .heading {
@@ -133,6 +83,37 @@
     text-wrap: pretty;
     word-break: keep-all;
     overflow-wrap: break-word;
+  }
+
+  /* ── Zone: image ── */
+  .zone-image {
+    flex: 0 1 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: 40px 48px 0;
+    position: relative;
+    min-height: 0;
+  }
+
+  .slide-image {
+    display: block;
+    object-fit: contain;
+    object-position: center;
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    border-radius: 12px;
+    flex-shrink: 1;
+    min-height: 0;
+  }
+
+  /* ── Zone: body ── */
+  .zone-body {
+    flex: 0 0 auto;
+    padding: 40px 96px 0;
   }
 
   .body-text {
@@ -176,10 +157,13 @@
 </head>
 <body class="{{#if image}}has-image{{else}}no-image{{/if}}">
 
+  <div class="zone-label">
+    {{#if label}}<div class="label">{{label}}</div>{{/if}}
+    <div class="rule"></div>
+  </div>
+
   <div class="content">
     <div class="zone-heading">
-      {{#if label}}<div class="label">{{label}}</div>{{/if}}
-      <div class="rule"></div>
       <h1 class="heading">{{heading}}</h1>
     </div>
 
@@ -194,8 +178,6 @@
       <p class="body-text">{{body}}</p>
     </div>
     {{/if}}
-
-    <div class="spacer"></div>
   </div>
 
   <footer class="footer">
