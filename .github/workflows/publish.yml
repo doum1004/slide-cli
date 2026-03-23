@@ -83,6 +83,8 @@ jobs:
 
       - name: Publish to npm
         run: npm publish --access public --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       # ── 8. Build changelog entry and update CHANGELOG.md ────────────
       # Runs after publish (so a failed publish skips this entirely) but
