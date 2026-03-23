@@ -1,0 +1,82 @@
+{
+  "name": "Bold Metric Wide",
+  "id": "bold-metric-wide",
+  "version": "1.0.0",
+  "description": "Wide-format statistic card with oversized number, optional background image, two-column layout, and source attribution for presentations and data storytelling.",
+  "author": "slide-cli",
+  "aspectRatio": "16:9",
+  "width": 1920,
+  "height": 1080,
+  "slots": [
+    {
+      "id": "eyebrow",
+      "type": "text",
+      "label": "Eyebrow label",
+      "required": false,
+      "default": "",
+      "description": "Short uppercase tag above the metric. 1–4 words. E.g. 'Industry Report' or 'Q3 2024'."
+    },
+    {
+      "id": "metric",
+      "type": "text",
+      "label": "Metric / number",
+      "required": true,
+      "description": "The hero number or statistic. Keep to 1–5 characters for maximum impact. E.g. '73%', '$4.2T', '10×'."
+    },
+    {
+      "id": "context",
+      "type": "text",
+      "label": "Context line",
+      "required": true,
+      "description": "One sentence explaining what the metric means. 4–12 words. Displayed in the right column."
+    },
+    {
+      "id": "detail",
+      "type": "text",
+      "label": "Detail paragraph",
+      "required": false,
+      "default": "",
+      "description": "Optional elaboration. 1–2 sentences providing nuance, comparison, or implication."
+    },
+    {
+      "id": "source",
+      "type": "text",
+      "label": "Source attribution",
+      "required": false,
+      "default": "",
+      "description": "Data source shown at bottom. E.g. 'McKinsey, 2024' or 'Based on 12,000 respondents'."
+    },
+    {
+      "id": "bg-image",
+      "type": "image",
+      "label": "Background image",
+      "required": false,
+      "default": "",
+      "description": "Optional background photo. Covered with a dark gradient scrim so text remains legible. Local path, URL, or data URI."
+    },
+    {
+      "id": "bg",
+      "type": "color",
+      "label": "Background color",
+      "required": false,
+      "default": "#0b0a09",
+      "description": "Slide background color. Used as the base when no bg-image is set."
+    },
+    {
+      "id": "accent",
+      "type": "color",
+      "label": "Accent color",
+      "required": false,
+      "default": "#ff6b35",
+      "description": "Color for the metric number, decorative elements, and eyebrow. Vivid saturated colors work best."
+    },
+    {
+      "id": "ink",
+      "type": "color",
+      "label": "Text color",
+      "required": false,
+      "default": "#f0ece4",
+      "description": "Color for context, detail, and secondary text."
+    }
+  ]
+}

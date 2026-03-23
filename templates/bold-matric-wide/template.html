@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  /* === Reset === */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  /* === Canvas — fixed 16:9 === */
+  html, body {
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    background: {{bg}};
+  }
+
+  /* === CJK / accented Latin fallback fonts === */
+  @font-face {
+    font-family: 'Noto Sans CJK';
+    font-weight: 900;
+    src: local('Noto Sans CJK JP Black'),
+         url('file:///usr/share/fonts/opentype/noto/NotoSansCJK-Black.ttc') format('truetype');
+  }
+  @font-face {
+    font-family: 'Noto Sans CJK';
+    font-weight: 700;
+    src: local('Noto Sans CJK JP'),
+         url('file:///usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc') format('truetype');
+  }
+
+  /* === Body layout === */
+  body {
+    display: flex;
+    flex-direction: column;
+    font-family: 'Helvetica Neue', 'Noto Sans CJK', Arial, Helvetica, sans-serif;
+    color: {{ink}};
+    position: relative;
+  }
+
+  /* === Background image layer === */
+  .bg-image {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+  .bg-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .bg-image::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      135deg,
+      rgba(0, 0, 0, 0.80) 0%,
+      rgba(0, 0, 0, 0.60) 50%,
+      rgba(0, 0, 0, 0.45) 100%
+    );
+  }
+
+  /* === Noise texture overlay === */
+  body::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    opacity: 0.25;
+    z-index: 1;
+  }
+
+  /* === Top bar === */
+  .top-bar {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 44px 80px 0 80px;
+    min-height: 56px;
+  }
+  .eyebrow {
+    font-family: 'Courier New', 'Noto Sans CJK', monospace;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: {{accent}};
+  }
+  .counter-top {
+    font-family: 'Courier New', 'Noto Sans CJK', monospace;
+    font-size: 20px;
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    color: {{ink}};
+    opacity: 0.25;
+  }
+
+  /* === Main two-column layout === */
+  .main {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    flex: 1;
+    padding: 0 80px;
+    gap: 80px;
+  }
+
+  /* === Left column — metric === */
+  .col-left {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    max-width: 960px;
+  }
+
+  /* Vertical accent bar beside the metric */
+  .metric-group {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    gap: 40px;
+  }
+  .vertical-rule {
+    width: 5px;
+    background: {{accent}};
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+  .metric {
+    font-family: 'Helvetica Neue', 'Noto Sans CJK', Arial, Helvetica, sans-serif;
+    font-size: 180px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    color: {{accent}};
+    text-wrap: pretty;
+  }
+
+  /* === Right column — context + detail === */
+  .col-right {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    max-width: 720px;
+  }
+  .context {
+    font-size: 42px;
+    font-weight: 700;
+    line-height: 1.35;
+    color: {{ink}};
+    text-wrap: pretty;
+    margin-bottom: 24px;
+  }
+  .dot-sep {
+    display: flex;
+    gap: 10px;
+    margin: 8px 0 28px 0;
+  }
+  .dot-sep span {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: {{accent}};
+    opacity: 0.5;
+  }
+  .detail {
+    font-size: 28px;
+    font-weight: 400;
+    line-height: 1.6;
+    color: {{ink}};
+    opacity: 0.55;
+    text-wrap: pretty;
+    max-width: 640px;
+  }
+
+  /* === Ghost metric watermark === */
+  .ghost-metric {
+    position: absolute;
+    top: 50%;
+    left: 28%;
+    transform: translate(-50%, -55%);
+    font-family: 'Helvetica Neue', 'Noto Sans CJK', Arial, Helvetica, sans-serif;
+    font-size: 480px;
+    font-weight: 900;
+    color: {{accent}};
+    opacity: 0.03;
+    line-height: 1;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 2;
+    letter-spacing: -0.04em;
+  }
+  .has-bg-image .ghost-metric {
+    opacity: 0.05;
+  }
+
+  /* === Corner brackets === */
+  .corner {
+    position: absolute;
+    width: 36px;
+    height: 36px;
+    z-index: 2;
+  }
+  .corner-tl {
+    top: 36px; left: 36px;
+    border-left: 2px solid {{accent}};
+    border-top: 2px solid {{accent}};
+  }
+  .corner-tr {
+    top: 36px; right: 36px;
+    border-right: 2px solid {{accent}};
+    border-top: 2px solid {{accent}};
+  }
+  .corner-bl {
+    bottom: 36px; left: 36px;
+    border-left: 2px solid {{accent}};
+    border-bottom: 2px solid {{accent}};
+  }
+  .corner-br {
+    bottom: 36px; right: 36px;
+    border-right: 2px solid {{accent}};
+    border-bottom: 2px solid {{accent}};
+  }
+
+  /* === Bottom bar === */
+  .bottom-bar {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 80px 44px 80px;
+    min-height: 56px;
+  }
+  .source {
+    font-family: 'Courier New', 'Noto Sans CJK', monospace;
+    font-size: 20px;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    color: {{ink}};
+    opacity: 0.28;
+    text-transform: uppercase;
+  }
+  .bottom-rule {
+    flex: 1;
+    height: 1px;
+    background: {{ink}};
+    opacity: 0.08;
+    margin: 0 40px;
+  }
+  .title-label {
+    font-family: 'Courier New', 'Noto Sans CJK', monospace;
+    font-size: 20px;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    color: {{ink}};
+    opacity: 0.20;
+  }
+</style>
+</head>
+<body class="{{#if bg-image}}has-bg-image{{/if}}">
+
+  <!-- Background image (optional) -->
+  {{#if bg-image}}
+  <div class="bg-image">
+    <img src="{{bg-image}}" alt="">
+  </div>
+  {{/if}}
+
+  <!-- Decorative corner brackets -->
+  <div class="corner corner-tl"></div>
+  <div class="corner corner-tr"></div>
+  <div class="corner corner-bl"></div>
+  <div class="corner corner-br"></div>
+
+  <!-- Ghost watermark -->
+  <div class="ghost-metric">{{metric}}</div>
+
+  <!-- Top bar: eyebrow + counter -->
+  <div class="top-bar">
+    {{#if eyebrow}}<div class="eyebrow">{{eyebrow}}</div>{{else}}<div></div>{{/if}}
+    <div class="counter-top">{{slideIndex}} / {{totalSlides}}</div>
+  </div>
+
+  <!-- Main two-column content -->
+  <div class="main">
+
+    <!-- Left: metric with vertical accent bar -->
+    <div class="col-left">
+      <div class="metric-group">
+        <div class="vertical-rule"></div>
+        <div class="metric">{{metric}}</div>
+      </div>
+    </div>
+
+    <!-- Right: context + detail -->
+    <div class="col-right">
+      <p class="context">{{context}}</p>
+
+      {{#if detail}}
+      <div class="dot-sep">
+        <span></span><span></span><span></span>
+      </div>
+      <p class="detail">{{detail}}</p>
+      {{/if}}
+    </div>
+
+  </div>
+
+  <!-- Bottom bar: source + rule + title -->
+  <div class="bottom-bar">
+    {{#if source}}<div class="source">{{source}}</div>{{else}}<div></div>{{/if}}
+    <div class="bottom-rule"></div>
+    {{#if title}}<div class="title-label">{{title}}</div>{{else}}<div></div>{{/if}}
+  </div>
+
+</body>
+</html>
