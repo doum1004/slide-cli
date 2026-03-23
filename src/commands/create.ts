@@ -10,7 +10,7 @@ import type { PresentationData, CreateOptions } from "../types.js";
 /**
  * Derive a safe directory name from a presentation title.
  * Lowercases, replaces spaces/special chars with hyphens, collapses runs, strips leading/trailing hyphens.
- * e.g. "My Great Deck!" → "my-great-deck"
+ * e.g. "My Great Deck!" > "my-great-deck"
  */
 function slugify(title: string): string {
   return title
@@ -97,7 +97,7 @@ export async function createCommand(opts: CreateOptions) {
   mkdirSync(outDir, { recursive: true });
 
   const totalSlides = data.slides.length;
-  console.log(chalk.dim(`  ${totalSlides} slide${totalSlides !== 1 ? "s" : ""} → ${outDir}\n`));
+  console.log(chalk.dim(`  ${totalSlides} slide${totalSlides !== 1 ? "s" : ""} > ${outDir}\n`));
 
   // ── 5. Pre-flight image check (dry run — no screenshots yet) ───────
   // Run the render once without screenshots to surface image failures early.

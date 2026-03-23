@@ -51,7 +51,7 @@ export async function addTemplateCommand(
   try {
     mkdirSync(destDir, { recursive: true });
     cpSync(src, destDir, { recursive: true });
-    spinner.succeed(`Template installed → ${chalk.cyan(destDir)}`);
+    spinner.succeed(`Template installed > ${chalk.cyan(destDir)}`);
   } catch (err: any) {
     spinner.fail(`Copy failed: ${err.message}`);
     process.exit(1);

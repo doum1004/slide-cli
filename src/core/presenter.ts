@@ -343,7 +343,7 @@ export function generatePresenter(
 </header>
 
 <main>
-  <button class="nav-btn nav-prev" id="btnPrev" onclick="go(-1)" title="Previous (←)">
+  <button class="nav-btn nav-prev" id="btnPrev" onclick="go(-1)" title="Previous (<-)">
     <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
   </button>
 
@@ -361,7 +361,7 @@ export function generatePresenter(
     </div>
   </div>
 
-  <button class="nav-btn nav-next" id="btnNext" onclick="go(1)" title="Next (→)">
+  <button class="nav-btn nav-next" id="btnNext" onclick="go(1)" title="Next (->)">
     <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
   </button>
 </main>
@@ -380,7 +380,7 @@ export function generatePresenter(
   <button class="ctrl-btn" id="btnPlay" onclick="togglePlay()">▶ PLAY</button>
 </footer>
 
-<div class="kbd-hint" id="kbdHint">← → to navigate · space to play · f for fullscreen · esc to exit</div>
+<div class="kbd-hint" id="kbdHint"><- -> to navigate · space to play · f for fullscreen · esc to exit</div>
 
 <script>
   const SLIDE_HTML   = ${JSON.stringify(htmlFiles)};
