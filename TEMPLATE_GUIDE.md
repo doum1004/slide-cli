@@ -322,6 +322,71 @@ These slides render at 1080×1920px but display on a mobile screen at roughly 37
 
 **Layout direction:** `flex-direction: column`. 9:16 is a tall, narrow canvas — vertical stacking is natural. Two-column layouts can work for specific use cases (image beside text) but require careful width management.
 
+### Image + text split layouts (for 9:16)
+
+When a template features a prominent image alongside text, split the canvas into two vertical zones rather than using a full-bleed background with an overlay. This gives the image room to breathe and keeps text on a clean, solid-colored surface.
+
+**Recommended split ratios:**
+
+| Split | Image zone | Text zone | Best for |
+|---|---|---|---|
+| 55 / 45 | 1056px | 864px | Headshots, portraits, product photos with heading + body |
+| 50 / 50 | 960px | 960px | Equal emphasis — scene photo with longer text |
+| 40 / 60 | 768px | 1152px | Text-heavy — small image with detailed description |
+| 65 / 35 | 1248px | 672px | Image-dominant — large visual with short caption only |
+
+**Implementation pattern:**
+
+```css
+/* Image zone — fixed height, top of card */
+.image-zone {
+  position: relative;
+  width: 100%;
+  height: 1056px;        /* 55% of 1920 */
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.image-zone img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;     /* crops to fill — no distortion */
+  display: block;
+}
+
+/* Text zone — fills remaining space */
+.text-zone {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 96px 140px 96px;
+}
+```
+
+**Gradient fade between zones:** Use a gradient overlay at the bottom of the image zone to create a seamless transition into the background color. This eliminates the hard edge where photo meets solid color.
+
+```css
+.image-zone::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 280px;
+  background: linear-gradient(to bottom, transparent 0%, {{bg}} 100%);
+  pointer-events: none;
+}
+```
+
+The gradient uses `{{bg}}` so it automatically matches whatever background color the slide uses — no hardcoded values needed.
+
+**When to use split vs. full-bleed overlay:**
+
+| Approach | Use when | Example |
+|---|---|---|
+| **Split layout** (image zone + text zone) | The image IS the content — a person, product, or scene the viewer should see clearly | Team intros, product cards, testimonials with portraits |
+| **Full-bleed overlay** (image behind text with dark overlay) | The image is atmosphere — mood, texture, context | Insight cards, quote cards, title slides |
+
 ---
 
 ## Design guidelines for 16:9 cards (1920×1080px)
@@ -494,38 +559,156 @@ color: #ffffff;
 accent: #ff6b35;  /* any vivid color */
 ```
 
+### Z-index stacking conventions
+
+Templates with images, overlays, and layered content need a consistent z-index strategy. Use this standard stacking order so every template layers elements predictably:
+
+| z-index | Layer | What goes here |
+|---|---|---|
+| 0 | **Image** | Background image, featured photo, `<img>` elements |
+| 1 | **Image overlay** | Dark tint (`::after` on image container), gradient fades |
+| 2–3 | **Content** | Text zones, headings, body, eyebrows, rules |
+| 2–3 | **Footer** | Attribution, slide counter, bottom bar |
+| 10 | **Texture** | Noise overlay, grain, grid — covers everything for unified feel |
+
+**Why z-index 10 for noise?** Leaving a gap (3→10) means you can insert new layers later without renumbering. The noise texture should always be the topmost visual layer (with `pointer-events: none`) so it applies uniformly across image and text zones.
+
+```css
+.bg-image    { z-index: 0; }
+.bg-overlay  { z-index: 1; }
+.content     { position: relative; z-index: 2; }
+.footer-bar  { position: absolute; z-index: 2; }
+.noise       { position: absolute; inset: 0; z-index: 10; pointer-events: none; }
+```
+
+### Designing with image slots
+
+Image slots introduce complexity that text-only templates don't have. Follow these principles:
+
+**Always use `object-fit: cover`** on images inside fixed-size containers. This crops the image to fill the space without distortion. Never use `object-fit: contain` (leaves gaps) or `object-fit: fill` (stretches).
+
+```css
+.image-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+```
+
+**Protect text legibility over images.** When text overlaps an image, you need one of:
+
+1. **Solid overlay** — a semi-transparent layer of the `bg` color between image and text:
+   ```css
+   .bg-image::after {
+     content: '';
+     position: absolute;
+     inset: 0;
+     background: {{bg}};
+     opacity: 0.72;     /* 0.65–0.80 depending on image brightness */
+   }
+   ```
+
+2. **Gradient fade** — transitions from image to solid color. Best for split layouts:
+   ```css
+   .image-zone::after {
+     content: '';
+     position: absolute;
+     bottom: 0; left: 0; right: 0;
+     height: 280px;
+     background: linear-gradient(to bottom, transparent 0%, {{bg}} 100%);
+   }
+   ```
+
+3. **Text shadow** — last resort for text directly on images. Heavy and often looks dated:
+   ```css
+   /* Avoid unless no other option */
+   .heading { text-shadow: 0 2px 40px rgba(0,0,0,0.8); }
+   ```
+
+**Use `{{bg}}` in overlays, not hardcoded black.** This ensures the overlay tint matches the deck's color identity. A `#0c0b09` overlay on a warm-dark deck feels cohesive; a `#000000` overlay feels generic.
+
+**Make images optional when possible.** Templates should look complete with or without an image. Wrap image-dependent HTML and CSS in `{{#if image}}…{{/if}}`:
+
+```html
+{{#if image}}
+<div class="bg-image">
+  <img src="{{image}}" alt="">
+</div>
+{{/if}}
+```
+
+```css
+{{#if image}}
+.bg-image { position: absolute; inset: 0; z-index: 0; }
+.bg-image img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.bg-image::after {
+  content: ''; position: absolute; inset: 0;
+  background: {{bg}}; opacity: 0.72;
+}
+{{/if}}
+```
+
+When the image is required (e.g. a portrait spotlight card), document this clearly in `_slots` and include guidance on what kinds of images work best.
+
 ### Decorative elements that work well
+
+**CSS-only elements:**
 
 ```css
 /* Thin ruled line */
-.rule { width: 60px; height: 2px; background: var(--accent); }
+.rule { width: 60px; height: 2px; background: {{accent}}; }
+
+/* Top accent bar — thin colored stripe at the card edge */
+.accent-bar {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 5px;
+  background: {{accent}};
+  z-index: 2;
+}
 
 /* Corner brackets (no border-radius) */
-.corner-tl { position: absolute; top: 80px; left: 80px;
+.corner-tl {
+  position: absolute; top: 80px; left: 80px;
   width: 50px; height: 50px;
   border-left: 2px solid currentColor;
-  border-top: 2px solid currentColor; }
+  border-top: 2px solid currentColor;
+}
 
 /* Noise texture overlay */
-body::before {
-  content: ''; position: absolute; inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-  pointer-events: none; opacity: 0.35; }
+.noise {
+  position: absolute; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+  pointer-events: none;
+  opacity: 0.25;
+  z-index: 10;
+}
 
 /* Subtle grid overlay */
-body::before {
-  content: ''; position: absolute; inset: 0;
+.grid-overlay {
+  position: absolute; inset: 0;
   background-image:
     linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-  background-size: 80px 80px; }
+  background-size: 80px 80px;
+  pointer-events: none;
+  z-index: 10;
+}
+```
 
-/* SVG quotation marks (font-independent) */
-<svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg" style="width:200px;opacity:0.12">
+**Inline SVG elements** (use directly in the HTML `<body>`, not inside `<style>`):
+
+```html
+<!-- SVG quotation marks (font-independent) -->
+<svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg"
+     style="width:200px; opacity:0.12; position:absolute; top:100px; left:96px;">
   <path d="M20 130 C20 90 45 55 80 30 L70 15 C25 42 0 82 0 130 C0 148 12 160 28 160
-           C44 160 55 148 55 132 C55 116 44 104 28 104 C24 104 22 104 20 105 Z" fill="currentColor"/>
+           C44 160 55 148 55 132 C55 116 44 104 28 104 C24 104 22 104 20 105 Z"
+        fill="currentColor"/>
   <path d="M110 130 C110 90 135 55 170 30 L160 15 C115 42 90 82 90 130 C90 148 102 160 118 160
-           C134 160 145 148 145 132 C145 116 134 104 118 104 C114 104 112 104 110 105 Z" fill="currentColor"/>
+           C134 160 145 148 145 132 C145 116 134 104 118 104 C114 104 112 104 110 105 Z"
+        fill="currentColor"/>
 </svg>
 ```
 
@@ -676,3 +859,6 @@ This is a fully working minimal 16:9 template. The same structure applies to any
 - [ ] `sample.json` `slides` array is valid and would pass `slide create`
 - [ ] At least 2 slides in the sample showing different content and color combos
 - [ ] `bg` and `ink` are the **same** on every slide in `sample.json` — only `accent` varies
+- [ ] Images use `object-fit: cover` inside fixed-size containers
+- [ ] Image overlays and gradient fades use `{{bg}}`, not hardcoded black
+- [ ] Z-index follows the convention: image (0) → overlay (1) → content (2–3) → noise (10)
