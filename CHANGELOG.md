@@ -9,6 +9,27 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 <!-- New entries are prepended automatically by the publish workflow -->
 
+## v1.0.5 — 2026-03-24
+
+### Changes
+
+- refactor: comment out performance logging in renderSlides and screenshotSlides functions (b833ec5)
+- fix: update README examples to use correct sample data paths (0443c46)
+- feat: adjust right column width in insight-wide template for improved layout (ca7a2d6)
+- feat: add spotlight-wide template with detailed structure and customizable options (0b95664)
+- feat: add insight-wide template with structured layout and customizable options (9db4fe5)
+- feat: enhance template authoring guide with image and text layout strategies (b789a89)
+- fix: update .gitignore to generalize downloaded fonts entry (7024b5b)
+- feat: add spotlight card template and configuration for enhanced slide presentations (30baa83)
+- feat: add guidelines for consistent background and text colors across slides (2b320b6)
+- feat: add insight card template and JSON configuration for carousel decks (85550fc)
+- Remove deprecated sample JSON files and templates for bold metric presentations (1d25d80)
+
+**Full diff:** [v1.0.4...v1.0.5](https://github.com/doum1004/slide-cli/compare/v1.0.4...v1.0.5)
+
+---
+
+
 ## v1.0.4 — 2026-03-23
 
 ### Changes
