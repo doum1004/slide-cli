@@ -159,13 +159,13 @@ export async function renderSlides(
     writeFileSync(slideHtmlPath, wrapHtml(html, template.manifest.width, template.manifest.height));
     results.push({ slideIndex: i + 1, htmlPath: slideHtmlPath, imagePath: slideImagePath });
   }
-  console.log(`[perf] Resolve + write HTML: ${(performance.now() - resolveStart).toFixed(0)}ms`);
+  //console.log(`[perf] Resolve + write HTML: ${(performance.now() - resolveStart).toFixed(0)}ms`);
 
   if (generateImages) {
     await screenshotSlides(results, template.manifest.width, template.manifest.height, format);
   }
 
-  console.log(`[perf] Total renderSlides: ${(performance.now() - totalStart).toFixed(0)}ms`);
+  //console.log(`[perf] Total renderSlides: ${(performance.now() - totalStart).toFixed(0)}ms`);
   return { results, failures };
 }
 
@@ -206,7 +206,7 @@ async function screenshotSlides(
       "--font-render-hinting=none",
     ],
   });
-  console.log(`[perf] Browser launch: ${(performance.now() - launchStart).toFixed(0)}ms`);
+  //console.log(`[perf] Browser launch: ${(performance.now() - launchStart).toFixed(0)}ms`);
 
   try {
     const page = await browser.newPage();
@@ -225,7 +225,7 @@ async function screenshotSlides(
 </html>`;
 
     await page.setContent(shellHtml, { waitUntil: "load" });
-    console.log(`[perf] Shell page ready: ${(performance.now() - shellStart).toFixed(0)}ms`);
+    //console.log(`[perf] Shell page ready: ${(performance.now() - shellStart).toFixed(0)}ms`);
 
     // ── Render each slide by swapping body ──────────────────────────
     const isJpeg = format === "jpg";
@@ -261,7 +261,7 @@ async function screenshotSlides(
         },
         { styles: headStyles, body: bodyContent, attrs: bodyAttrs }
       );
-      console.log(`[perf]   slide ${result.slideIndex} swap: ${(performance.now() - t0).toFixed(0)}ms`);
+      //console.log(`[perf]   slide ${result.slideIndex} swap: ${(performance.now() - t0).toFixed(0)}ms`);
 
       // Wait for base64 images to decode
       await page.evaluate(() =>
@@ -291,13 +291,13 @@ async function screenshotSlides(
         quality: isJpeg ? 95 : undefined,
         clip: { x: 0, y: 0, width, height },
       });
-      console.log(`[perf]   slide ${result.slideIndex} screenshot: ${(performance.now() - t2).toFixed(0)}ms`);
+      //console.log(`[perf]   slide ${result.slideIndex} screenshot: ${(performance.now() - t2).toFixed(0)}ms`);
 
       if (isJpeg && screenshotPath !== result.imagePath) {
         renameSync(screenshotPath, result.imagePath);
       }
 
-      console.log(`[perf]   slide ${result.slideIndex} total: ${(performance.now() - slideStart).toFixed(0)}ms`);
+      //console.log(`[perf]   slide ${result.slideIndex} total: ${(performance.now() - slideStart).toFixed(0)}ms`);
     }
   } finally {
     await browser.close();
