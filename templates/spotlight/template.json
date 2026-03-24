@@ -1,0 +1,74 @@
+{
+  "name": "Spotlight",
+  "id": "spotlight",
+  "version": "1.0.0",
+  "description": "Image-forward spotlight card — featured photo top, heading and body below. Ideal for quotes, testimonials, team intros, and product features on a 9:16 canvas.",
+  "author": "slide-cli",
+  "aspectRatio": "9:16",
+  "width": 1080,
+  "height": 1920,
+  "slots": [
+    {
+      "id": "image",
+      "type": "image",
+      "label": "Featured image",
+      "required": true,
+      "description": "The main visual — headshot, product photo, or scene. Displayed in the top portion of the card. Local path or URL."
+    },
+    {
+      "id": "heading",
+      "type": "text",
+      "label": "Heading",
+      "required": true,
+      "description": "Primary text below the image. A name, quote, or title. 2–10 words."
+    },
+    {
+      "id": "body",
+      "type": "text",
+      "label": "Body text",
+      "required": false,
+      "default": "",
+      "description": "Supporting text. Role, attribution, description, or 1–3 sentences."
+    },
+    {
+      "id": "eyebrow",
+      "type": "text",
+      "label": "Eyebrow label",
+      "required": false,
+      "default": "",
+      "description": "Small uppercase label above the heading (e.g. 'FOUNDER', 'TESTIMONIAL', 'FEATURED')."
+    },
+    {
+      "id": "footer",
+      "type": "text",
+      "label": "Footer text",
+      "required": false,
+      "default": "",
+      "description": "Bottom-left attribution, handle, or brand (e.g. '@yourname')."
+    },
+    {
+      "id": "bg",
+      "type": "color",
+      "label": "Background color",
+      "required": false,
+      "default": "#0c0b09",
+      "description": "Card background. Keep consistent across all slides in a deck."
+    },
+    {
+      "id": "ink",
+      "type": "color",
+      "label": "Text color",
+      "required": false,
+      "default": "#eae6de",
+      "description": "Primary text color. Keep consistent across all slides in a deck."
+    },
+    {
+      "id": "accent",
+      "type": "color",
+      "label": "Accent color",
+      "required": false,
+      "default": "#d4a054",
+      "description": "Accent color for eyebrow, rule, and border detail. Vary per slide."
+    }
+  ]
+}
