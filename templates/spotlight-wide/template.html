@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    background: {{bg}};
+  }
+
+  body {
+    display: flex;
+    flex-direction: row;
+    font-family: Georgia, 'Times New Roman', serif;
+    color: {{ink}};
+    position: relative;
+  }
+
+  /* ── Noise overlay ── */
+  .noise {
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+    pointer-events: none;
+    opacity: 0.25;
+    z-index: 10;
+  }
+
+  /* ── Text column — left ── */
+  .col-text {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 80px 72px 80px 96px;
+    position: relative;
+    z-index: 2;
+  }
+
+  /* ── Image column — right ── */
+  .col-image {
+    flex: 0 0 640px;
+    position: relative;
+    z-index: 0;
+    overflow: hidden;
+  }
+
+  .col-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* Gradient fade from image into bg on the left edge */
+  .col-image::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 200px;
+    background: linear-gradient(to right, {{bg}} 0%, transparent 100%);
+    pointer-events: none;
+  }
+
+  /* Accent bar on the left edge of the image */
+  .col-image::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 4px;
+    background: {{accent}};
+    z-index: 2;
+  }
+
+  /* ── Eyebrow ── */
+  .eyebrow {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: {{accent}};
+    margin-bottom: 28px;
+  }
+
+  /* ── Accent rule ── */
+  .rule {
+    width: 48px;
+    height: 3px;
+    background: {{accent}};
+    margin-bottom: 36px;
+  }
+
+  /* ── Heading ── */
+  .heading {
+    font-size: 80px;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+    text-wrap: pretty;
+    max-width: 900px;
+    margin-bottom: 32px;
+  }
+
+  /* ── Body ── */
+  .body {
+    font-size: 30px;
+    font-weight: 400;
+    line-height: 1.6;
+    color: {{ink}};
+    opacity: 0.6;
+    max-width: 800px;
+    text-wrap: pretty;
+  }
+
+  /* ── Footer bar ── */
+  .footer-bar {
+    position: absolute;
+    bottom: 44px;
+    left: 96px;
+    right: 96px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 2;
+  }
+
+  .footer-text {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 20px;
+    font-weight: 400;
+    color: {{ink}};
+    opacity: 0.28;
+    letter-spacing: 0.04em;
+  }
+
+  .counter {
+    font-family: 'Courier New', monospace;
+    font-size: 20px;
+    font-weight: 400;
+    color: {{ink}};
+    opacity: 0.22;
+    letter-spacing: 0.08em;
+  }
+</style>
+</head>
+<body>
+
+  <!-- Noise texture -->
+  <div class="noise"></div>
+
+  <!-- Left column: text content -->
+  <div class="col-text">
+    {{#if eyebrow}}<div class="eyebrow">{{eyebrow}}</div>{{/if}}
+    <div class="rule"></div>
+    <h1 class="heading">{{heading}}</h1>
+    {{#if body}}<p class="body">{{body}}</p>{{/if}}
+  </div>
+
+  <!-- Right column: featured image -->
+  <div class="col-image">
+    <img src="{{image}}" alt="">
+  </div>
+
+  <!-- Footer -->
+  <div class="footer-bar">
+    {{#if footer}}<span class="footer-text">{{footer}}</span>{{else}}<span></span>{{/if}}
+    <span class="counter">{{slideIndex}} / {{totalSlides}}</span>
+  </div>
+
+</body>
+</html>
