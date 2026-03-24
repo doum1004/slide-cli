@@ -1,0 +1,57 @@
+{
+  "_template": "insight-wide",
+  "_description": "Widescreen insight card for presentations, YouTube thumbnails, and desktop decks. Two-column layout: bold heading on the left, supporting body text on the right, separated by a vertical accent divider. Supports an optional full-bleed background image with a dark overlay. Keep bg and ink consistent across all slides; vary only accent.",
+  "_slots": {
+    "heading": "REQUIRED — the main insight. 2–10 words. Displayed at 88px bold serif in the left column.",
+    "body":    "optional — supporting explanation. 1–3 sentences. Displayed in the right column at 30px. When omitted, the heading expands to fill the full width and the vertical divider is hidden.",
+    "eyebrow": "optional — short uppercase label above the rule (e.g. 'LESSON', 'INSIGHT', 'TIP'). Displayed in accent color.",
+    "footer":  "optional — bottom-left text. Attribution, handle, or brand name (e.g. '@yourname').",
+    "image":   "optional — background image. Local path relative to data JSON or a URL. A dark overlay (tinted with bg color at 74% opacity) is applied automatically so text remains legible. Works best with moody, dark, or desaturated photos. When omitted, the slide uses the solid bg color.",
+    "bg":      "optional — background hex color. Also used as the overlay tint when an image is present. Use the SAME value on every slide in a deck. Default: #0c0b09",
+    "ink":     "optional — primary text hex color. Use the SAME value on every slide in a deck. Default: #eae6de",
+    "accent":  "optional — accent hex color for eyebrow, rule, and vertical divider. VARY per slide. Default: #d4a054"
+  },
+  "title": "Lessons from Building in Public",
+  "slides": [
+    {
+      "layout": "insight-wide",
+      "eyebrow": "Lesson",
+      "heading": "Start before you're ready",
+      "body": "Waiting for the perfect moment is just procrastination wearing a mask. Ship the ugly first version — you'll learn more in one week of real feedback than a month of planning.",
+      "footer": "@buildpublic",
+      "bg": "#0c0b09",
+      "ink": "#eae6de",
+      "accent": "#d4a054"
+    },
+    {
+      "layout": "insight-wide",
+      "eyebrow": "Lesson",
+      "heading": "Share the process, not just the outcome",
+      "body": "People connect with struggle and iteration. The messy middle is the interesting part — polished results are forgettable.",
+      "image": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=1920&q=80",
+      "footer": "@buildpublic",
+      "bg": "#0c0b09",
+      "ink": "#eae6de",
+      "accent": "#6db89c"
+    },
+    {
+      "layout": "insight-wide",
+      "eyebrow": "Lesson",
+      "heading": "Consistency compounds",
+      "body": "One post won't change anything. Three hundred posts will change everything. Show up daily and let time do the heavy lifting.",
+      "footer": "@buildpublic",
+      "bg": "#0c0b09",
+      "ink": "#eae6de",
+      "accent": "#b87e6d"
+    },
+    {
+      "layout": "insight-wide",
+      "eyebrow": "Lesson",
+      "heading": "Your audience is smaller than you think — and that's fine",
+      "footer": "@buildpublic",
+      "bg": "#0c0b09",
+      "ink": "#eae6de",
+      "accent": "#8a8ed4"
+    }
+  ]
+}
