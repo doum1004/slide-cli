@@ -11,7 +11,7 @@ A TypeScript CLI to create beautiful slide cards from JSON data + HTML templates
 Supports **9:16** (Stories/Reels), **16:9** (presentations/YouTube), and **1:1** (feed) aspect ratios.
 
 ```
-slide create        --data data.json --template minimal --out ./output
+slide create        --data ./templates/minimal/sample.json --template minimal --out ./output
 slide list          [--verbose]
 slide add-template  <path>  [--force]
 ```
@@ -54,7 +54,7 @@ The published `dist/` runs on **Node** — so any end user with Node can install
 bun install
 bun run build
 slide list --verbose
-slide create --data samples/sample-quotes.json --template quote-card
+slide create --data ./templates/minimal/sample.json --template minimal 
 ```
 
 ---
@@ -64,7 +64,7 @@ slide create --data samples/sample-quotes.json --template quote-card
 ### `slide create`
 
 ```bash
-slide create --data my-deck.json --template minimal --out ./output
+slide create --data ./templates/minimal/sample.json --template minimal --out ./output
 ```
 
 | Flag | Default | Description |
@@ -226,7 +226,9 @@ User templates take priority over built-ins on id collision.
 ```bash
 docker build -t slide-cli .
 docker run --rm -v $(pwd)/output:/work/output slide-cli \
-  slide create --data data.json --template minimal
+  slide list
+docker run --rm -v $(pwd)/output:/work/output slide-cli \
+  slide create --data ./templates/minimal/sample.json --template minimal
 ```
 
 **Local dev (installs from local build):**
