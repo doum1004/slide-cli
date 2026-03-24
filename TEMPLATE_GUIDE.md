@@ -413,6 +413,62 @@ These slides render at 1080×1920px but display on a mobile screen at roughly 37
 .secondary { color: #6b6560; }
 ```
 
+### Consistent background and text colors across a deck
+
+**The core rule:** Every slide in a deck should share the same `bg` (background) and `ink` (primary text) color. Only the `accent` color should change between slides to create variety.
+
+This creates visual cohesion — the deck feels like one unified piece rather than a patchwork of unrelated cards. The accent color (used for rules, labels, highlights, and secondary elements) provides enough per-slide personality without breaking the rhythm.
+
+**How to implement this:**
+
+1. **Define `bg` and `ink` as slots with strong defaults** — pick one background/text pairing and commit to it:
+   ```json
+   { "id": "bg",  "type": "color", "default": "#0f0e0c", "description": "Background. Keep consistent across all slides." },
+   { "id": "ink", "type": "color", "default": "#f0ece4", "description": "Primary text. Keep consistent across all slides." },
+   { "id": "accent", "type": "color", "default": "#e8b86d", "description": "Accent color — varies per slide for visual interest." }
+   ```
+
+2. **In sample.json, keep `bg` and `ink` the same on every slide:**
+   ```json
+   { "heading": "Slide 1", "bg": "#0f0e0c", "ink": "#f0ece4", "accent": "#c8b89a" },
+   { "heading": "Slide 2", "bg": "#0f0e0c", "ink": "#f0ece4", "accent": "#8eb8a0" },
+   { "heading": "Slide 3", "bg": "#0f0e0c", "ink": "#f0ece4", "accent": "#a8b8d0" }
+   ```
+
+3. **In `_slots` documentation, make the intent explicit:**
+   ```json
+   "_slots": {
+     "bg":     "optional — background hex color. Use the SAME value on every slide in a deck. Default: #0f0e0c",
+     "ink":    "optional — primary text hex color. Use the SAME value on every slide in a deck. Default: #f0ece4",
+     "accent": "optional — accent hex color. VARY this per slide for visual interest. Default: #e8b86d"
+   }
+   ```
+
+4. **Apply in CSS — `bg` and `ink` for the canvas, `accent` only for highlights:**
+   ```css
+   html, body { background: {{bg}}; color: {{ink}}; }
+   .label     { color: {{accent}}; }
+   .rule      { background: {{accent}}; }
+   .caption   { color: {{accent}}; opacity: 0.8; }
+   /* Headings, body text, and counters all inherit {{ink}} */
+   ```
+
+**Why this matters:**
+- Changing background color between slides creates a jarring "slideshow of screenshots" effect
+- Consistent `bg` + `ink` lets the viewer focus on the content, not the shifting palette
+- The accent color alone provides enough variation — it touches small elements (rules, labels, captions) that signal "new slide" without disrupting the overall feel
+- When users *do* want a different background (e.g. a title slide vs. content slides), they can still override `bg` — the slots allow it, but the defaults and documentation guide them toward consistency
+
+**Recommended pairings:**
+
+| Style | `bg` | `ink` | Accent examples |
+|---|---|---|---|
+| Dark editorial | `#0f0e0c` | `#f0ece4` | `#c8b89a`, `#7eb8d4`, `#d47e7e` |
+| Warm dark | `#1a1410` | `#f5f0e8` | `#e8b86d`, `#a8d4a0`, `#d4a8c8` |
+| Cool dark | `#0a0e14` | `#e8ecf0` | `#6b9fd4`, `#d4b86b`, `#b86bd4` |
+| Light clean | `#faf7f2` | `#1a1714` | `#c0392b`, `#2980b9`, `#27ae60` |
+| Pure light | `#ffffff` | `#111111` | `#ff6b35`, `#6b35ff`, `#35ff6b` |
+
 ### Color palette strategies
 
 **Dark editorial** (popular for thought-leadership content):
@@ -492,15 +548,17 @@ h1, h2, h3, .title, .quote-text, .card-title {
 
 **Do not use** `white-space: nowrap` combined with JS font-scaling to force single-line titles. That approach requires JavaScript, adds timing dependencies with Puppeteer, and prevents natural wrapping when a title genuinely needs two lines. `text-wrap: pretty` handles it correctly with one CSS property.
 
-### Per-slide color variation
-Pass `bg`, `accent`, and `ink` as slots so each slide in a deck can have its own
-personality while sharing the same layout:
+### Per-slide accent variation
+
+Pass `accent` as a slot so each slide in a deck can have its own personality while sharing the same background and text color:
 
 ```json
-{ "layout": "my-template", "heading": "Slide 1", "bg": "#0f0e0c", "accent": "#c8b89a" },
-{ "layout": "my-template", "heading": "Slide 2", "bg": "#080f0c", "accent": "#8eb8a0" },
-{ "layout": "my-template", "heading": "Slide 3", "bg": "#090c14", "accent": "#a8b8d0" }
+{ "layout": "my-template", "heading": "Slide 1", "bg": "#0f0e0c", "ink": "#f0ece4", "accent": "#c8b89a" },
+{ "layout": "my-template", "heading": "Slide 2", "bg": "#0f0e0c", "ink": "#f0ece4", "accent": "#8eb8a0" },
+{ "layout": "my-template", "heading": "Slide 3", "bg": "#0f0e0c", "ink": "#f0ece4", "accent": "#a8b8d0" }
 ```
+
+Note how `bg` and `ink` stay the same — only `accent` changes.
 
 ---
 
@@ -522,9 +580,9 @@ This is a fully working minimal 16:9 template. The same structure applies to any
     { "id": "statement", "type": "text",  "label": "Statement",    "required": true,  "description": "The main statement. 3–10 words." },
     { "id": "caption",   "type": "text",  "label": "Caption",      "required": false, "default": "", "description": "Small text below. Attribution, context, or source." },
     { "id": "label",     "type": "text",  "label": "Top label",    "required": false, "default": "", "description": "Uppercase eyebrow tag at the top." },
-    { "id": "bg",        "type": "color", "label": "Background",   "required": false, "default": "#0f0e0c" },
-    { "id": "accent",    "type": "color", "label": "Accent color", "required": false, "default": "#e8b86d" },
-    { "id": "ink",       "type": "color", "label": "Text color",   "required": false, "default": "#f0ece4" }
+    { "id": "bg",        "type": "color", "label": "Background",   "required": false, "default": "#0f0e0c", "description": "Background color. Keep consistent across all slides in a deck." },
+    { "id": "accent",    "type": "color", "label": "Accent color", "required": false, "default": "#e8b86d", "description": "Accent color for rule, label, caption. Vary per slide." },
+    { "id": "ink",       "type": "color", "label": "Text color",   "required": false, "default": "#f0ece4", "description": "Primary text color. Keep consistent across all slides in a deck." }
   ]
 }
 ```
@@ -555,7 +613,7 @@ This is a fully working minimal 16:9 template. The same structure applies to any
   .statement {
     font-size: 96px; font-weight: 400;
     line-height: 1.1; letter-spacing: -0.02em;
-    color: {{ink}}; max-width: 1400px;
+    max-width: 1400px;
     text-wrap: pretty;
   }
   .caption {
@@ -586,20 +644,20 @@ This is a fully working minimal 16:9 template. The same structure applies to any
 ```json
 {
   "_template": "statement",
-  "_description": "Single bold statement card. Best for impactful one-liners, principles, or rules. Each slide should have its own 'bg' and 'accent' colors for visual variety across the deck.",
+  "_description": "Single bold statement card. Best for impactful one-liners, principles, or rules. Keep bg and ink consistent across all slides; vary only accent for visual interest.",
   "_slots": {
     "statement": "REQUIRED — the main statement. 3–10 words works best at 96px font size.",
     "caption":   "optional — smaller text below: attribution, source, or elaboration.",
     "label":     "optional — short uppercase eyebrow tag above the rule (e.g. 'Rule 01').",
-    "bg":        "optional — background hex color. Default #0f0e0c. Try dark near-blacks for editorial feel.",
-    "accent":    "optional — accent hex color for the rule, label, and caption. Default #e8b86d.",
-    "ink":       "optional — main text hex color. Default #f0ece4 (warm white)."
+    "bg":        "optional — background hex color. Use the SAME value on every slide. Default: #0f0e0c",
+    "accent":    "optional — accent hex color for rule, label, caption. VARY per slide. Default: #e8b86d",
+    "ink":       "optional — primary text hex color. Use the SAME value on every slide. Default: #f0ece4"
   },
   "title": "Design Rules",
   "slides": [
     { "layout": "statement", "label": "Rule 01", "statement": "Constraints breed creativity.", "caption": "— limit your tools, not your thinking", "bg": "#0f0e0c", "accent": "#e8b86d", "ink": "#f0ece4" },
-    { "layout": "statement", "label": "Rule 02", "statement": "Ship, then refine.", "caption": "— perfection is the enemy of done", "bg": "#0a1220", "accent": "#7eb8d4", "ink": "#e8f0f4" },
-    { "layout": "statement", "label": "Rule 03", "statement": "Clarity over cleverness.", "bg": "#120a0a", "accent": "#d47e7e", "ink": "#f4e8e8" }
+    { "layout": "statement", "label": "Rule 02", "statement": "Ship, then refine.", "caption": "— perfection is the enemy of done", "bg": "#0f0e0c", "accent": "#7eb8d4", "ink": "#f0ece4" },
+    { "layout": "statement", "label": "Rule 03", "statement": "Clarity over cleverness.", "bg": "#0f0e0c", "accent": "#d47e7e", "ink": "#f0ece4" }
   ]
 }
 ```
@@ -617,3 +675,4 @@ This is a fully working minimal 16:9 template. The same structure applies to any
 - [ ] `sample.json` has `_slots` with a description for every slot
 - [ ] `sample.json` `slides` array is valid and would pass `slide create`
 - [ ] At least 2 slides in the sample showing different content and color combos
+- [ ] `bg` and `ink` are the **same** on every slide in `sample.json` — only `accent` varies
