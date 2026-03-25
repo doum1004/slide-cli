@@ -1,57 +1,49 @@
 {
-  "_template": "insight-wide",
-  "_description": "Widescreen insight card for presentations, YouTube thumbnails, and desktop decks. Two-column layout: bold heading on the left, supporting body text on the right, separated by a vertical accent divider. Supports an optional full-bleed background image with a dark overlay. Keep bg and ink consistent across all slides; vary only accent.",
-  "_slots": {
-    "heading": "REQUIRED — the main insight. 2–10 words. Displayed at 88px bold serif in the left column.",
-    "body":    "optional — supporting explanation. 1–3 sentences. Displayed in the right column at 30px. When omitted, the heading expands to fill the full width and the vertical divider is hidden.",
-    "eyebrow": "optional — short uppercase label above the rule (e.g. 'LESSON', 'INSIGHT', 'TIP'). Displayed in accent color.",
-    "footer":  "optional — bottom-left text. Attribution, handle, or brand name (e.g. '@yourname').",
-    "image":   "optional — background image. Local path relative to data JSON or a URL. A dark overlay (tinted with bg color at 74% opacity) is applied automatically so text remains legible. Works best with moody, dark, or desaturated photos. When omitted, the slide uses the solid bg color.",
-    "bg":      "optional — background hex color. Also used as the overlay tint when an image is present. Use the SAME value on every slide in a deck. Default: #0c0b09",
-    "ink":     "optional — primary text hex color. Use the SAME value on every slide in a deck. Default: #eae6de",
-    "accent":  "optional — accent hex color for eyebrow, rule, and vertical divider. VARY per slide. Default: #d4a054"
-  },
-  "title": "Lessons from Building in Public",
-  "slides": [
-    {
-      "layout": "insight-wide",
-      "eyebrow": "Lesson",
-      "heading": "Start before you're ready",
-      "body": "Waiting for the perfect moment is just procrastination wearing a mask. Ship the ugly first version — you'll learn more in one week of real feedback than a month of planning.",
-      "footer": "@buildpublic",
-      "bg": "#0c0b09",
-      "ink": "#eae6de",
-      "accent": "#d4a054"
-    },
-    {
-      "layout": "insight-wide",
-      "eyebrow": "Lesson",
-      "heading": "Share the process, not just the outcome",
-      "body": "People connect with struggle and iteration. The messy middle is the interesting part — polished results are forgettable.",
-      "image": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=1920&q=80",
-      "footer": "@buildpublic",
-      "bg": "#0c0b09",
-      "ink": "#eae6de",
-      "accent": "#6db89c"
-    },
-    {
-      "layout": "insight-wide",
-      "eyebrow": "Lesson",
-      "heading": "Consistency compounds",
-      "body": "One post won't change anything. Three hundred posts will change everything. Show up daily and let time do the heavy lifting.",
-      "footer": "@buildpublic",
-      "bg": "#0c0b09",
-      "ink": "#eae6de",
-      "accent": "#b87e6d"
-    },
-    {
-      "layout": "insight-wide",
-      "eyebrow": "Lesson",
-      "heading": "Your audience is smaller than you think — and that's fine",
-      "footer": "@buildpublic",
-      "bg": "#0c0b09",
-      "ink": "#eae6de",
-      "accent": "#8a8ed4"
-    }
-  ]
-}
+    "title": "Toronto Stadium Upgrades Completed Ahead of World Cup Matches",
+    "slides": [
+      {
+        "layout": "insight",
+        "eyebrow": "Update",
+        "heading": "Toronto Stadium upgrades finished",
+        "body": "All major improvements ready for upcoming World Cup games.",
+        "image": "https://i.cbc.ca/ais/14da5c8e-51f2-45e4-8272-3f715cc4c2b6,1774378344472/full/max/0/default.jpg?im=Crop%2Crect%3D%280%2C240%2C2560%2C1440%29%3BResize%3D860",
+        "footer": "Maplesoup Toronto",
+        "bg": "#0c0b09",
+        "ink": "#eae6de",
+        "accent": "#d4a054"
+      },
+      {
+        "layout": "insight",
+        "eyebrow": "Update",
+        "heading": "Expanded seating and facilities",
+        "body": "Temporary 17,000 seats added, total capacity now 45,000.",
+        "image": "https://i.cbc.ca/ais/008acbb8-5cb6-4a80-9662-fa5139807bd9,1774377749452/full/max/0/default.jpg?im=Crop%2Crect%3D%280%2C0%2C5786%2C3857%29%3BResize%3D796",
+        "footer": "Maplesoup Toronto",
+        "bg": "#0c0b09",
+        "ink": "#eae6de",
+        "accent": "#6db89c"
+      },
+      {
+        "layout": "insight",
+        "eyebrow": "Update",
+        "heading": "City to host six World Cup matches",
+        "body": "Matches include group stage and knockout rounds in June and July.",
+        "image": "https://i.cbc.ca/ais/14da5c8e-51f2-45e4-8272-3f715cc4c2b6,1774378344472/full/max/0/default.jpg?im=Crop%2Crect%3D%280%2C240%2C2560%2C1440%29%3BResize%3D860",
+        "footer": "Maplesoup Toronto",
+        "bg": "#0c0b09",
+        "ink": "#eae6de",
+        "accent": "#b87e6d"
+      },
+      {
+        "layout": "insight",
+        "eyebrow": "Update",
+        "heading": "Upgrades benefit beyond World Cup",
+        "body": "New infrastructure and stadium features remain post-tournament.",
+        "image": "https://i.cbc.ca/ais/008acbb8-5cb6-4a80-9662-fa5139807bd9,1774377749452/full/max/0/default.jpg?im=Crop%2Crect%3D%280%2C0%2C5786%2C3857%29%3BResize%3D796",
+        "footer": "Maplesoup Toronto",
+        "bg": "#0c0b09",
+        "ink": "#eae6de",
+        "accent": "#8a8ed4"
+      }
+    ]
+  }

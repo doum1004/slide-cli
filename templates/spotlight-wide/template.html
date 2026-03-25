@@ -9,14 +9,14 @@
     width: 1920px;
     height: 1080px;
     overflow: hidden;
-    background: {{bg}};
+    background: {{#if bg}}{{bg}}{{else}}#1a1a2e{{/if}};
   }
 
   body {
     display: flex;
     flex-direction: row;
     font-family: Georgia, 'Times New Roman', serif;
-    color: {{ink}};
+    color: {{#if ink}}{{ink}}{{else}}#ffffff{{/if}};
     position: relative;
   }
 
@@ -64,7 +64,7 @@
     bottom: 0;
     left: 0;
     width: 200px;
-    background: linear-gradient(to right, {{bg}} 0%, transparent 100%);
+    background: linear-gradient(to right, {{#if bg}}{{bg}}{{else}}#1a1a2e{{/if}} 0%, transparent 100%);
     pointer-events: none;
   }
 
@@ -76,7 +76,7 @@
     bottom: 0;
     left: 0;
     width: 4px;
-    background: {{accent}};
+    background: {{#if accent}}{{accent}}{{else}}#e94560{{/if}};
     z-index: 2;
   }
 
@@ -87,7 +87,7 @@
     font-weight: 700;
     letter-spacing: 0.22em;
     text-transform: uppercase;
-    color: {{accent}};
+    color: {{#if accent}}{{accent}}{{else}}#e94560{{/if}};
     margin-bottom: 28px;
   }
 
@@ -95,7 +95,7 @@
   .rule {
     width: 48px;
     height: 3px;
-    background: {{accent}};
+    background: {{#if accent}}{{accent}}{{else}}#e94560{{/if}};
     margin-bottom: 36px;
   }
 
@@ -115,7 +115,7 @@
     font-size: 30px;
     font-weight: 400;
     line-height: 1.6;
-    color: {{ink}};
+    color: {{#if ink}}{{ink}}{{else}}#ffffff{{/if}};
     opacity: 0.6;
     max-width: 800px;
     text-wrap: pretty;
@@ -137,7 +137,7 @@
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-size: 20px;
     font-weight: 400;
-    color: {{ink}};
+    color: {{#if ink}}{{ink}}{{else}}#ffffff{{/if}};
     opacity: 0.28;
     letter-spacing: 0.04em;
   }
@@ -146,7 +146,7 @@
     font-family: 'Courier New', monospace;
     font-size: 20px;
     font-weight: 400;
-    color: {{ink}};
+    color: {{#if ink}}{{ink}}{{else}}#ffffff{{/if}};
     opacity: 0.22;
     letter-spacing: 0.08em;
   }
