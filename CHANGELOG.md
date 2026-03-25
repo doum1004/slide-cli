@@ -9,6 +9,20 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 <!-- New entries are prepended automatically by the publish workflow -->
 
+## v1.0.8 — 2026-03-25
+
+### Changes
+
+- feat: add support for publishing to GitHub Packages in workflow (3ec482a)
+- 1.0.7 (784bb3b)
+- chore: bump version to 1.0.6 and update publishConfig registry (8b3753d)
+- docs: enhance template guide with color slot usage and fallback recommendations (161dcd1)
+
+**Full diff:** [v1.0.6...v1.0.8](https://github.com/doum1004/slide-cli/compare/v1.0.6...v1.0.8)
+
+---
+
+
 ## v1.0.6 — 2026-03-25
 
 ### Changes
