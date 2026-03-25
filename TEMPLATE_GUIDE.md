@@ -222,6 +222,49 @@ Slot values are injected via [Handlebars](https://handlebarsjs.com/) before rend
    ```
    This is the recommended way to apply per-slide color themes.
 
+7. **Color slots must have inline defaults in CSS** — Slot values like `{{bg}}`, `{{ink}}`, and `{{accent}}` may be empty or null at render time (e.g. when a user omits them from their data JSON and no `default` is set in the manifest). If a color slot renders as an empty string, the CSS property becomes invalid and the browser discards it — resulting in no background, invisible text, or missing accent elements.
+
+   **Always wrap color slot references in `{{#if}}…{{else}}…{{/if}}` with a hardcoded fallback:**
+
+   ```css
+   /* ✗ Dangerous — breaks if bg is empty */
+   html, body { background: {{bg}}; }
+
+   /* ✓ Safe — falls back to a concrete color */
+   html, body { background: {{#if bg}}{{bg}}{{else}}#0f0e0c{{/if}}; }
+   ```
+
+   **Apply this to every occurrence** of a color slot in `<style>`, including inside pseudo-elements (`::after`, `::before`), gradients, and any other CSS property:
+
+   ```css
+   body { color: {{#if ink}}{{ink}}{{else}}#f0ece4{{/if}}; }
+
+   .eyebrow { color: {{#if accent}}{{accent}}{{else}}#e8b86d{{/if}}; }
+   .rule    { background: {{#if accent}}{{accent}}{{else}}#e8b86d{{/if}}; }
+
+   /* Gradient fades must also be protected */
+   .image-zone::after {
+     background: linear-gradient(to bottom, transparent 0%,
+       {{#if bg}}{{bg}}{{else}}#0f0e0c{{/if}} 100%);
+   }
+
+   /* Overlays too */
+   .bg-image::after {
+     background: {{#if bg}}{{bg}}{{else}}#0f0e0c{{/if}};
+     opacity: 0.72;
+   }
+   ```
+
+   **The fallback value should match the slot's `default` in `template.json`** so behavior is consistent whether the default comes from the manifest or the inline CSS. If the slot has `"default": "#0f0e0c"` in the manifest, use `#0f0e0c` as the `{{else}}` value.
+
+   **This applies to all color-type slots**, not just `bg`. Common ones to protect:
+
+   | Slot | Typical fallback | Used in |
+   |---|---|---|
+   | `bg` | `#0f0e0c` | `html, body` background, overlays, gradient fades |
+   | `ink` | `#f0ece4` | `body` color, `.body`, `.footer-text`, `.counter` |
+   | `accent` | `#e8b86d` | `.eyebrow`, `.rule`, `.divider`, `.label`, `.caption` |
+
 ---
 
 ## 3. sample.json — documentation + working example
@@ -778,21 +821,29 @@ This is a fully working minimal 16:9 template. The same structure applies to any
 <meta charset="UTF-8">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { width: 1920px; height: 1080px; overflow: hidden; background: {{bg}}; }
+  html, body {
+    width: 1920px; height: 1080px; overflow: hidden;
+    background: {{#if bg}}{{bg}}{{else}}#0f0e0c{{/if}};
+  }
   body {
     display: flex; flex-direction: column; justify-content: center;
     padding: 80px 120px;
     font-family: Georgia, 'Times New Roman', serif;
-    color: {{ink}};
+    color: {{#if ink}}{{ink}}{{else}}#f0ece4{{/if}};
     position: relative;
   }
   .label {
     font-family: 'Courier New', monospace;
     font-size: 22px; font-weight: 400;
     letter-spacing: 0.2em; text-transform: uppercase;
-    color: {{accent}}; margin-bottom: 36px;
+    color: {{#if accent}}{{accent}}{{else}}#e8b86d{{/if}};
+    margin-bottom: 36px;
   }
-  .rule { width: 64px; height: 3px; background: {{accent}}; margin-bottom: 48px; }
+  .rule {
+    width: 64px; height: 3px;
+    background: {{#if accent}}{{accent}}{{else}}#e8b86d{{/if}};
+    margin-bottom: 48px;
+  }
   .statement {
     font-size: 96px; font-weight: 400;
     line-height: 1.1; letter-spacing: -0.02em;
@@ -803,7 +854,8 @@ This is a fully working minimal 16:9 template. The same structure applies to any
     margin-top: 48px;
     font-family: 'Courier New', monospace;
     font-size: 28px; font-weight: 400;
-    line-height: 1.6; color: {{accent}};
+    line-height: 1.6;
+    color: {{#if accent}}{{accent}}{{else}}#e8b86d{{/if}};
     opacity: 0.8;
   }
   .counter {
@@ -854,11 +906,13 @@ This is a fully working minimal 16:9 template. The same structure applies to any
 - [ ] All slots used as `{{slotId}}` in the HTML are declared in `slots[]`
 - [ ] `html` and `body` CSS dimensions exactly match `width × height` in the manifest, with `overflow: hidden`
 - [ ] Font stacks include system fallbacks (no network-only fonts)
+- [ ] Every color slot in CSS uses `{{#if color}}{{color}}{{else}}#fallback{{/if}}` — never bare `{{color}}`
+- [ ] Inline CSS fallback values match the slot's `default` in `template.json`
 - [ ] `{{slideIndex}}` and `{{totalSlides}}` used for slide counter (optional but recommended)
 - [ ] `sample.json` has `_slots` with a description for every slot
 - [ ] `sample.json` `slides` array is valid and would pass `slide create`
 - [ ] At least 2 slides in the sample showing different content and color combos
 - [ ] `bg` and `ink` are the **same** on every slide in `sample.json` — only `accent` varies
 - [ ] Images use `object-fit: cover` inside fixed-size containers
-- [ ] Image overlays and gradient fades use `{{bg}}`, not hardcoded black
+- [ ] Image overlays and gradient fades use `{{bg}}` (with inline default), not hardcoded black
 - [ ] Z-index follows the convention: image (0) → overlay (1) → content (2–3) → noise (10)
