@@ -9,6 +9,17 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 <!-- New entries are prepended automatically by the publish workflow -->
 
+## v1.0.6 — 2026-03-25
+
+### Changes
+
+- feat: update templates for spotlight and insight with new layouts and fallback colors (75439c5)
+
+**Full diff:** [v1.0.5...v1.0.6](https://github.com/doum1004/slide-cli/compare/v1.0.5...v1.0.6)
+
+---
+
+
 ## v1.0.5 — 2026-03-24
 
 ### Changes
