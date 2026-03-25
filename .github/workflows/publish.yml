@@ -17,10 +17,10 @@ on:
         required: false
         default: ""
 
-# Only one publish job at a time
 permissions:
   contents: write
   id-token: write
+  packages: write          # ← ADDED
 
 concurrency:
   group: publish
@@ -31,15 +31,15 @@ jobs:
     name: Test → Build → Publish
     runs-on: ubuntu-latest
     permissions:
-      contents: write   # push version-bump commit + tag + create release
-      id-token: write   # required for OIDC npm publish
+      contents: write
+      id-token: write
+      packages: write      # ← ADDED
 
     steps:
       # ── 1. Checkout ─────────────────────────────────────────────────
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          # Fetch full history so git log and tagging work correctly
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -58,8 +58,6 @@ jobs:
         run: bun test
 
       # ── 5. Bump version ─────────────────────────────────────────────
-      # npm version edits package.json but we commit/tag ourselves so a
-      # failed publish can't leave a dangling tag on the remote.
       - name: Bump version (${{ inputs.bump }})
         id: bump
         run: |
@@ -74,7 +72,7 @@ jobs:
       - name: Build
         run: bun scripts/build.js
 
-      # ── 7. Publish to npm ───────────────────────────────────────────
+      # ── 7a. Publish to npm ──────────────────────────────────────────
       - name: Set up Node (for npm publish)
         uses: actions/setup-node@v4
         with:
@@ -86,10 +84,23 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
+      # ── 7b. Publish to GitHub Packages ──────────────────────────────
+      - name: Set up Node (for GitHub Packages)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://npm.pkg.github.com
+          scope: '@doum1004'
+
+      - name: Publish to GitHub Packages
+        run: |
+          npm pkg set name='@doum1004/slide-cli'
+          npm publish --access public
+          npm pkg set name='slide-cli'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       # ── 8. Build changelog entry and update CHANGELOG.md ────────────
-      # Runs after publish (so a failed publish skips this entirely) but
-      # before the git commit so the file update lands in the same commit
-      # as the version bump.
       - name: Update CHANGELOG.md
         id: changelog
         run: |
@@ -97,7 +108,6 @@ jobs:
           DATE=$(date -u +%Y-%m-%d)
           NOTE="${{ inputs.note }}"
 
-          # Find the previous tag to diff against
           PREV_TAG=$(git tag --sort=-version:refname | grep -v "^${VERSION}$" | head -1)
 
           if [ -z "$PREV_TAG" ]; then
@@ -106,7 +116,6 @@ jobs:
             LOG=$(git log --pretty=format:"- %s (%h)" "${PREV_TAG}..HEAD")
           fi
 
-          # Pass to later steps
           {
             echo "log<<EOF"
             echo "$LOG"
@@ -115,7 +124,6 @@ jobs:
             echo "date=${DATE}"
           } >> "$GITHUB_OUTPUT"
 
-          # Build the new CHANGELOG entry
           ENTRY_FILE=$(mktemp)
           {
             echo "## ${VERSION} — ${DATE}"
@@ -139,7 +147,6 @@ jobs:
             echo ""
           } > "$ENTRY_FILE"
 
-          # Splice entry after the marker comment in CHANGELOG.md
           MARKER="<!-- New entries are prepended automatically by the publish workflow -->"
           awk -v entry_file="$ENTRY_FILE" -v marker="$MARKER" '
             $0 == marker {
