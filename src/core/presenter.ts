@@ -72,6 +72,8 @@ export function generatePresenter(
     }
   }
 
+  const isPng = format === "png";
+
   const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -90,6 +92,9 @@ export function generatePresenter(
     --radius: 12px;
     --font-mono: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, "DejaVu Sans Mono", monospace;
     --font-serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Noto Serif", serif;
+    --checker-light: #e0e0e0;
+    --checker-dark: #cccccc;
+    --checker-size: 16px;
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -197,6 +202,22 @@ export function generatePresenter(
     position: relative;
   }
 
+  /* ── Checkerboard transparency indicator ── */
+  .slide-frame.transparency-active {
+    background-color: var(--checker-light);
+    background-image:
+      linear-gradient(45deg, var(--checker-dark) 25%, transparent 25%),
+      linear-gradient(-45deg, var(--checker-dark) 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, var(--checker-dark) 75%),
+      linear-gradient(-45deg, transparent 75%, var(--checker-dark) 75%);
+    background-size: var(--checker-size) var(--checker-size);
+    background-position:
+      0 0,
+      0 calc(var(--checker-size) / 2),
+      calc(var(--checker-size) / 2) calc(var(--checker-size) * -1 / 2),
+      calc(var(--checker-size) / -2) 0;
+  }
+
   .slide-frame img {
     width: 100%;
     height: 100%;
@@ -213,6 +234,16 @@ export function generatePresenter(
     border: none;
     pointer-events: none;
     transform-origin: top left;
+  }
+
+  /*
+   * In HTML mode with transparency active, make the iframe
+   * background transparent so the checkerboard shows through.
+   * The iframe itself gets "background: transparent" injected
+   * via JS when the grid is on.
+   */
+  .slide-frame.transparency-active iframe {
+    background: transparent;
   }
 
   .render-badge {
@@ -319,6 +350,15 @@ export function generatePresenter(
   .ctrl-btn.active { background: var(--accent); color: #0a0a0a; border-color: var(--accent); }
   .ctrl-btn svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
   .ctrl-btn.active svg { stroke: #0a0a0a; }
+
+  .ctrl-btn.transparency-btn.active {
+    background: var(--checker-light);
+    color: #333;
+    border-color: var(--checker-dark);
+  }
+  .ctrl-btn.transparency-btn.active svg {
+    stroke: #333;
+  }
 
   .speed-select {
     background: var(--surface);
@@ -427,7 +467,6 @@ export function generatePresenter(
     background: var(--border);
   }
 
-  /* ── Single-column shortcut list ── */
   .hotkey-list {
     display: flex;
     flex-direction: column;
@@ -562,13 +601,14 @@ export function generatePresenter(
   body.fullscreen:hover .nav-btn { opacity: 1; }
   body.fullscreen .slide-container { max-height: 100dvh; }
   body.fullscreen .shortcut-fab { display: flex; }
+  body.fullscreen .transparency-fab { display: flex; }
 
-  /* ── Floating shortcut button (fullscreen) ── */
-  .shortcut-fab {
+  /* ── Floating buttons (fullscreen) ── */
+  .shortcut-fab,
+  .transparency-fab {
     display: none;
     position: fixed;
     bottom: 20px;
-    right: 20px;
     width: 40px;
     height: 40px;
     border-radius: 10px;
@@ -583,7 +623,11 @@ export function generatePresenter(
     opacity: 0;
     box-shadow: 0 4px 16px rgba(0,0,0,0.4);
   }
-  .shortcut-fab svg {
+  .shortcut-fab { right: 20px; }
+  .transparency-fab { right: 68px; }
+
+  .shortcut-fab svg,
+  .transparency-fab svg {
     width: 18px;
     height: 18px;
     fill: none;
@@ -592,13 +636,22 @@ export function generatePresenter(
     stroke-linecap: round;
     stroke-linejoin: round;
   }
-  .shortcut-fab:hover {
+  .shortcut-fab:hover,
+  .transparency-fab:hover {
     border-color: var(--accent2);
     color: var(--accent);
     background: var(--border);
     opacity: 1 !important;
   }
+  .transparency-fab.active {
+    background: var(--checker-light);
+    border-color: var(--checker-dark);
+    color: #555;
+    opacity: 1 !important;
+  }
   body.fullscreen:hover .shortcut-fab { opacity: 0.6; }
+  body.fullscreen:hover .transparency-fab { opacity: 0.6; }
+  body.fullscreen:hover .transparency-fab.active { opacity: 1; }
 
   .slide-frame.loading::after {
     content: '';
@@ -649,7 +702,7 @@ export function generatePresenter(
 </header>
 
 <main>
-  <button class="nav-btn nav-prev" id="btnPrev" onclick="go(-1)" title="Previous (\u2190)">
+  <button class="nav-btn nav-prev" id="btnPrev" onclick="go(-1)" title="Previous (\\u2190)">
     <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
   </button>
 
@@ -664,7 +717,7 @@ export function generatePresenter(
     </div>
   </div>
 
-  <button class="nav-btn nav-next" id="btnNext" onclick="go(1)" title="Next (\u2192)">
+  <button class="nav-btn nav-next" id="btnNext" onclick="go(1)" title="Next (\\u2192)">
     <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
   </button>
 </main>
@@ -674,6 +727,10 @@ export function generatePresenter(
     <svg viewBox="0 0 24 24"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
     <span class="btn-label">FULL</span>
   </button>
+  ${isPng ? `<button class="ctrl-btn transparency-btn" id="btnTransparency" onclick="toggleTransparency()" title="Toggle transparency grid (T)">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" fill="currentColor" opacity="0.3"/><rect x="13" y="3" width="8" height="8"/><rect x="3" y="13" width="8" height="8"/><rect x="13" y="13" width="8" height="8" fill="currentColor" opacity="0.3"/></svg>
+    <span class="btn-label">ALPHA</span>
+  </button>` : ""}
   <div class="dot-track" id="dotTrack">
     ${htmlFiles.map((_, i) => `<button class="dot${i === 0 ? " active" : ""}" onclick="goTo(${i})" title="Slide ${i + 1}"></button>`).join("")}
   </div>
@@ -694,7 +751,10 @@ export function generatePresenter(
   </button>
 </footer>
 
-<!-- Floating shortcut button for fullscreen mode -->
+<!-- Floating buttons for fullscreen mode -->
+${isPng ? `<button class="transparency-fab" id="transparencyFab" onclick="toggleTransparency()" title="Toggle transparency grid (T)">
+  <svg viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" fill="currentColor" opacity="0.3"/><rect x="13" y="3" width="8" height="8"/><rect x="3" y="13" width="8" height="8"/><rect x="13" y="13" width="8" height="8" fill="currentColor" opacity="0.3"/></svg>
+</button>` : ""}
 <button class="shortcut-fab" id="shortcutFab" onclick="toggleHotkeys()" title="Keyboard Shortcuts (?)">
   <svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><line x1="6" y1="10" x2="6" y2="10"/><line x1="10" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="14" y2="10"/><line x1="18" y1="10" x2="18" y2="10"/><line x1="8" y1="14" x2="16" y2="14"/></svg>
 </button>
@@ -714,11 +774,11 @@ export function generatePresenter(
       <div class="hotkey-section">Navigation</div>
       <div class="hotkey-row">
         <div class="hotkey-label">Previous slide</div>
-        <div class="hotkey-keys"><kbd>\u2190</kbd></div>
+        <div class="hotkey-keys"><kbd>\\u2190</kbd></div>
       </div>
       <div class="hotkey-row">
         <div class="hotkey-label">Next slide</div>
-        <div class="hotkey-keys"><kbd>\u2192</kbd></div>
+        <div class="hotkey-keys"><kbd>\\u2192</kbd></div>
       </div>
       <div class="hotkey-row">
         <div class="hotkey-label">First slide</div>
@@ -744,6 +804,10 @@ export function generatePresenter(
         <div class="hotkey-label">Image / HTML mode</div>
         <div class="hotkey-keys"><kbd>M</kbd></div>
       </div>
+      ${isPng ? `<div class="hotkey-row">
+        <div class="hotkey-label">Transparency grid</div>
+        <div class="hotkey-keys"><kbd>T</kbd></div>
+      </div>` : ""}
       <div class="hotkey-row">
         <div class="hotkey-label">Show shortcuts</div>
         <div class="hotkey-keys"><kbd>?</kbd></div>
@@ -767,6 +831,7 @@ export function generatePresenter(
   const SLIDE_HTML   = ${JSON.stringify(htmlFiles)};
   const SLIDE_IMAGES = ${JSON.stringify(imageFiles)};
   const HAS_IMAGES   = ${hasImages};
+  const IS_PNG       = ${isPng};
   const SLIDE_WIDTH  = ${width};
   const SLIDE_HEIGHT = ${height};
   const TOTAL        = ${total};
@@ -777,6 +842,7 @@ export function generatePresenter(
   let timer = null;
   let loadingGeneration = 0;
   let hotkeyOpen = false;
+  let transparencyGrid = ${isPng ? "true" : "false"};
 
   const $ = (id) => document.getElementById(id);
   const elCur       = $('cur');
@@ -795,6 +861,49 @@ export function generatePresenter(
   const elHotkeyOverlay = $('hotkeyOverlay');
   const elBtnShortcuts  = $('btnShortcuts');
   const elIntroToast    = $('introToast');
+  const elBtnTransparency  = $('btnTransparency');
+  const elTransparencyFab  = $('transparencyFab');
+
+  /* ── Transparency grid ── */
+  function applyTransparency() {
+    const show = transparencyGrid && IS_PNG;
+    elFrame.classList.toggle('transparency-active', show);
+    if (elBtnTransparency) elBtnTransparency.classList.toggle('active', transparencyGrid);
+    if (elTransparencyFab) elTransparencyFab.classList.toggle('active', transparencyGrid);
+
+    // For HTML mode: inject/remove transparent background into all cached iframes
+    iframeCache.forEach((iframe, idx) => {
+      applyIframeTransparency(iframe, show);
+    });
+  }
+
+  function applyIframeTransparency(iframe, transparent) {
+    try {
+      const doc = iframe.contentDocument;
+      if (!doc || !doc.documentElement) return;
+
+      const existingStyle = doc.getElementById('__transparency-override');
+
+      if (transparent) {
+        if (!existingStyle) {
+          const style = doc.createElement('style');
+          style.id = '__transparency-override';
+          style.textContent = 'html, body { background: transparent !important; }';
+          doc.head.appendChild(style);
+        }
+      } else {
+        if (existingStyle) existingStyle.remove();
+      }
+    } catch (_) {
+      // cross-origin iframe — can't touch it, CSS rule on parent handles the iframe element bg
+    }
+  }
+
+  function toggleTransparency() {
+    if (!IS_PNG) return;
+    transparencyGrid = !transparencyGrid;
+    applyTransparency();
+  }
 
   /* ── Hotkey panel ── */
   function toggleHotkeys() {
@@ -841,12 +950,18 @@ export function generatePresenter(
     }
     const iframe = document.createElement('iframe');
     iframe.sandbox = 'allow-scripts allow-same-origin';
-    iframe.style.cssText = 'position:absolute;top:0;left:0;width:${width}px;height:${height}px;border:none;pointer-events:none;transform-origin:top left;';
+    iframe.style.cssText = 'position:absolute;top:0;left:0;width:${width}px;height:${height}px;border:none;pointer-events:none;transform-origin:top left;background:transparent;';
     iframe.src = SLIDE_HTML[idx];
 
-    const markLoaded = () => { iframeLoaded.add(idx); };
+    const markLoaded = () => {
+      iframeLoaded.add(idx);
+      // Once loaded, inject transparency override if grid is active
+      if (transparencyGrid && IS_PNG) {
+        applyIframeTransparency(iframe, true);
+      }
+    };
     iframe.addEventListener('load', markLoaded, { once: true });
-    iframe.addEventListener('error', markLoaded, { once: true });
+    iframe.addEventListener('error', () => { iframeLoaded.add(idx); }, { once: true });
 
     iframeCache.set(idx, iframe);
     return iframe;
@@ -858,6 +973,7 @@ export function generatePresenter(
     mode = m;
     elBtnImg.classList.toggle('active', m === 'img');
     elBtnHtml.classList.toggle('active', m === 'html');
+    applyTransparency();
     showSlide(current);
   }
 
@@ -889,6 +1005,10 @@ export function generatePresenter(
 
       if (iframeLoaded.has(idx)) {
         elFrame.classList.remove('loading');
+        // Re-apply transparency in case it was toggled while cached
+        if (transparencyGrid && IS_PNG) {
+          applyIframeTransparency(iframe, true);
+        }
       } else {
         elFrame.classList.add('loading');
 
@@ -913,6 +1033,8 @@ export function generatePresenter(
 
       scaleIframe(iframe);
     }
+
+    applyTransparency();
   }
 
   function scaleIframe(iframe) {
@@ -1026,6 +1148,7 @@ export function generatePresenter(
       case ' ':          e.preventDefault(); togglePlay(); break;
       case 'f': case 'F': toggleFullscreen(); break;
       case 'm': case 'M': setMode(mode === 'img' ? 'html' : 'img'); break;
+      case 't': case 'T': toggleTransparency(); break;
       case 'Escape':
         if (document.fullscreenElement) document.exitFullscreen?.();
         break;
@@ -1044,6 +1167,7 @@ export function generatePresenter(
   }, { passive: true });
 
   /* ── Init ── */
+  applyTransparency();
   showSlide(0);
   updateUI();
   if (HAS_IMAGES && typeof requestIdleCallback === 'function') {
