@@ -1,0 +1,49 @@
+{
+  "_template": "overlay",
+  "_description": "Transparent-background overlay for compositing on video or images in vertical short-form formats (TikTok, Reels, YouTube Shorts). All text is positioned within the platform-safe zone — avoiding the top status bar, bottom caption/nav area, and right-side action buttons. Export as PNG with transparency and layer in your editor. Keep ink consistent across slides; vary only accent.",
+  "_slots": {
+    "headline":        "REQUIRED — main heading text. 1–8 words. Rendered at 96px bold inside the safe zone (vertically centered). Avoid very long phrases — the safe zone is 732px wide.",
+    "eyebrow":         "optional — short uppercase tag above the headline (e.g. 'EPISODE 04', 'TIP'). Monospace, accent-colored. 1–3 words.",
+    "caption":         "optional — supporting line below the headline. 1–2 short sentences. Slightly smaller and translucent.",
+    "accent":          "optional — accent hex color for eyebrow and rule. VARY per slide for visual interest. Default: #e8b86d",
+    "ink":             "optional — primary text hex color. White (#ffffff) for dark video, dark (#1a1714) for light video. Keep SAME across all slides. Default: #ffffff",
+    "shadow-strength": "optional — text shadow opacity 0–1. Raise for bright/busy footage (0.8–1.0), lower for dark footage (0.3–0.5). Default: 0.7"
+  },
+  "title": "Video Overlay Series",
+  "slides": [
+    {
+      "layout": "overlay",
+      "eyebrow": "Episode 01",
+      "headline": "The art of showing up",
+      "caption": "Consistency beats intensity — every single time.",
+      "accent": "#e8b86d",
+      "ink": "#ffffff",
+      "shadow-strength": "0.7"
+    },
+    {
+      "layout": "overlay",
+      "eyebrow": "Tip",
+      "headline": "Start before you're ready",
+      "accent": "#7eb8d4",
+      "ink": "#ffffff",
+      "shadow-strength": "0.7"
+    },
+    {
+      "layout": "overlay",
+      "headline": "Less noise, more signal",
+      "caption": "Cut everything that doesn't serve the story.",
+      "accent": "#d47e7e",
+      "ink": "#ffffff",
+      "shadow-strength": "0.8"
+    },
+    {
+      "layout": "overlay",
+      "eyebrow": "Breaking",
+      "headline": "We just launched",
+      "caption": "Available now on all platforms.",
+      "accent": "#a8e6cf",
+      "ink": "#ffffff",
+      "shadow-strength": "0.6"
+    }
+  ]
+}

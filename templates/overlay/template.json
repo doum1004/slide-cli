@@ -1,0 +1,59 @@
+{
+  "name": "Overlay",
+  "id": "overlay",
+  "version": "1.0.0",
+  "description": "Transparent-background overlay for compositing on top of video or images. Text is positioned within the shorts-safe zone, avoiding platform UI on all edges.",
+  "author": "slide-cli",
+  "aspectRatio": "9:16",
+  "width": 1080,
+  "height": 1920,
+  "slots": [
+    {
+      "id": "headline",
+      "type": "text",
+      "label": "Headline",
+      "required": true,
+      "description": "Main heading text. 1–8 words. Positioned in the vertical safe zone."
+    },
+    {
+      "id": "eyebrow",
+      "type": "text",
+      "label": "Eyebrow label",
+      "required": false,
+      "default": "",
+      "description": "Short uppercase tag above the headline (e.g. 'EPISODE 04', 'TIP', 'BREAKING')."
+    },
+    {
+      "id": "caption",
+      "type": "text",
+      "label": "Caption",
+      "required": false,
+      "default": "",
+      "description": "Supporting line below the headline. 1–2 short sentences or an attribution."
+    },
+    {
+      "id": "accent",
+      "type": "color",
+      "label": "Accent color",
+      "required": false,
+      "default": "#e8b86d",
+      "description": "Color for the eyebrow label and decorative rule. Vary per slide for visual interest."
+    },
+    {
+      "id": "ink",
+      "type": "color",
+      "label": "Text color",
+      "required": false,
+      "default": "#ffffff",
+      "description": "Primary text color for headline and caption. White for dark video, dark for light video. Keep consistent across slides."
+    },
+    {
+      "id": "shadow-strength",
+      "type": "text",
+      "label": "Text shadow strength",
+      "required": false,
+      "default": "0.7",
+      "description": "Opacity of text shadows (0–1). Increase for bright/busy backgrounds, decrease for dark ones."
+    }
+  ]
+}

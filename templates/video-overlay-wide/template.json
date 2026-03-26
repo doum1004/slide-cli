@@ -1,0 +1,84 @@
+{
+  "name": "Video Overlay Wide",
+  "id": "video-overlay-wide",
+  "version": "1.0.0",
+  "description": "Transparent overlay layers for video compositing via ffmpeg. Each slide becomes a positioned PNG layer.",
+  "author": "overlay-system",
+  "aspectRatio": "16:9",
+  "width": 1920,
+  "height": 1080,
+  "slots": [
+    {
+      "id": "headline",
+      "type": "text",
+      "label": "Headline",
+      "required": false,
+      "default": "",
+      "description": "Primary text. 1–8 words."
+    },
+    {
+      "id": "subtitle",
+      "type": "text",
+      "label": "Subtitle",
+      "required": false,
+      "default": "",
+      "description": "Secondary text below headline. 1–2 sentences."
+    },
+    {
+      "id": "label",
+      "type": "text",
+      "label": "Eyebrow label",
+      "required": false,
+      "default": "",
+      "description": "Short uppercase tag above the headline."
+    },
+    {
+      "id": "position",
+      "type": "text",
+      "label": "Content position",
+      "required": false,
+      "default": "bottom-left",
+      "description": "Placement: bottom-left, bottom-center, bottom-right, top-left, top-center, top-right, center."
+    },
+    {
+      "id": "lower-third",
+      "type": "text",
+      "label": "Lower-third mode",
+      "required": false,
+      "default": "",
+      "description": "Set to any value (e.g. 'yes') to render as a broadcast-style lower-third bar. Overrides position."
+    },
+    {
+      "id": "accent",
+      "type": "color",
+      "label": "Accent color",
+      "required": false,
+      "default": "#e8b86d",
+      "description": "Color for rules, labels, decorative elements."
+    },
+    {
+      "id": "ink",
+      "type": "color",
+      "label": "Text color",
+      "required": false,
+      "default": "#ffffff",
+      "description": "Primary text color."
+    },
+    {
+      "id": "hide-backdrop",
+      "type": "text",
+      "label": "Hide backdrop",
+      "required": false,
+      "default": "",
+      "description": "Set to any value to remove the dark backdrop behind text. Leave empty to keep it."
+    },
+    {
+      "id": "image",
+      "type": "image",
+      "label": "Image / logo",
+      "required": false,
+      "default": "",
+      "description": "Small image (logo, avatar) displayed next to text. Rendered as a circle."
+    }
+  ]
+}

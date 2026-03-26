@@ -1,0 +1,84 @@
+{
+  "name": "Video Overlay 9:16",
+  "id": "video-overlay",
+  "version": "1.0.0",
+  "description": "Transparent 9:16 overlay layers for vertical video compositing. Safe zones tuned for YouTube Shorts, TikTok, and Instagram Reels.",
+  "author": "overlay-system",
+  "aspectRatio": "9:16",
+  "width": 1080,
+  "height": 1920,
+  "slots": [
+    {
+      "id": "headline",
+      "type": "text",
+      "label": "Headline",
+      "required": false,
+      "default": "",
+      "description": "Primary text. 1–6 words."
+    },
+    {
+      "id": "subtitle",
+      "type": "text",
+      "label": "Subtitle",
+      "required": false,
+      "default": "",
+      "description": "Secondary text below headline. 1–2 sentences."
+    },
+    {
+      "id": "label",
+      "type": "text",
+      "label": "Eyebrow label",
+      "required": false,
+      "default": "",
+      "description": "Short uppercase tag above the headline."
+    },
+    {
+      "id": "position",
+      "type": "text",
+      "label": "Content position",
+      "required": false,
+      "default": "safe-bottom",
+      "description": "Placement: safe-bottom (default), safe-top, safe-center, safe-left, safe-right. All positions respect platform UI safe zones."
+    },
+    {
+      "id": "lower-third",
+      "type": "text",
+      "label": "Lower-third mode",
+      "required": false,
+      "default": "",
+      "description": "Set to any value (e.g. 'yes') to render as a lower-third bar above the platform UI zone. Overrides position."
+    },
+    {
+      "id": "accent",
+      "type": "color",
+      "label": "Accent color",
+      "required": false,
+      "default": "#e8b86d",
+      "description": "Color for rules, labels, decorative elements."
+    },
+    {
+      "id": "ink",
+      "type": "color",
+      "label": "Text color",
+      "required": false,
+      "default": "#ffffff",
+      "description": "Primary text color."
+    },
+    {
+      "id": "hide-backdrop",
+      "type": "text",
+      "label": "Hide backdrop",
+      "required": false,
+      "default": "",
+      "description": "Set to any value to remove the dark backdrop behind text. Leave empty to keep it."
+    },
+    {
+      "id": "image",
+      "type": "image",
+      "label": "Image / logo",
+      "required": false,
+      "default": "",
+      "description": "Small image (logo, avatar) displayed with text. Rendered as a circle."
+    }
+  ]
+}
