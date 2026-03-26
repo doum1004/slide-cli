@@ -101,7 +101,7 @@ Defines the template identity and every data slot the HTML can use.
 
 | Ratio | width | height | Use case |
 |---|---|---|---|
-| 9:16 | 1080 | 1920 | Instagram Stories, TikTok, Reels |
+| 9:16 | 1080 | 1920 | Instagram Stories, TikTok, Reels, YouTube Shorts |
 | 1:1 | 1080 | 1080 | Instagram feed, Twitter/X |
 | 16:9 | 1920 | 1080 | YouTube thumbnails, presentations, Google Slides export |
 
@@ -208,9 +208,11 @@ Slot values are injected via [Handlebars](https://handlebarsjs.com/) before rend
    - Labels and eyebrows (`font-size 30–40px`): `font-weight: 700`
    - Footers and counters (`font-size 28–32px`): `font-weight: 400`, never lighter
 
-4. **No `<script>` side effects that block rendering** — Puppeteer waits for
-   `networkidle0` then `document.fonts.ready`. Avoid long JS loops or timers
-   that prevent the page from settling.
+4. **No `<script>` tags** — The renderer uses a shell-page approach that swaps
+   slide content into the DOM via `innerHTML`. Scripts inserted through `innerHTML`
+   **do not execute** (browser security behavior). All layout logic must be
+   handled through Handlebars conditionals and CSS alone. Never rely on JavaScript
+   for toggling visibility, computing styles, or any rendering logic.
 
 5. **Colors must be hardcoded or from slots** — CSS variables like `var(--accent)`
    will not be set unless you define them yourself in `<style>`.
@@ -265,6 +267,39 @@ Slot values are injected via [Handlebars](https://handlebarsjs.com/) before rend
    | `ink` | `#f0ece4` | `body` color, `.body`, `.footer-text`, `.counter` |
    | `accent` | `#e8b86d` | `.eyebrow`, `.rule`, `.divider`, `.label`, `.caption` |
 
+8. **Boolean-like slots: use absence/presence, not string values** — Handlebars
+   `{{#if}}` treats **any non-empty string as truthy**, including the string `"false"`.
+   There is no reliable way to pass `"true"` / `"false"` strings and branch on them.
+
+   **Design boolean slots as "set = on, absent = off" (opt-in):**
+   ```json
+   { "id": "hide-backdrop", "type": "text", "default": "", "description": "Set to any value to hide the backdrop. Leave empty to show it." }
+   ```
+   ```handlebars
+   {{#unless hide-backdrop}}<div class="backdrop"></div>{{/unless}}
+   ```
+
+   **Or "set = on, absent = off" (opt-in feature):**
+   ```json
+   { "id": "lower-third", "type": "text", "default": "", "description": "Set to any value to enable lower-third mode." }
+   ```
+   ```handlebars
+   {{#if lower-third}}…lower-third layout…{{else}}…standard layout…{{/if}}
+   ```
+
+   **Never do this:**
+   ```json
+   { "id": "show-backdrop", "default": "true" }
+   ```
+   ```handlebars
+   {{!-- ✗ BROKEN — "false" is truthy, backdrop always shows --}}
+   {{#if show-backdrop}}<div class="backdrop"></div>{{/if}}
+   ```
+
+   **Rule of thumb:** If the feature should be ON by default, name the slot for the
+   negative action (`hide-X`, `no-X`). If the feature should be OFF by default,
+   name the slot for the positive action (`enable-X`, `show-X`, or just `X`).
+
 ---
 
 ## 3. sample.json — documentation + working example
@@ -309,13 +344,47 @@ Slot values are injected via [Handlebars](https://handlebarsjs.com/) before rend
 
 ---
 
+## Template categories
+
+Templates fall into two categories based on their output format:
+
+### Slide templates (opaque background)
+Standard templates that render with a solid background color. Used for social media
+cards, presentations, and any content viewed as standalone images.
+
+- `html, body` background is set to a color slot (e.g. `{{bg}}`)
+- Rendered as JPG or PNG with a visible background
+- **Examples:** editorial cards, quote cards, presentation slides
+
+### Video overlay templates (transparent background)
+Templates that render with a **transparent background** for compositing onto video
+using ffmpeg. Each slide becomes a layer that appears at a specific time range.
+
+- `html, body { background: transparent; }`
+- **Must be rendered as PNG** (JPG does not support transparency)
+- Puppeteer must capture with `omitBackground: true`
+- Content is positioned to avoid platform UI elements (see safe zones below)
+- **Examples:** lower-thirds, captions, chapter titles, speaker name cards
+
+```css
+/* Video overlay template — transparent canvas */
+html, body {
+  width: 1080px;
+  height: 1920px;
+  overflow: hidden;
+  background: transparent;  /* ← key difference */
+}
+```
+
+---
+
 ## Design guidelines
 
 ### Choosing your aspect ratio
 
 | Format | Ratio | Canvas | Primary display context |
 |---|---|---|---|
-| Stories, Reels, TikTok | 9:16 | 1080×1920 | Mobile, full-screen, held vertically |
+| Stories, Reels, TikTok, Shorts | 9:16 | 1080×1920 | Mobile, full-screen, held vertically |
 | Presentations, YouTube | 16:9 | 1920×1080 | Desktop/TV, projected, landscape |
 | Feed, Square posts | 1:1 | 1080×1080 | Mixed — mobile and desktop feeds |
 
@@ -340,7 +409,7 @@ These slides render at 1080×1920px but display on a mobile screen at roughly 37
 
 **Never go below 28px render size** for any text a user needs to read.
 
-### Layout zones (for 1080×1920)
+### Layout zones for slide templates (1080×1920)
 
 ```
 ┌─────────────────────────────┐  ← y=0
@@ -364,6 +433,103 @@ These slides render at 1080×1920px but display on a mobile screen at roughly 37
 **Horizontal padding:** 80–120px left/right. Cards are viewed on mobile — tight edges feel cramped.
 
 **Layout direction:** `flex-direction: column`. 9:16 is a tall, narrow canvas — vertical stacking is natural. Two-column layouts can work for specific use cases (image beside text) but require careful width management.
+
+### Platform-safe zones for 9:16 video overlays
+
+YouTube Shorts, TikTok, and Instagram Reels all overlay UI elements (buttons, captions,
+profile info, descriptions) that obscure significant portions of the screen. Video overlay
+templates **must** keep content within the safe rectangle to avoid being hidden by platform UI.
+
+```
+                    1080px
+  ┌─────────────────────────────────┐  ← y=0
+  │                                 │
+  │  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░ │  ← TOP DEAD ZONE: y 0–200
+  │  ░ YT: search, cast, menu     ░│    YouTube Shorts header bar
+  │  ░ IG: camera, "Reels" title  ░│    Instagram Reels top bar
+  │  ░ TT: "Following | For You"  ░│    TikTok tab switcher
+  │  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░ │
+  │                                 │
+  │                                 │
+  │    ╔═══════════════════════╗    │
+  │    ║                       ║    │
+  │    ║    TRUE SAFE ZONE     ║    │
+  │    ║    x: 64–900          ║    │
+  │    ║    y: 200–1600        ║    │
+  │    ║    (840 × 1400px)     ║    │
+  │    ║                       ║    │
+  │    ╚═══════════════════════╝    │
+  │                                 │
+  │                          ░░░░░░ │  ← RIGHT DEAD ZONE: x 920–1080
+  │                          ░like ░│    y ≈ 1000–1600
+  │                          ░dis  ░│    YT: like, dislike, comment,
+  │                          ░cmt  ░│         share, remix
+  │                          ░shr  ░│    TT: profile, like, comment,
+  │                          ░     ░│         bookmark, share
+  │                          ░░░░░░ │    IG: like, comment, share, save
+  │                                 │
+  │  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░ │  ← BOTTOM DEAD ZONE: y 1600–1920
+  │  ░ YT: title, @handle, sub   ░│    YouTube: video title + subscribe
+  │  ░ IG: username, caption,     ░│    Instagram: user, caption,
+  │  ░     audio, CTA buttons     ░│    audio bar, shop/CTA
+  │  ░ TT: @user, description,   ░│    TikTok: username, caption,
+  │  ░     sound ticker           ░│    sound marquee, effects
+  │  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░ │
+  └─────────────────────────────────┘  ← y=1920
+```
+
+#### Dead zone summary
+
+| Zone | Pixel range | Obstructed by |
+|---|---|---|
+| **Top** | y 0–200 | YT search/cast/menu, IG camera/"Reels" header, TT "Following \| For You" tabs |
+| **Right** | x 920–1080, y 1000–1600 | YT like/dislike/comment/share/remix, TT profile/like/comment/bookmark/share, IG like/comment/share/save |
+| **Bottom** | y 1600–1920 | YT title + @handle + subscribe, IG username + caption + audio + CTA, TT @user + description + sound ticker |
+
+#### Safe rectangle
+
+| Edge | Value | Notes |
+|---|---|---|
+| Left | 64px | Comfortable padding from screen edge |
+| Right | 900px | Avoids right-side action button column |
+| Top | 200px | Clears all platform header bars |
+| Bottom | 1600px | Above all platform caption/description areas |
+| **Safe width** | 836px | 900 − 64 |
+| **Safe height** | 1400px | 1600 − 200 |
+
+#### Recommended position presets for video overlays
+
+| Position name | CSS anchor | Avoids |
+|---|---|---|
+| `safe-bottom` | bottom: 360px; left: 64px | Bottom captions + right buttons |
+| `safe-top` | top: 220px; left: 64px | Top headers |
+| `safe-center` | centered, shifted slightly up | All edges |
+| `safe-left` | left: 64px; vertically centered | Right buttons |
+| `safe-right` | right-aligned; top: 340px | Top headers; placed above right button zone |
+| `lower-third` | full-width bar; bottom: 320px | Sits directly above bottom dead zone |
+
+#### Lower-third placement for video overlays
+
+The traditional broadcast lower-third must be repositioned for short-form video.
+On television, a lower-third sits at the very bottom of the frame. On Shorts/Reels/TikTok,
+the bottom 320px is completely obscured by platform UI. Place the lower-third bar's
+bottom edge at **y ≈ 1600** (`bottom: 320px` in CSS) so it floats just above the
+platform caption zone.
+
+```css
+.lower-third-accent-line {
+  position: absolute;
+  left: 0; right: 0;
+  bottom: 320px;       /* sits at y=1600, top of bottom dead zone */
+  height: 5px;
+  background: {{#if accent}}{{accent}}{{else}}#e8b86d{{/if}};
+}
+.lower-third-content {
+  position: absolute;
+  left: 64px; right: 64px;
+  bottom: 348px;       /* text sits above the accent line */
+}
+```
 
 ### Image + text split layouts (for 9:16)
 
@@ -577,6 +743,11 @@ This creates visual cohesion — the deck feels like one unified piece rather th
 | Light clean | `#faf7f2` | `#1a1714` | `#c0392b`, `#2980b9`, `#27ae60` |
 | Pure light | `#ffffff` | `#111111` | `#ff6b35`, `#6b35ff`, `#35ff6b` |
 
+**For video overlay templates:** There is no `bg` slot since the background is transparent.
+Use `ink` for text color (default `#ffffff` for visibility over video) and `accent` for
+decorative elements. The backdrop pill (`rgba(0,0,0,0.58)`) provides contrast against
+any video content.
+
 ### Color palette strategies
 
 **Dark editorial** (popular for thought-leadership content):
@@ -670,6 +841,10 @@ Image slots introduce complexity that text-only templates don't have. Follow the
    ```
 
 **Use `{{bg}}` in overlays, not hardcoded black.** This ensures the overlay tint matches the deck's color identity. A `#0c0b09` overlay on a warm-dark deck feels cohesive; a `#000000` overlay feels generic.
+
+**For video overlay templates:** Since there is no `bg` slot, use `rgba(0,0,0,opacity)` for
+backdrop elements. The backdrop provides its own contrast — it doesn't need to match a
+background color.
 
 **Make images optional when possible.** Templates should look complete with or without an image. Wrap image-dependent HTML and CSS in `{{#if image}}…{{/if}}`:
 
@@ -916,3 +1091,15 @@ This is a fully working minimal 16:9 template. The same structure applies to any
 - [ ] Images use `object-fit: cover` inside fixed-size containers
 - [ ] Image overlays and gradient fades use `{{bg}}` (with inline default), not hardcoded black
 - [ ] Z-index follows the convention: image (0) → overlay (1) → content (2–3) → noise (10)
+- [ ] **No `<script>` tags anywhere** — the renderer's `innerHTML` swap does not execute scripts
+- [ ] Boolean-like slots use presence/absence pattern (`hide-X` for default-on, `enable-X` for default-off)
+
+### Additional checklist for video overlay templates
+
+- [ ] `html, body { background: transparent; }` — no background color
+- [ ] Output format is PNG (not JPG) — transparency requires it
+- [ ] Backdrop elements use `rgba(0,0,0,opacity)` — not a `{{bg}}` slot
+- [ ] **9:16 overlays:** All content positioned within the safe rectangle (x 64–900, y 200–1600)
+- [ ] **9:16 overlays:** Lower-third bar sits at `bottom: 320px` or higher — above platform caption zone
+- [ ] **9:16 overlays:** No content in the right gutter (x 920–1080) between y 1000–1600
+- [ ] **16:9 overlays:** Standard margin rules apply (80px+ edges) — no platform-specific dead zones
