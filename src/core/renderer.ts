@@ -215,11 +215,16 @@ async function screenshotSlides(
     // ── Shell page loaded once, slides swapped in via DOM ──────────
     const shellStart = performance.now();
 
+    const isJpeg = format === "jpg";
+
     const shellHtml = `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <style id="slide-styles"></style>
+<style>
+  ${!isJpeg ? 'html, body { background: transparent !important; }' : ''}
+</style>
 </head>
 <body></body>
 </html>`;
@@ -228,7 +233,6 @@ async function screenshotSlides(
     //console.log(`[perf] Shell page ready: ${(performance.now() - shellStart).toFixed(0)}ms`);
 
     // ── Render each slide by swapping body ──────────────────────────
-    const isJpeg = format === "jpg";
 
     for (const result of results) {
       const slideStart = performance.now();
@@ -290,6 +294,7 @@ async function screenshotSlides(
         type: isJpeg ? "jpeg" : "png",
         quality: isJpeg ? 95 : undefined,
         clip: { x: 0, y: 0, width, height },
+        omitBackground: !isJpeg,  // ← ADD THIS
       });
       //console.log(`[perf]   slide ${result.slideIndex} screenshot: ${(performance.now() - t2).toFixed(0)}ms`);
 
