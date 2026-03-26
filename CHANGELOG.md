@@ -9,6 +9,20 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 <!-- New entries are prepended automatically by the publish workflow -->
 
+## v1.0.9 — 2026-03-26
+
+### Changes
+
+- feat: add transparency grid toggle for PNG slides in presenter (ca4d498)
+- feat: add new overlay templates for video compositing with customizable options (908912d)
+- feat: update template guide with boolean slot usage and video overlay guidelines (cc07da5)
+- feat: enhance screenshot functionality with JPEG background handling (a067012)
+
+**Full diff:** [v1.0.8...v1.0.9](https://github.com/doum1004/slide-cli/compare/v1.0.8...v1.0.9)
+
+---
+
+
 ## v1.0.8 — 2026-03-25
 
 ### Changes
