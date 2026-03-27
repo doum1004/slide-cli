@@ -59,14 +59,22 @@
     max-width: 840px;
   }
 
-  /* safe-center: centered in the safe rectangle */
+  /* safe-center: centered in the safe rectangle, shifted slightly below true center */
   .pos-safe-center {
-    top: 50%;
+    top: 70%;
     left: 50%;
     transform: translate(-50%, -55%);
     align-items: center;
     text-align: center;
     max-width: 900px;
+  }
+
+  .pos-safe-center .headline-text {
+    font-size: 45px;
+  }
+
+  .pos-safe-center .subtitle-text {
+    font-size: 30px;
   }
 
   /* safe-left: vertically centered, hugging left edge */
@@ -91,7 +99,7 @@
     position: absolute;
     inset: 0;
     border-radius: 20px;
-    background: rgba(0, 0, 0, 0.58);
+    background: rgba(0, 0, 0, 0.05);
     pointer-events: none;
     z-index: 0;
   }
@@ -117,6 +125,7 @@
     text-transform: uppercase;
     color: {{#if accent}}{{accent}}{{else}}#e8b86d{{/if}};
     line-height: 1.2;
+    text-wrap: balance;
   }
 
   .rule {
@@ -126,13 +135,13 @@
   }
 
   .headline-text {
-    font-size: 76px;
+    font-size: 60px;
     font-weight: 700;
     line-height: 1.12;
     letter-spacing: -0.01em;
     color: {{#if ink}}{{ink}}{{else}}#ffffff{{/if}};
-    text-wrap: pretty;
     text-shadow: 0 3px 16px rgba(0, 0, 0, 0.55);
+    text-wrap: balance;
   }
 
   .subtitle-text {
@@ -142,6 +151,7 @@
     color: {{#if ink}}{{ink}}{{else}}#ffffff{{/if}};
     opacity: 0.85;
     text-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+    text-wrap: balance;
   }
 
   /* ─── Circular image ─── */
@@ -230,6 +240,7 @@
     opacity: 0.28;
     z-index: 2;
     text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+    text-wrap: balance;
   }
 </style>
 </head>
@@ -243,7 +254,6 @@
     <div class="lower-third-content">
       {{#if image}}<img class="slot-image" src="{{image}}" alt="">{{/if}}
       <div class="text-block">
-        {{#if label}}<div class="label-text">{{label}}</div>{{/if}}
         {{#if headline}}<div class="headline-text">{{headline}}</div>{{/if}}
         {{#if subtitle}}<div class="subtitle-text">{{subtitle}}</div>{{/if}}
       </div>
@@ -252,11 +262,9 @@
   {{else}}
 
     {{!-- ═══ STANDARD POSITIONED MODE ═══ --}}
-    <div class="content-anchor pos-{{default position "safe-bottom"}}">
-      {{#unless hide-backdrop}}<div class="backdrop"></div>{{/unless}}
+    <div class="content-anchor pos-{{default position "safe-top"}}">
       {{#if image}}<img class="slot-image" src="{{image}}" alt="">{{/if}}
-      <div class="text-block {{#if hide-backdrop}}text-block-bare{{/if}}">
-        {{#if label}}<div class="label-text">{{label}}</div>{{/if}}
+      <div class="text-block text-block-bare">
         {{#if headline}}
           <div class="rule"></div>
           <div class="headline-text">{{headline}}</div>

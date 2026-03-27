@@ -37,8 +37,8 @@
       "type": "text",
       "label": "Content position",
       "required": false,
-      "default": "safe-bottom",
-      "description": "Placement: safe-bottom (default), safe-top, safe-center, safe-left, safe-right. All positions respect platform UI safe zones."
+      "default": "safe-top",
+      "description": "Placement: safe-top (default), safe-bottom, safe-center, safe-left, safe-right. All positions respect platform UI safe zones."
     },
     {
       "id": "lower-third",
@@ -63,14 +63,6 @@
       "required": false,
       "default": "#ffffff",
       "description": "Primary text color."
-    },
-    {
-      "id": "hide-backdrop",
-      "type": "text",
-      "label": "Hide backdrop",
-      "required": false,
-      "default": "",
-      "description": "Set to any value to remove the dark backdrop behind text. Leave empty to keep it."
     },
     {
       "id": "image",
