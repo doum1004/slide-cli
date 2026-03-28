@@ -43,7 +43,7 @@
     {
       "layout": "video-overlay",
       "headline": "Follow for more",
-      "position": "safe-top",
+      "position": "safe-bottom",
       "accent": "#8eb8a0",
       "ink": "#ffffff"
     }
