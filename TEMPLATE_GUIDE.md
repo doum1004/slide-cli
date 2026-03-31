@@ -941,6 +941,17 @@ h1, h2, h3, .title, .quote-text, .card-title {
 }
 ```
 
+And also apply these
+```
+.your-text {
+  overflow-wrap: break-word;
+  word-break: keep-all;
+  line-break: loose;
+}
+```
+keep-all → prevents ugly mid-character breaking in Korean
+break-word → still allows wrapping when needed
+
 **When to use it:** Short text blocks — slide titles, card headings, pull-quotes, eyebrow labels. Not needed on long body paragraphs (browsers cap it at ~6 lines for performance, so it has no effect on prose anyway).
 
 **`text-wrap: balance`** is the stronger alternative — it fully balances line lengths across all lines, not just the last one. Use `pretty` when you want clean, natural wrapping without orphans (the default for these templates), and `balance` when you specifically want every line to be the same visual weight.

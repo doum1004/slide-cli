@@ -83,7 +83,7 @@
   /* ── Eyebrow ── */
   .eyebrow {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    font-size: 22px;
+    font-size: 60px;
     font-weight: 700;
     letter-spacing: 0.22em;
     text-transform: uppercase;
@@ -101,24 +101,30 @@
 
   /* ── Heading ── */
   .heading {
-    font-size: 80px;
+    font-size: 120px;
     font-weight: 700;
     line-height: 1.1;
     letter-spacing: -0.015em;
-    text-wrap: pretty;
+    text-wrap: balanced;
+    overflow-wrap: break-word;
+    word-break: keep-all;
+    line-break: loose;
     max-width: 900px;
     margin-bottom: 32px;
   }
 
   /* ── Body ── */
   .body {
-    font-size: 30px;
+    font-size: 60px;
     font-weight: 400;
     line-height: 1.6;
     color: {{#if ink}}{{ink}}{{else}}#ffffff{{/if}};
     opacity: 0.6;
     max-width: 800px;
     text-wrap: pretty;
+    overflow-wrap: break-word;
+    word-break: keep-all;
+    line-break: loose;
   }
 
   /* ── Footer bar ── */
