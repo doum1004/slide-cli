@@ -1,0 +1,29 @@
+{
+  "title": "Toronto Stadium Upgrades Completed Ahead of World Cup Matches",
+  "template": "insight-wide",
+  "format": "jpg",
+  "totalSlides": 4,
+  "skipped": 0,
+  "slides": [
+    {
+      "slideIndex": 1,
+      "htmlPath": "slide-1.html",
+      "imagePath": "slide-1.jpg"
+    },
+    {
+      "slideIndex": 2,
+      "htmlPath": "slide-2.html",
+      "imagePath": "slide-2.jpg"
+    },
+    {
+      "slideIndex": 3,
+      "htmlPath": "slide-3.html",
+      "imagePath": "slide-3.jpg"
+    },
+    {
+      "slideIndex": 4,
+      "htmlPath": "slide-4.html",
+      "imagePath": "slide-4.jpg"
+    }
+  ]
+}
