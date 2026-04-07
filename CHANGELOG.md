@@ -9,6 +9,24 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 <!-- New entries are prepended automatically by the publish workflow -->
 
+## v1.0.10 — 2026-04-07
+
+### Changes
+
+- Remove the Data Layouts wide template JSON file, including all associated layout configurations and properties. (df49469)
+- add insight and insight wide preview (96470dc)
+- Update insight2 and insight2-wide templates (922dac3)
+- Add new multi-layout data visualization template for 16:9 presentations (e43f350)
+- feat: add new insight-wide2 template with updated layout and styling (82973ae)
+- feat: enhance text styling in templates with improved font sizes and wrapping options (c33beb0)
+- feat: adjust position settings for video overlay elements to improve layout (a1e6d6f)
+- feat: update video overlay template with position adjustments and style enhancements (1b662da)
+
+**Full diff:** [v1.0.9...v1.0.10](https://github.com/doum1004/slide-cli/compare/v1.0.9...v1.0.10)
+
+---
+
+
 ## v1.0.9 — 2026-03-26
 
 ### Changes
