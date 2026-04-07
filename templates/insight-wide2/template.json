@@ -1,0 +1,75 @@
+{
+  "name": "Insight Wide",
+  "id": "insight-wide2",
+  "version": "1.0.0",
+  "description": "Widescreen insight card for presentations — bold heading, body text, and optional background image on a 16:9 canvas.",
+  "author": "slide-cli",
+  "aspectRatio": "16:9",
+  "width": 1920,
+  "height": 1080,
+  "slots": [
+    {
+      "id": "heading",
+      "type": "text",
+      "label": "Heading",
+      "required": true,
+      "description": "Main insight heading. 2–10 words work best."
+    },
+    {
+      "id": "body",
+      "type": "text",
+      "label": "Body text",
+      "required": false,
+      "default": "",
+      "description": "Supporting explanation. 1–3 sentences."
+    },
+    {
+      "id": "eyebrow",
+      "type": "text",
+      "label": "Eyebrow label",
+      "required": false,
+      "default": "",
+      "description": "Small uppercase label above the heading (e.g. 'LESSON', 'INSIGHT', 'TIP')."
+    },
+    {
+      "id": "footer",
+      "type": "text",
+      "label": "Footer text",
+      "required": false,
+      "default": "",
+      "description": "Bottom-left attribution or handle (e.g. '@yourname')."
+    },
+    {
+      "id": "image",
+      "type": "image",
+      "label": "Background image",
+      "required": false,
+      "default": "",
+      "description": "Optional background image. Covers the full slide with a dark overlay so text stays legible. Local path or URL."
+    },
+    {
+      "id": "bg",
+      "type": "color",
+      "label": "Background color",
+      "required": false,
+      "default": "#0c0b09",
+      "description": "Slide background. Also used as the overlay tint when an image is present. Keep consistent across all slides."
+    },
+    {
+      "id": "ink",
+      "type": "color",
+      "label": "Text color",
+      "required": false,
+      "default": "#eae6de",
+      "description": "Primary text color. Keep consistent across all slides in a deck."
+    },
+    {
+      "id": "accent",
+      "type": "color",
+      "label": "Accent color",
+      "required": false,
+      "default": "#d4a054",
+      "description": "Accent color for eyebrow and rule. Vary per slide."
+    }
+  ]
+}

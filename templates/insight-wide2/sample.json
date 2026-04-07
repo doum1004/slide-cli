@@ -2,7 +2,7 @@
     "title": "Toronto Stadium Upgrades Completed Ahead of World Cup Matches",
     "slides": [
       {
-        "layout": "insight-wide",
+        "layout": "insight-wide2",
         "eyebrow": "Update",
         "heading": "Toronto Stadium upgrades finished",
         "body": "All major improvements ready for upcoming World Cup games.",
@@ -13,7 +13,7 @@
         "accent": "#d4a054"
       },
       {
-        "layout": "insight-wide",
+        "layout": "insight-wide2",
         "eyebrow": "Update",
         "heading": "Expanded seating and facilities",
         "body": "Temporary 17,000 seats added, total capacity now 45,000.",
@@ -24,7 +24,7 @@
         "accent": "#6db89c"
       },
       {
-        "layout": "insight-wide",
+        "layout": "insight-wide2",
         "eyebrow": "Update",
         "heading": "City to host six World Cup matches",
         "body": "Matches include group stage and knockout rounds in June and July.",
@@ -35,7 +35,7 @@
         "accent": "#b87e6d"
       },
       {
-        "layout": "insight-wide",
+        "layout": "insight-wide2",
         "eyebrow": "Update",
         "heading": "Upgrades benefit beyond World Cup",
         "body": "New infrastructure and stadium features remain post-tournament.",
