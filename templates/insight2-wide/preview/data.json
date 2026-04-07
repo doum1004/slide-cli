@@ -1,0 +1,49 @@
+{
+  "title": "Toronto Stadium Upgrades Completed Ahead of World Cup Matches",
+  "slides": [
+    {
+      "layout": "insight2-wide",
+      "eyebrow": "Update",
+      "heading": "Toronto Stadium upgrades finished",
+      "body": "All major improvements ready for upcoming World Cup games.",
+      "image": "https://i.cbc.ca/ais/14da5c8e-51f2-45e4-8272-3f715cc4c2b6,1774378344472/full/max/0/default.jpg?im=Crop%2Crect%3D%280%2C240%2C2560%2C1440%29%3BResize%3D860",
+      "footer": "Maplesoup Toronto",
+      "bg": "#0c0b09",
+      "ink": "#eae6de",
+      "accent": "#d4a054"
+    },
+    {
+      "layout": "insight2-wide",
+      "eyebrow": "Update",
+      "heading": "Expanded seating and facilities",
+      "body": "Temporary 17,000 seats added, total capacity now 45,000.",
+      "image": "https://i.cbc.ca/ais/008acbb8-5cb6-4a80-9662-fa5139807bd9,1774377749452/full/max/0/default.jpg?im=Crop%2Crect%3D%280%2C0%2C5786%2C3857%29%3BResize%3D796",
+      "footer": "Maplesoup Toronto",
+      "bg": "#0c0b09",
+      "ink": "#eae6de",
+      "accent": "#6db89c"
+    },
+    {
+      "layout": "insight2-wide",
+      "eyebrow": "Update",
+      "heading": "City to host six World Cup matches",
+      "body": "Matches include group stage and knockout rounds in June and July.",
+      "image": "https://i.cbc.ca/ais/14da5c8e-51f2-45e4-8272-3f715cc4c2b6,1774378344472/full/max/0/default.jpg?im=Crop%2Crect%3D%280%2C240%2C2560%2C1440%29%3BResize%3D860",
+      "footer": "Maplesoup Toronto",
+      "bg": "#0c0b09",
+      "ink": "#eae6de",
+      "accent": "#b87e6d"
+    },
+    {
+      "layout": "insight2-wide",
+      "eyebrow": "Update",
+      "heading": "Upgrades benefit beyond World Cup",
+      "body": "New infrastructure and stadium features remain post-tournament.",
+      "image": "https://i.cbc.ca/ais/008acbb8-5cb6-4a80-9662-fa5139807bd9,1774377749452/full/max/0/default.jpg?im=Crop%2Crect%3D%280%2C0%2C5786%2C3857%29%3BResize%3D796",
+      "footer": "Maplesoup Toronto",
+      "bg": "#0c0b09",
+      "ink": "#eae6de",
+      "accent": "#8a8ed4"
+    }
+  ]
+}

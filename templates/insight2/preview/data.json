@@ -1,0 +1,54 @@
+{
+  "_template": "insight2",
+  "_description": "Insight card for carousel decks. Best for sharing lessons, tips, rules, or principles — one per slide. Supports an optional background image with an automatic dark overlay. Keep bg and ink consistent across all slides; vary only accent for visual interest.",
+  "_slots": {
+    "heading": "REQUIRED — the main insight2. 2–8 words. Displayed at 100px bold serif.",
+    "body": "optional — supporting explanation. 1–3 sentences. Shown at reduced opacity below the heading.",
+    "footer": "optional — bottom-left text. Attribution, handle, or brand name (e.g. '@yourname').",
+    "image": "optional — background image. Local path relative to data JSON or a URL. A dark overlay (tinted with bg color at 72% opacity) is applied automatically so text remains legible. Works best with moody, dark, or desaturated photos. When omitted, the slide uses the solid bg color.",
+    "bg": "optional — background hex color. Also used as the overlay tint when an image is present. Use the SAME value on every slide in a deck. Default: #0c0b09",
+    "ink": "optional — primary text hex color. Use the SAME value on every slide in a deck. Default: #eae6de",
+    "accent": "optional — accent hex color for eyebrow and rule. VARY per slide. Default: #d4a054"
+  },
+  "title": "7 Lessons from Building in Public",
+  "slides": [
+    {
+      "layout": "insight2",
+      "heading": "Start before you're ready",
+      "body": "Waiting for the perfect moment is just procrastination wearing a mask. Ship the ugly first version.",
+      "footer": "@buildpublic",
+      "bg": "#0c0b09",
+      "ink": "#eae6de",
+      "accent": "#d4a054"
+    },
+    {
+      "layout": "insight2",
+      "heading": "Share the process, not just the outcome",
+      "body": "People connect with struggle and iteration. The messy middle is the interesting part.",
+      "image": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=1080&q=80",
+      "footer": "@buildpublic",
+      "bg": "#0c0b09",
+      "ink": "#eae6de",
+      "accent": "#6db89c"
+    },
+    {
+      "layout": "insight2",
+      "heading": "Consistency compounds",
+      "body": "One post won't change anything. Three hundred posts will change everything.",
+      "footer": "@buildpublic",
+      "bg": "#0c0b09",
+      "ink": "#eae6de",
+      "accent": "#b87e6d"
+    },
+    {
+      "layout": "insight2",
+      "heading": "Your audience is smaller than you think",
+      "body": "And that's fine. Ten people who care beat ten thousand who scroll past.",
+      "image": "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1080&q=80",
+      "footer": "@buildpublic",
+      "bg": "#0c0b09",
+      "ink": "#eae6de",
+      "accent": "#8a8ed4"
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 {
   "name": "Insight Wide",
-  "id": "insight-wide2",
+  "id": "insight2-wide",
   "version": "1.0.0",
   "description": "Widescreen insight card for presentations — bold heading, body text, and optional background image on a 16:9 canvas.",
   "author": "slide-cli",

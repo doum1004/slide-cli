@@ -9,7 +9,7 @@
     width: 1080px;
     height: 1920px;
     overflow: hidden;
-    background: {{#if bg}}{{bg}}{{else}}#1a1a2e{{/if}};
+    background: #0c0b09;
   }
 
   body {
@@ -17,31 +17,11 @@
     flex-direction: column;
     justify-content: flex-start;
     font-family: Georgia, 'Times New Roman', serif;
-    color: {{#if ink}}{{ink}}{{else}}#ffffff{{/if}};
+    color: #eae6de;
     position: relative;
   }
 
   /* ── Background image layer ── */
-  {{#if image}}
-  .bg-image {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-  }
-  .bg-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-  .bg-image::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: {{#if bg}}{{bg}}{{else}}#1a1a2e{{/if}};
-    opacity: 0.72;
-  }
-  {{/if}}
 
   /* ── Noise overlay ── */
   .noise {
@@ -71,7 +51,7 @@
   .rule {
     width: 56px;
     height: 3px;
-    background: {{#if accent}}{{accent}}{{else}}#e94560{{/if}};
+    background: #b87e6d;
     margin-bottom: 52px;
   }
 
@@ -103,7 +83,7 @@
     font-size: 42px;
     font-weight: 400;
     line-height: 1.55;
-    color: {{#if ink}}{{ink}}{{else}}#ffffff{{/if}};
+    color: #eae6de;
     opacity: 0.65;
     max-width: 820px;
     text-wrap: pretty;
@@ -134,7 +114,7 @@
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-size: 28px;
     font-weight: 400;
-    color: {{#if ink}}{{ink}}{{else}}#ffffff{{/if}};
+    color: #eae6de;
     opacity: 0.30;
     letter-spacing: 0.04em;
   }
@@ -143,20 +123,31 @@
     font-family: 'Courier New', monospace;
     font-size: 28px;
     font-weight: 400;
-    color: {{#if ink}}{{ink}}{{else}}#ffffff{{/if}};
+    color: #eae6de;
     opacity: 0.25;
     letter-spacing: 0.08em;
   }
+</style>
+<style data-system-fonts>
+:root {
+  --sys-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --sys-serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Noto Serif", serif;
+  --sys-mono: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, "DejaVu Sans Mono", monospace;
+}
+body, html, div, span, p, a, li, td, th, label, input, button, textarea, select {
+  font-family: var(--sys-sans) !important;
+}
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--sys-serif) !important;
+}
+code, pre, kbd, samp, .mono, [class*="mono"] {
+  font-family: var(--sys-mono) !important;
+}
 </style>
 </head>
 <body>
 
   <!-- Background image (optional) -->
-  {{#if image}}
-  <div class="bg-image">
-    <img src="{{image}}" alt="">
-  </div>
-  {{/if}}
 
   <!-- Noise texture -->
   <div class="noise"></div>
@@ -164,21 +155,19 @@
   <!-- Heading – always centered -->
   <div class="heading-layer">
     <div class="rule"></div>
-    <h1 class="heading">{{heading}}</h1>
+    <h1 class="heading">Consistency compounds</h1>
   </div>
 
   <!-- Body – always at bottom -->
-  {{#if body}}
   <div class="body-layer">
-    <p class="body">{{body}}</p>
+    <p class="body">One post won&#x27;t change anything. Three hundred posts will change everything.</p>
   </div>
-  {{/if}}
 
   <!-- Footer -->
   <div class="footer-area">
     <div class="footer-bar">
-      {{#if footer}}<span class="footer-text">{{footer}}</span>{{else}}<span></span>{{/if}}
-      <span class="counter">{{slideIndex}} / {{totalSlides}}</span>
+      <span class="footer-text">@buildpublic</span>
+      <span class="counter">3 / 4</span>
     </div>
   </div>
 
