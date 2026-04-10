@@ -1,0 +1,51 @@
+{
+  "_template": "video-overlay",
+  "_description": "Transparent 9:16 overlay layers for vertical video (YouTube Shorts, TikTok, Instagram Reels). All positions respect platform UI safe zones — content never collides with action buttons, captions, headers, or navigation elements.",
+  "_slots": {
+    "headline": "optional — primary text. 1–6 words at 76px (50px in lower-third mode).",
+    "subtitle": "optional — secondary text below headline. 1–2 short sentences.",
+    "label": "optional — short uppercase eyebrow tag above headline.",
+    "position": "optional — safe-top (default), safe-bottom, safe-center, safe-left, safe-right. All avoid platform UI overlays.",
+    "lower-third": "optional — set to any value (e.g. 'yes') for a lower-third bar above the platform caption zone. Overrides position.",
+    "accent": "optional — accent hex color for rules, labels, decorative elements. Vary per layer. Default: #e8b86d",
+    "ink": "optional — primary text hex color. Use the SAME value on every layer. Default: #ffffff",
+    "image": "optional — small image (logo, avatar, icon) displayed next to text. Rendered as a circle."
+  },
+  "title": "Short-Form Video Overlays",
+  "slides": [
+    {
+      "layout": "video-overlay",
+      "label": "Intro",
+      "headline": "Welcome",
+      "subtitle": "Here are the key highlights.",
+      "position": "safe-top",
+      "accent": "#e8b86d",
+      "ink": "#ffffff"
+    },
+    {
+      "layout": "video-overlay",
+      "label": "Tip 01",
+      "headline": "Hook Fast",
+      "subtitle": "You have 2 seconds before they scroll.",
+      "position": "safe-center",
+      "accent": "#7eb8d4",
+      "ink": "#ffffff"
+    },
+    {
+      "layout": "video-overlay",
+      "headline": "Jane Smith",
+      "subtitle": "Creative Director, Acme",
+      "label": "Speaker",
+      "lower-third": "yes",
+      "accent": "#d47e7e",
+      "ink": "#ffffff"
+    },
+    {
+      "layout": "video-overlay",
+      "headline": "Follow for more",
+      "position": "safe-bottom",
+      "accent": "#8eb8a0",
+      "ink": "#ffffff"
+    }
+  ]
+}

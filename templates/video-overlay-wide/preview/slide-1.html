@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    background: transparent;
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  }
+
+  body {
+    position: relative;
+  }
+
+  /* ─────────────────────────────────────
+     POSITIONED CONTENT (non lower-third)
+     ───────────────────────────────────── */
+
+  .content-anchor {
+    position: absolute;
+    display: inline-flex;
+    flex-direction: row;
+    align-items: flex-end;
+    gap: 24px;
+    max-width: 1200px;
+  }
+
+  .pos-bottom-left   { bottom: 80px; left: 80px; }
+  .pos-bottom-center {
+    bottom: 80px; left: 50%; transform: translateX(-50%);
+    flex-direction: column; align-items: center; text-align: center;
+  }
+  .pos-bottom-right  { bottom: 80px; right: 80px; }
+  .pos-top-left      { top: 80px; left: 80px; align-items: flex-start; }
+  .pos-top-center {
+    top: 80px; left: 50%; transform: translateX(-50%);
+    flex-direction: column; align-items: center; text-align: center;
+  }
+  .pos-top-right     { top: 80px; right: 80px; align-items: flex-start; }
+  .pos-center {
+    top: 50%; left: 50%; transform: translate(-50%, -50%);
+    flex-direction: column; align-items: center; text-align: center;
+  }
+
+  /* ─── Backdrop pill ─── */
+  .backdrop {
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    background: rgba(0, 0, 0, 0.65);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ─── Text block ─── */
+  .text-block {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 36px 44px;
+  }
+
+  .text-block-bare {
+    padding: 0;
+  }
+
+  .label-text {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #e8b86d;
+    line-height: 1.2;
+  }
+
+  .rule {
+    width: 48px;
+    height: 3px;
+    background: #e8b86d;
+  }
+
+  .headline-text {
+    font-size: 64px;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    color: #ffffff;
+    text-wrap: pretty;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+  }
+
+  .subtitle-text {
+    font-size: 30px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #ffffff;
+    opacity: 0.85;
+    text-shadow: 0 1px 8px rgba(0, 0, 0, 0.4);
+    max-width: 900px;
+  }
+
+  /* ─── Circular image ─── */
+  .slot-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 3px solid #e8b86d;
+    z-index: 2;
+  }
+
+  /* ─────────────────────────────────────
+     LOWER-THIRD MODE
+     ───────────────────────────────────── */
+
+  .lower-third-bg {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 180px;
+    background: linear-gradient(
+      to top,
+      rgba(0, 0, 0, 0.75) 0%,
+      rgba(0, 0, 0, 0.55) 60%,
+      transparent 100%
+    );
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .lower-third-accent-line {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 4px;
+    background: #e8b86d;
+    z-index: 3;
+  }
+
+  .lower-third-content {
+    position: absolute;
+    bottom: 28px; left: 80px; right: 80px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 28px;
+    z-index: 2;
+  }
+
+  .lower-third-content .text-block {
+    padding: 0;
+    gap: 6px;
+  }
+
+  .lower-third-content .headline-text {
+    font-size: 42px;
+  }
+
+  .lower-third-content .subtitle-text {
+    font-size: 24px;
+    opacity: 0.8;
+  }
+
+  .lower-third-content .label-text {
+    font-size: 18px;
+  }
+
+  /* ─── Counter ─── */
+  .counter {
+    position: absolute;
+    top: 32px; right: 48px;
+    font-family: 'Courier New', monospace;
+    font-size: 20px;
+    color: #ffffff;
+    opacity: 0.35;
+    z-index: 2;
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
+  }
+</style>
+<style data-system-fonts>
+:root {
+  --sys-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --sys-serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Noto Serif", serif;
+  --sys-mono: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, "DejaVu Sans Mono", monospace;
+}
+body, html, div, span, p, a, li, td, th, label, input, button, textarea, select {
+  font-family: var(--sys-sans) !important;
+}
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--sys-serif) !important;
+}
+code, pre, kbd, samp, .mono, [class*="mono"] {
+  font-family: var(--sys-mono) !important;
+}
+</style>
+</head>
+<body>
+
+
+    <div class="content-anchor pos-bottom-left">
+      <div class="backdrop"></div>
+      
+      <div class="text-block ">
+        <div class="label-text">Introduction</div>
+          <div class="rule"></div>
+          <div class="headline-text">Welcome to the Demo</div>
+        <div class="subtitle-text">Let&#x27;s walk through the key features.</div>
+      </div>
+    </div>
+
+
+</body>
+</html>

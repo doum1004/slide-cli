@@ -1,0 +1,53 @@
+{
+  "_template": "video-overlay-wide",
+  "_description": "Transparent overlay layers for video compositing. Each slide renders as a PNG with alpha transparency, intended to be overlaid on video using ffmpeg. Use 'position' to place content on screen, or set 'lower-third' for a broadcast-style bar.",
+  "_slots": {
+    "headline": "optional — primary text on the overlay. 1–8 words at 64px (42px in lower-third mode).",
+    "subtitle": "optional — secondary text below headline. 1–2 short sentences.",
+    "label": "optional — short uppercase eyebrow tag above headline (e.g. 'CHAPTER 1', 'SPEAKER').",
+    "position": "optional — where content appears: bottom-left (default), bottom-center, bottom-right, top-left, top-center, top-right, center.",
+    "lower-third": "optional — set to any value (e.g. 'yes') to render as a broadcast-style lower-third bar. Overrides position.",
+    "accent": "optional — accent hex color for rules, labels, decorative elements. Vary per layer. Default: #e8b86d",
+    "ink": "optional — primary text hex color. Use the SAME value on every layer. Default: #ffffff",
+    "hide-backdrop": "optional — set to any value to remove the dark backdrop behind text. Leave empty to keep it (default).",
+    "image": "optional — small image (logo, avatar, icon) displayed next to text. Rendered as a circle."
+  },
+  "title": "Product Demo Overlays",
+  "slides": [
+    {
+      "layout": "video-overlay-wide",
+      "label": "Introduction",
+      "headline": "Welcome to the Demo",
+      "subtitle": "Let's walk through the key features.",
+      "position": "bottom-left",
+      "accent": "#e8b86d",
+      "ink": "#ffffff"
+    },
+    {
+      "layout": "video-overlay-wide",
+      "label": "Feature 1",
+      "headline": "Lightning Fast Rendering",
+      "subtitle": "60fps on any device, no compromises.",
+      "position": "center",
+      "accent": "#7eb8d4",
+      "ink": "#ffffff",
+      "hide-backdrop": "yes"
+    },
+    {
+      "layout": "video-overlay-wide",
+      "headline": "Jane Smith",
+      "subtitle": "Lead Engineer, Acme Corp",
+      "label": "Speaker",
+      "lower-third": "yes",
+      "accent": "#d47e7e",
+      "ink": "#ffffff"
+    },
+    {
+      "layout": "video-overlay-wide",
+      "headline": "Try it free at acme.dev",
+      "position": "bottom-center",
+      "accent": "#8eb8a0",
+      "ink": "#ffffff"
+    }
+  ]
+}

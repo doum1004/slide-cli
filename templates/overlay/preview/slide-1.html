@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 1080px;
+    height: 1920px;
+    overflow: hidden;
+    background: transparent;
+  }
+
+  body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    color: #ffffff;
+    position: relative;
+  }
+
+  /*
+    ── SHORTS SAFE ZONE ──
+    Platform UI covers:
+      Top:    ~200px  (status bar, search, close)
+      Bottom: ~520px  (username, caption, music, nav)
+      Right:  ~260px  (like/comment/share buttons, lower half)
+
+    Safe area:
+      Y: 200 → 1400  (1200px tall)
+      X: 88  → 820   (732px wide, avoids right buttons)
+
+    We place all content inside this zone.
+  */
+
+  /* ── Scrim: contained to safe zone area ── */
+  .scrim {
+    position: absolute;
+    top: 200px;
+    left: 0;
+    right: 0;
+    height: 1200px;
+    background: radial-gradient(
+      ellipse 80% 70% at 30% 55%,
+      rgba(0, 0, 0, 0.38) 0%,
+      rgba(0, 0, 0, 0.0) 100%
+    );
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── Safe zone container ── */
+  .safe-zone {
+    position: absolute;
+    top: 200px;
+    left: 88px;
+    width: 732px;
+    height: 1200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    z-index: 2;
+  }
+
+  /* ── Eyebrow ── */
+  .eyebrow {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #e8b86d;
+    margin-bottom: 24px;
+    text-shadow:
+      0 2px 12px rgba(0, 0, 0, 0.7),
+      0 0 40px rgba(0, 0, 0, 0.3);
+  }
+
+  /* ── Decorative rule ── */
+  .rule {
+    width: 56px;
+    height: 3px;
+    background: #e8b86d;
+    margin-bottom: 36px;
+    border-radius: 2px;
+    box-shadow: 0 1px 8px rgba(0, 0, 0, 0.4);
+  }
+
+  /* ── Headline ── */
+  .headline {
+    font-size: 96px;
+    font-weight: 800;
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    text-wrap: pretty;
+    text-shadow:
+      0 2px 16px rgba(0, 0, 0, 0.7),
+      0 4px 40px rgba(0, 0, 0, 0.7);
+  }
+
+  /* ── Caption ── */
+  .caption {
+    margin-top: 32px;
+    font-size: 36px;
+    font-weight: 400;
+    line-height: 1.45;
+    opacity: 0.85;
+    max-width: 660px;
+    text-shadow:
+      0 2px 12px rgba(0, 0, 0, 0.7);
+  }
+
+  /* ── Slide counter: top-left of safe zone ── */
+  .counter {
+    position: absolute;
+    top: 220px;
+    left: 88px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 24px;
+    font-weight: 400;
+    opacity: 0.35;
+    letter-spacing: 0.12em;
+    text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+    z-index: 2;
+  }
+</style>
+<style data-system-fonts>
+:root {
+  --sys-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --sys-serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Noto Serif", serif;
+  --sys-mono: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, "DejaVu Sans Mono", monospace;
+}
+body, html, div, span, p, a, li, td, th, label, input, button, textarea, select {
+  font-family: var(--sys-sans) !important;
+}
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--sys-serif) !important;
+}
+code, pre, kbd, samp, .mono, [class*="mono"] {
+  font-family: var(--sys-mono) !important;
+}
+</style>
+</head>
+<body>
+
+  <div class="scrim"></div>
+
+  <div class="counter">1 / 4</div>
+
+  <div class="safe-zone">
+    <div class="eyebrow">Episode 01</div>
+    <div class="rule"></div>
+    <h1 class="headline">The art of showing up</h1>
+    <p class="caption">Consistency beats intensity — every single time.</p>
+  </div>
+
+</body>
+</html>

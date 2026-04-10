@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 1080px;
+    height: 1920px;
+    overflow: hidden;
+    background: #fafaf8;
+  }
+
+  body {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    font-family: 'Lato', 'Helvetica Neue', Arial, sans-serif;
+  }
+
+  /* Paper texture */
+  body::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; mix-blend-mode: multiply;
+  }
+
+  .header {
+    padding: 80px 96px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative; z-index: 1;
+  }
+
+  /* topic: full opacity, slightly larger */
+  .topic {
+    font-size: 30px; font-weight: 700;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: #2d6a4f;
+  }
+
+  /* header-num: enough to be present, not distracting */
+  .header-num {
+    font-size: 28px; font-weight: 300;
+    color: #181818; opacity: 0.35; letter-spacing: 0.1em;
+  }
+
+  .top-rule {
+    margin: 60px 96px 0;
+    height: 1px;
+    background: linear-gradient(90deg, #2d6a4f, transparent);
+    opacity: 0.4;
+  }
+
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 96px;
+    position: relative; z-index: 1;
+  }
+
+  /* SVG quotation mark */
+  .open-quote {
+    position: absolute;
+    top: -20px; left: 48px;
+    pointer-events: none;
+    opacity: 0.13;
+    width: 260px; height: 220px;
+  }
+
+  .quote-text {
+    font-family: 'Playfair Display', 'Noto Serif CJK', Georgia, 'Times New Roman', serif;
+    font-size: 86px; font-weight: 700; font-style: italic;
+    line-height: 1.3; letter-spacing: -0.01em;
+    color: #181818;
+    position: relative; z-index: 1;
+    margin-bottom: 80px;
+    text-wrap: balance;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+  }
+
+  /* ── Attribution row — portrait + text side by side ── */
+  .attribution {
+    display: flex;
+    align-items: center;
+    gap: 48px;
+    position: relative; z-index: 1;
+  }
+
+  /* Circular portrait */
+  .portrait {
+    flex: 0 0 140px;
+    width: 140px; height: 140px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid #2d6a4f;
+    opacity: 0.92;
+  }
+  .portrait img {
+    width: 100%; height: 100%;
+    object-fit: cover; object-position: center top;
+    display: block;
+  }
+
+  .attribution-text { display: flex; flex-direction: column; gap: 12px; }
+
+  .attr-rule { width: 64px; height: 3px; background: #2d6a4f; margin-bottom: 4px; }
+
+  .author-name {
+    font-family: 'Playfair Display', 'Noto Serif CJK', Georgia, 'Times New Roman', serif;
+    font-size: 46px; font-weight: 700;
+    color: #181818; letter-spacing: 0.01em;
+  }
+
+  /* author-role: raised opacity and size for legibility */
+  .author-role {
+    font-size: 34px; font-weight: 400;
+    color: #181818; opacity: 0.6; letter-spacing: 0.04em;
+  }
+
+  .footer {
+    padding: 0 96px 80px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    position: relative; z-index: 1;
+  }
+
+  .bottom-rule {
+    flex: 1; height: 1px;
+    background: #181818; opacity: 0.1;
+    margin-right: 40px; margin-bottom: 8px;
+  }
+
+  /* slide-info: visible enough to orient the reader */
+  .slide-info {
+    font-size: 28px; font-weight: 400;
+    color: #181818; opacity: 0.38;
+    letter-spacing: 0.1em; white-space: nowrap;
+  }
+
+  .corner-br {
+    position: absolute; bottom: 80px; right: 80px;
+    width: 60px; height: 60px;
+    border-right: 2px solid #2d6a4f;
+    border-bottom: 2px solid #2d6a4f;
+    opacity: 0.25;
+  }
+  .corner-tl {
+    position: absolute; top: 80px; left: 80px;
+    width: 60px; height: 60px;
+    border-left: 2px solid #2d6a4f;
+    border-top: 2px solid #2d6a4f;
+    opacity: 0.25;
+  }
+</style>
+<style data-system-fonts>
+:root {
+  --sys-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --sys-serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Noto Serif", serif;
+  --sys-mono: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, "DejaVu Sans Mono", monospace;
+}
+body, html, div, span, p, a, li, td, th, label, input, button, textarea, select {
+  font-family: var(--sys-sans) !important;
+}
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--sys-serif) !important;
+}
+code, pre, kbd, samp, .mono, [class*="mono"] {
+  font-family: var(--sys-mono) !important;
+}
+</style>
+</head>
+<body>
+  <div class="corner-tl"></div>
+  <div class="corner-br"></div>
+
+  <div class="header">
+    <span class="topic">On Design</span>
+    <span class="header-num">3</span>
+  </div>
+
+  <div class="top-rule"></div>
+
+  <div class="main">
+    <svg class="open-quote" viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg">
+      <path d="M20 130 C20 90 45 55 80 30 L70 15 C25 42 0 82 0 130 C0 148 12 160 28 160 C44 160 55 148 55 132 C55 116 44 104 28 104 C24 104 22 104 20 105 Z" fill="#2d6a4f"/>
+      <path d="M110 130 C110 90 135 55 170 30 L160 15 C115 42 90 82 90 130 C90 148 102 160 118 160 C134 160 145 148 145 132 C145 116 134 104 118 104 C114 104 112 104 110 105 Z" fill="#2d6a4f"/>
+    </svg>
+
+    <blockquote class="quote-text">Design is not just what it looks like and feels like. Design is how it works.</blockquote>
+
+    <div class="attribution">
+      <div class="attribution-text">
+        <div class="attr-rule"></div>
+        <div class="author-name">Steve Jobs</div>
+        <div class="author-role">Apple Inc.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="bottom-rule"></div>
+    <div class="slide-info">3 / 4</div>
+  </div>
+</body>
+</html>

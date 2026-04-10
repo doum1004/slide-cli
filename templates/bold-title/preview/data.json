@@ -1,0 +1,57 @@
+{
+  "_template": "bold-title",
+  "_description": "High-impact editorial card with a gradient background, subtle grid overlay, and a giant Bebas Neue display title. Best for short punchy titles (1–3 words). Each slide can have its own gradient colors and highlight accent.",
+  "_slots": {
+    "title": "REQUIRED — the bold display title. Shown at 192px. Use text naturally — text-wrap:balance distributes lines evenly so any length looks intentional. Put context or explanation in subtitle, not in the title itself.",
+    "subtitle": "optional — one sentence of supporting text below the title",
+    "eyebrow": "optional — small uppercase label with a decorative line shown above the title",
+    "colorA": "optional — hex color for top of the gradient background (default: #1a0533)",
+    "colorB": "optional — hex color for bottom of the gradient background (default: #0d1f3c)",
+    "highlight": "optional — hex accent color used for the eyebrow text, dot, and rule (default: #ff6b35)",
+    "image": "optional — path or https:// URL. Used as a full-bleed background image behind the gradient. Dark, atmospheric photos work best (landscapes, textures, cityscapes)."
+  },
+  "title": "The Future Deck",
+  "slides": [
+    {
+      "layout": "bold-title",
+      "eyebrow": "The future is",
+      "title": "NOW",
+      "subtitle": "Everything you thought would take a decade is happening this year.",
+      "colorA": "#0d0221",
+      "colorB": "#1a0f2e",
+      "highlight": "#ff6b35",
+      "cta": "Stay curious →"
+    },
+    {
+      "layout": "bold-title",
+      "eyebrow": "Rule No. 2",
+      "title": "SHIP FAST",
+      "subtitle": "A good product shipped today beats a perfect product shipped never.",
+      "colorA": "#0a1628",
+      "colorB": "#051020",
+      "highlight": "#00d4ff",
+      "cta": "Move fast, learn faster"
+    },
+    {
+      "layout": "bold-title",
+      "eyebrow": "The bottom line",
+      "title": "BUILD",
+      "subtitle": "Ideas are worthless without execution. Start before you're ready.",
+      "colorA": "#1a0a00",
+      "colorB": "#0d1a00",
+      "highlight": "#f5c400",
+      "cta": "Start today"
+    },
+    {
+      "layout": "bold-title",
+      "eyebrow": "With image",
+      "title": "RISE",
+      "subtitle": "Great things are built one day at a time.",
+      "colorA": "#0a0a14",
+      "colorB": "#141428",
+      "highlight": "#a78bfa",
+      "image": "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1080",
+      "cta": "Keep climbing"
+    }
+  ]
+}

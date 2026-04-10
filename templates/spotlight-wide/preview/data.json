@@ -1,0 +1,61 @@
+{
+  "_template": "spotlight-wide",
+  "_description": "Widescreen spotlight card for presentations, pitch decks, and desktop carousels. Two-column layout: text content on the left, featured image on the right with a gradient fade and accent border. Ideal for team intros, testimonials, product features, and speaker cards. Keep bg and ink consistent across all slides; vary only accent.",
+  "_slots": {
+    "image": "REQUIRED — featured image. Headshot, product photo, or scene. Displayed in the right column (640px wide, full height) with object-fit: cover. Portrait-oriented photos work best — landscape photos will crop to the tall narrow column. Local path or URL.",
+    "heading": "REQUIRED — primary text in the left column. A name, quote, or short title. 2–10 words at 80px bold serif.",
+    "body": "optional — supporting text. Role, attribution, or 1–3 sentences. Shown at reduced opacity below the heading.",
+    "eyebrow": "optional — short uppercase label above the rule (e.g. 'FOUNDER', 'TESTIMONIAL', 'FEATURED'). Displayed in accent color.",
+    "footer": "optional — bottom-left text. Handle, brand, or attribution (e.g. '@yourcompany').",
+    "bg": "optional — background hex color. Also the gradient-fade target from the image. Use the SAME value on every slide. Default: #0c0b09",
+    "ink": "optional — primary text hex color. Use the SAME value on every slide. Default: #eae6de",
+    "accent": "optional — accent hex color for eyebrow, rule, and image border. VARY per slide. Default: #d4a054"
+  },
+  "title": "Meet the Team",
+  "slides": [
+    {
+      "layout": "spotlight-wide",
+      "image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1080&q=80",
+      "eyebrow": "Founder",
+      "heading": "Alex Chen",
+      "body": "Built three startups before turning thirty. Believes the best code is the code you delete. Now leading product at the intersection of design and engineering.",
+      "footer": "@theteam",
+      "bg": "#0c0b09",
+      "ink": "#eae6de",
+      "accent": "#d4a054"
+    },
+    {
+      "layout": "spotlight-wide",
+      "image": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=1080&q=80",
+      "eyebrow": "Design Lead",
+      "heading": "Maya Rodriguez",
+      "body": "Fifteen years shaping interfaces at companies you've used today. Obsessed with whitespace and the details nobody notices until they're gone.",
+      "footer": "@theteam",
+      "bg": "#0c0b09",
+      "ink": "#eae6de",
+      "accent": "#6db89c"
+    },
+    {
+      "layout": "spotlight-wide",
+      "image": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=1080&q=80",
+      "eyebrow": "Engineering",
+      "heading": "James Okafor",
+      "body": "Systems thinker. Turns messy problems into clean architectures. Previously built infrastructure serving two hundred million requests a day.",
+      "footer": "@theteam",
+      "bg": "#0c0b09",
+      "ink": "#eae6de",
+      "accent": "#b87e6d"
+    },
+    {
+      "layout": "spotlight-wide",
+      "image": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=1080&q=80",
+      "eyebrow": "Growth",
+      "heading": "Priya Sharma",
+      "body": "Scaled two products from zero to a million users. Data-driven but story-first.",
+      "footer": "@theteam",
+      "bg": "#0c0b09",
+      "ink": "#eae6de",
+      "accent": "#8a8ed4"
+    }
+  ]
+}

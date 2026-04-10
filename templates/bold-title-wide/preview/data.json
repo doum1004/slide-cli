@@ -1,0 +1,58 @@
+{
+  "_template": "bold-title-wide",
+  "_description": "High-impact editorial card with a gradient background — 16:9 widescreen. Title sits on the left, subtitle on the right in a two-column layout. Best for short punchy titles (1–4 words).",
+  "_slots": {
+    "title": "REQUIRED — the bold display title. Shown at 148px. Keep it punchy. Put context in subtitle.",
+    "subtitle": "optional — one sentence of supporting text shown to the right of the title",
+    "eyebrow": "optional — small uppercase label with a decorative line shown above the title",
+    "colorA": "optional — hex color for left of the gradient background (default: #1a0533)",
+    "colorB": "optional — hex color for right of the gradient background (default: #0d1f3c)",
+    "highlight": "optional — hex accent color used for the eyebrow text, dot, and rule (default: #ff6b35)",
+    "image": "optional — path or https:// URL. Used as a full-bleed background image behind the gradient.",
+    "cta": "optional — call-to-action text shown at the bottom"
+  },
+  "title": "The Future Deck",
+  "slides": [
+    {
+      "layout": "bold-title-wide",
+      "eyebrow": "The future is",
+      "title": "NOW",
+      "subtitle": "Everything you thought would take a decade is happening this year.",
+      "colorA": "#0d0221",
+      "colorB": "#1a0f2e",
+      "highlight": "#ff6b35",
+      "cta": "Stay curious →"
+    },
+    {
+      "layout": "bold-title-wide",
+      "eyebrow": "Rule No. 2",
+      "title": "SHIP FAST",
+      "subtitle": "A good product shipped today beats a perfect product shipped never.",
+      "colorA": "#0a1628",
+      "colorB": "#051020",
+      "highlight": "#00d4ff",
+      "cta": "Move fast, learn faster"
+    },
+    {
+      "layout": "bold-title-wide",
+      "eyebrow": "The bottom line",
+      "title": "BUILD",
+      "subtitle": "Ideas are worthless without execution. Start before you're ready.",
+      "colorA": "#1a0a00",
+      "colorB": "#0d1a00",
+      "highlight": "#f5c400",
+      "cta": "Start today"
+    },
+    {
+      "layout": "bold-title-wide",
+      "eyebrow": "With image",
+      "title": "RISE",
+      "subtitle": "Great things are built one day at a time.",
+      "colorA": "#0a0a14",
+      "colorB": "#141428",
+      "highlight": "#a78bfa",
+      "image": "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1920",
+      "cta": "Keep climbing"
+    }
+  ]
+}

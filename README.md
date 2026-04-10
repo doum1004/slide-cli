@@ -134,21 +134,21 @@ slide add-template ./my-template/ --force
 
 | id | Ratio | Required slots | Style | Preview |
 |---|---|---|---|---|
-| `minimal` | 9:16 | `heading` | Clean typographic slide, Fraunces serif | — |
-| `minimal-wide` | 16:9 | `heading` | Clean typographic two-column layout | — |
-| `bold-title` | 9:16 | `title` | High-contrast editorial, gradient background | — |
-| `bold-title-wide` | 16:9 | `title` | High-contrast editorial, widescreen | — |
-| `quote-card` | 9:16 | `quote` | Elegant pull-quote card with attribution | — |
-| `quote-card-wide` | 16:9 | `quote` | Pull-quote card, widescreen | — |
+| `minimal` | 9:16 | `heading` | Clean typographic slide, Fraunces serif | ![](https://raw.githubusercontent.com/doum1004/slide-cli/main/templates/minimal/preview/slide-1.jpg) |
+| `minimal-wide` | 16:9 | `heading` | Clean typographic two-column layout | ![](https://raw.githubusercontent.com/doum1004/slide-cli/main/templates/minimal-wide/preview/slide-1.jpg) |
+| `bold-title` | 9:16 | `title` | High-contrast editorial, gradient background | ![](https://raw.githubusercontent.com/doum1004/slide-cli/main/templates/bold-title/preview/slide-1.jpg) |
+| `bold-title-wide` | 16:9 | `title` | High-contrast editorial, widescreen | ![](https://raw.githubusercontent.com/doum1004/slide-cli/main/templates/bold-title-wide/preview/slide-1.jpg) |
+| `quote-card` | 9:16 | `quote` | Elegant pull-quote card with attribution | ![](https://raw.githubusercontent.com/doum1004/slide-cli/main/templates/quote-card/preview/slide-1.jpg) |
+| `quote-card-wide` | 16:9 | `quote` | Pull-quote card, widescreen | ![](https://raw.githubusercontent.com/doum1004/slide-cli/main/templates/quote-card-wide/preview/slide-1.jpg) |
 | `insight` | 9:16 | `heading` | Insight card with optional background image | ![](https://raw.githubusercontent.com/doum1004/slide-cli/main/templates/insight/preview/slide-1.jpg) |
 | `insight-wide` | 16:9 | `heading` | Widescreen insight card with background image | ![](https://raw.githubusercontent.com/doum1004/slide-cli/main/templates/insight-wide/preview/slide-1.jpg) |
 | `insight2` | 9:16 | `heading` | Insight card v2 — bold heading, body, image | ![](https://raw.githubusercontent.com/doum1004/slide-cli/main/templates/insight2/preview/slide-1.jpg) |
 | `insight2-wide` | 16:9 | `heading` | Widescreen insight card v2 | ![](https://raw.githubusercontent.com/doum1004/slide-cli/main/templates/insight2-wide/preview/slide-1.jpg) |
-| `spotlight` | 9:16 | `image`, `heading` | Image-forward spotlight, photo top | — |
-| `spotlight-wide` | 16:9 | `image`, `heading` | Widescreen spotlight, image right | — |
-| `overlay` | 9:16 | `headline` | Transparent overlay for video compositing | — |
-| `video-overlay` | 9:16 | — | Transparent 9:16 overlay layers for shorts | — |
-| `video-overlay-wide` | 16:9 | — | Transparent 16:9 overlay layers for video | — |
+| `spotlight` | 9:16 | `image`, `heading` | Image-forward spotlight, photo top | ![](https://raw.githubusercontent.com/doum1004/slide-cli/main/templates/spotlight/preview/slide-1.jpg) |
+| `spotlight-wide` | 16:9 | `image`, `heading` | Widescreen spotlight, image right | ![](https://raw.githubusercontent.com/doum1004/slide-cli/main/templates/spotlight-wide/preview/slide-1.jpg) |
+| `overlay` | 9:16 | `headline` | Transparent overlay for video compositing | ![](https://raw.githubusercontent.com/doum1004/slide-cli/main/templates/overlay/preview/slide-1.jpg) |
+| `video-overlay` | 9:16 | — | Transparent 9:16 overlay layers for shorts | ![](https://raw.githubusercontent.com/doum1004/slide-cli/main/templates/video-overlay/preview/slide-1.jpg) |
+| `video-overlay-wide` | 16:9 | — | Transparent 16:9 overlay layers for video | ![](https://raw.githubusercontent.com/doum1004/slide-cli/main/templates/video-overlay-wide/preview/slide-1.jpg) |
 
 > **Tip:** Run `slide preview --all` to regenerate preview images locally, or `slide preview <template-id>` for a single template.
 
