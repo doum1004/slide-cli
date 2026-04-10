@@ -9,6 +9,19 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 <!-- New entries are prepended automatically by the publish workflow -->
 
+## v1.0.11 — 2026-04-10
+
+### Changes
+
+- Add short-form video overlay template with four slides (991c38e)
+- feat: add preview command to regenerate template previews (8fdb5b8)
+- Update npm downloads badge to total downloads badge (781d89b)
+
+**Full diff:** [v1.0.10...v1.0.11](https://github.com/doum1004/slide-cli/compare/v1.0.10...v1.0.11)
+
+---
+
+
 ## v1.0.10 — 2026-04-07
 
 ### Changes
