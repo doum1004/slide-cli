@@ -247,3 +247,11 @@ docker run --rm -v $(pwd)/output:/work/output slide-cli \
 bun run build
 docker build -f Dockerfile.dev -t slide-cli-dev .
 ```
+
+## DATA
+
+![Visitors](https://visitor-badge.laobi.icu/badge?page_id=doum1004.slide-cli)
+
+## License
+
+MIT
