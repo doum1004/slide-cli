@@ -1,7 +1,7 @@
 # slide-cli
 
 [![npm version](https://img.shields.io/npm/v/slide-cli?style=flat-square&color=cb3837&logo=npm)](https://www.npmjs.com/package/slide-cli)
-[![npm downloads](https://img.shields.io/npm/dm/slide-cli?style=flat-square&color=cb3837)](https://www.npmjs.com/package/slide-cli)
+![total downloads](https://img.shields.io/npm/dt/slide-cli)
 [![CI](https://img.shields.io/github/actions/workflow/status/doum1004/slide-cli/ci.yml?branch=main&style=flat-square&label=CI&logo=github)](https://github.com/doum1004/slide-cli/actions/workflows/ci.yml)
 [![license](https://img.shields.io/npm/l/slide-cli?style=flat-square&color=blue)](./LICENSE)
 [![bun](https://img.shields.io/badge/built%20with-bun-f9f1e1?style=flat-square&logo=bun)](https://bun.sh)
