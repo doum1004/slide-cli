@@ -5,6 +5,7 @@ import { createCommand } from "./commands/create.js";
 import { listCommand } from "./commands/list.js";
 import { addTemplateCommand } from "./commands/add-template.js";
 import { guideCommand } from "./commands/guide.js";
+import { previewCommand } from "./commands/preview.js";
 import { ensureConfigDir } from "./utils/paths.js";
 
 ensureConfigDir();
@@ -65,6 +66,22 @@ program
   .description("Show the full template authoring guide (--json for LLM-agent-friendly output)")
   .action((opts) => {
     guideCommand();
+  });
+
+// ── preview ──────────────────────────────────────────────────────────────
+program
+  .command("preview [template-id]")
+  .description("Regenerate preview/ folder for a template (or all templates with --all)")
+  .option("-a, --all", "Regenerate previews for all built-in templates", false)
+  .option("-f, --format <png|jpg>", "Image format for screenshots", "jpg")
+  .option("--no-images", "Skip Puppeteer screenshot step (HTML only)")
+  .action(async (templateId, opts) => {
+    await previewCommand({
+      templateId,
+      all: opts.all,
+      format: opts.format as "png" | "jpg",
+      noImages: !opts.images,
+    });
   });
 
 program.parse(process.argv);

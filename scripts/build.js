@@ -2,7 +2,7 @@
 // Cross-platform build script (works on Windows, macOS, Linux)
 // Run with: bun scripts/build.js   OR   node scripts/build.js
 
-import { cpSync, mkdirSync, copyFileSync, rmSync, existsSync, readFileSync, writeFileSync } from "fs";
+import { cpSync, mkdirSync, copyFileSync, rmSync, existsSync, readFileSync, writeFileSync, readdirSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import { execSync } from "child_process";
@@ -41,6 +41,16 @@ const copies = [
 for (const [src, dest] of copies) {
   cpSync(join(root, src), join(root, dest), { recursive: true });
   console.log(`📁  Copied ${src}/ → ${dest}/`);
+}
+
+// Strip preview/ folders from dist/templates — they're for the repo only, not the npm package
+const distTemplates = join(dist, "templates");
+for (const name of readdirSync(distTemplates)) {
+  const previewDir = join(distTemplates, name, "preview");
+  if (existsSync(previewDir)) {
+    rmSync(previewDir, { recursive: true, force: true });
+    console.log(`🗑  Stripped ${name}/preview/ from dist`);
+  }
 }
 
 copyFileSync(join(root, "TEMPLATE_GUIDE.md"), join(root, "dist", "TEMPLATE_GUIDE.md"));

@@ -132,14 +132,25 @@ slide add-template ./my-template/ --force
 
 ## Built-in templates
 
-| id | Ratio | Required slots | Style |
-|---|---|---|---|
-| `minimal` | 9:16 | `heading` | Dark typographic, Fraunces serif |
-| `bold-title` | 9:16 | `title` | Gradient editorial, Bebas Neue |
-| `quote-card` | 9:16 | `quote` | Light serif pull-quote card |
-| `minimal-wide` | 16:9 | `heading` | Dark typographic, two-column layout |
-| `bold-title-wide` | 16:9 | `title` | Gradient editorial, title left / subtitle right |
-| `quote-card-wide` | 16:9 | `quote` | Light serif pull-quote, quote left / attribution right |
+| id | Ratio | Required slots | Style | Preview |
+|---|---|---|---|---|
+| `minimal` | 9:16 | `heading` | Clean typographic slide, Fraunces serif | — |
+| `minimal-wide` | 16:9 | `heading` | Clean typographic two-column layout | — |
+| `bold-title` | 9:16 | `title` | High-contrast editorial, gradient background | — |
+| `bold-title-wide` | 16:9 | `title` | High-contrast editorial, widescreen | — |
+| `quote-card` | 9:16 | `quote` | Elegant pull-quote card with attribution | — |
+| `quote-card-wide` | 16:9 | `quote` | Pull-quote card, widescreen | — |
+| `insight` | 9:16 | `heading` | Insight card with optional background image | ![](https://raw.githubusercontent.com/doum1004/slide-cli/main/templates/insight/preview/slide-1.jpg) |
+| `insight-wide` | 16:9 | `heading` | Widescreen insight card with background image | ![](https://raw.githubusercontent.com/doum1004/slide-cli/main/templates/insight-wide/preview/slide-1.jpg) |
+| `insight2` | 9:16 | `heading` | Insight card v2 — bold heading, body, image | ![](https://raw.githubusercontent.com/doum1004/slide-cli/main/templates/insight2/preview/slide-1.jpg) |
+| `insight2-wide` | 16:9 | `heading` | Widescreen insight card v2 | ![](https://raw.githubusercontent.com/doum1004/slide-cli/main/templates/insight2-wide/preview/slide-1.jpg) |
+| `spotlight` | 9:16 | `image`, `heading` | Image-forward spotlight, photo top | — |
+| `spotlight-wide` | 16:9 | `image`, `heading` | Widescreen spotlight, image right | — |
+| `overlay` | 9:16 | `headline` | Transparent overlay for video compositing | — |
+| `video-overlay` | 9:16 | — | Transparent 9:16 overlay layers for shorts | — |
+| `video-overlay-wide` | 16:9 | — | Transparent 16:9 overlay layers for video | — |
+
+> **Tip:** Run `slide preview --all` to regenerate preview images locally, or `slide preview <template-id>` for a single template.
 
 ---
 
