@@ -9,6 +9,18 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 <!-- New entries are prepended automatically by the publish workflow -->
 
+## v1.1.0 — 2026-04-17
+
+### Changes
+
+- feat: enhance HTML rendering and screenshot functionality with Google Fonts handling and Chrome path checks (48ae6c8)
+- Update README with visitor badge and license (ec45549)
+
+**Full diff:** [v1.0.11...v1.1.0](https://github.com/doum1004/slide-cli/compare/v1.0.11...v1.1.0)
+
+---
+
+
 ## v1.0.11 — 2026-04-10
 
 ### Changes
