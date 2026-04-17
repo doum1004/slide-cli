@@ -1,5 +1,5 @@
 import Handlebars from "handlebars";
-import { writeFileSync, mkdirSync, existsSync, readFileSync, renameSync } from "fs";
+import { writeFileSync, mkdirSync, existsSync, readFileSync, renameSync, unlinkSync } from "fs";
 import { join, resolve, extname, isAbsolute } from "path";
 import type { Template, SlideData, RenderResult } from "../types.js";
 
@@ -55,6 +55,8 @@ async function tryResolveImage(
 
 // ── HTML helpers ─────────────────────────────────────────────────────────────
 
+const GOOGLE_FONTS_RE = /@import\s+url\(['"]https:\/\/fonts\.googleapis\.com[^'"]*['"]\);?\s*/g;
+
 function extractBody(html: string): string {
   const match = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
   return match ? match[1] : html;
@@ -82,11 +84,13 @@ function extractHeadStyles(html: string): string {
 }
 
 function wrapHtml(content: string, width: number, height: number): string {
+  // FIX #1: strip Google Fonts imports for full HTML documents too
   if (content.trim().startsWith("<!DOCTYPE") || content.trim().startsWith("<html")) {
-    return content.replace(
-      /@import\s+url\(['"]https:\/\/fonts\.googleapis\.com[^'"]*['"]\);?\s*/g, ""
-    );
+    return content.replace(GOOGLE_FONTS_RE, "");
   }
+
+  // FIX #1: strip Google Fonts imports from partial HTML content before wrapping
+  const strippedContent = content.replace(GOOGLE_FONTS_RE, "");
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -98,7 +102,7 @@ function wrapHtml(content: string, width: number, height: number): string {
   html, body { width: ${width}px; height: ${height}px; overflow: hidden; }
 </style>
 </head>
-<body>${content}</body>
+<body>${strippedContent}</body>
 </html>`;
 }
 
@@ -182,17 +186,25 @@ async function screenshotSlides(
   const launchStart = performance.now();
   const puppeteer = await import("puppeteer");
 
+  // FIX #2: check CHROME_PATH env var first before hardcoded fallbacks
   const chromePaths = [
-    "/opt/google/chrome/chrome",
-    "/usr/bin/google-chrome",
+    process.env.CHROME_PATH,
     "/usr/bin/chromium",
     "/usr/bin/chromium-browser",
-    process.env.CHROME_PATH,
+    "/usr/bin/google-chrome",
+    "/opt/google/chrome/chrome",
   ].filter(Boolean) as string[];
 
   let executablePath: string | undefined;
   for (const p of chromePaths) {
     if (existsSync(p)) { executablePath = p; break; }
+  }
+
+  // FIX #3: fail loudly if no Chrome binary found instead of silently falling back
+  if (!executablePath) {
+    throw new Error(
+      `No Chrome binary found. Set the CHROME_PATH environment variable or install chromium. Searched: ${chromePaths.join(", ")}`
+    );
   }
 
   const browser = await puppeteer.default.launch({
@@ -217,14 +229,14 @@ async function screenshotSlides(
 
     const isJpeg = format === "jpg";
 
+    // FIX #4: transparency-override style placed after slide-styles so it
+    // wins the cascade regardless of what injected headStyles sets
     const shellHtml = `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <style id="slide-styles"></style>
-<style>
-  ${!isJpeg ? 'html, body { background: transparent !important; }' : ''}
-</style>
+${!isJpeg ? '<style id="transparency-override">html, body { background: transparent !important; }</style>' : ""}
 </head>
 <body></body>
 </html>`;
@@ -294,12 +306,18 @@ async function screenshotSlides(
         type: isJpeg ? "jpeg" : "png",
         quality: isJpeg ? 95 : undefined,
         clip: { x: 0, y: 0, width, height },
-        omitBackground: !isJpeg,  // ← ADD THIS
+        omitBackground: !isJpeg,
       });
       //console.log(`[perf]   slide ${result.slideIndex} screenshot: ${(performance.now() - t2).toFixed(0)}ms`);
 
+      // FIX #5: clean up orphaned .jpeg file if rename fails
       if (isJpeg && screenshotPath !== result.imagePath) {
-        renameSync(screenshotPath, result.imagePath);
+        try {
+          renameSync(screenshotPath, result.imagePath);
+        } catch (err) {
+          try { unlinkSync(screenshotPath); } catch {}
+          throw err;
+        }
       }
 
       //console.log(`[perf]   slide ${result.slideIndex} total: ${(performance.now() - slideStart).toFixed(0)}ms`);
