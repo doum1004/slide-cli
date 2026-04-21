@@ -9,6 +9,17 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 <!-- New entries are prepended automatically by the publish workflow -->
 
+## v1.1.1 — 2026-04-21
+
+### Changes
+
+- feat: enhance screenshot functionality by adding dynamic Chrome path checks (9aae7ab)
+
+**Full diff:** [v1.1.0...v1.1.1](https://github.com/doum1004/slide-cli/compare/v1.1.0...v1.1.1)
+
+---
+
+
 ## v1.1.0 — 2026-04-17
 
 ### Changes
