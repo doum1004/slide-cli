@@ -186,9 +186,18 @@ async function screenshotSlides(
   const launchStart = performance.now();
   const puppeteer = await import("puppeteer");
 
-  // FIX #2: check CHROME_PATH env var first before hardcoded fallbacks
   const chromePaths = [
     process.env.CHROME_PATH,
+    // Windows
+    join(process.env.PROGRAMFILES ?? "", "Google/Chrome/Application/chrome.exe"),
+    join(process.env["PROGRAMFILES(X86)"] ?? "", "Google/Chrome/Application/chrome.exe"),
+    join(process.env.LOCALAPPDATA ?? "", "Google/Chrome/Application/chrome.exe"),
+    join(process.env.PROGRAMFILES ?? "", "Microsoft/Edge/Application/msedge.exe"),
+    join(process.env["PROGRAMFILES(X86)"] ?? "", "Microsoft/Edge/Application/msedge.exe"),
+    // macOS
+    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+    // Linux
+    "/test",
     "/usr/bin/chromium",
     "/usr/bin/chromium-browser",
     "/usr/bin/google-chrome",
