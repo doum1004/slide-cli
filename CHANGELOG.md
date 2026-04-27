@@ -9,6 +9,18 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 <!-- New entries are prepended automatically by the publish workflow -->
 
+## v1.1.2 — 2026-04-27
+
+### Changes
+
+- update insight2 preview (0da3df9)
+- refactor: adjust heading and body layer positioning for improved layout (02b5f98)
+
+**Full diff:** [v1.1.1...v1.1.2](https://github.com/doum1004/slide-cli/compare/v1.1.1...v1.1.2)
+
+---
+
+
 ## v1.1.1 — 2026-04-21
 
 ### Changes
