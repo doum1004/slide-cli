@@ -53,16 +53,15 @@
     z-index: 1;
   }
 
-  /* ── Heading layer – always vertically centered ── */
+  /* ── Heading layer – pinned to top ── */
   .heading-layer {
     position: absolute;
-    top: 0;
+    top: 160px;
     left: 96px;
     right: 96px;
-    bottom: 0;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     z-index: 2;
     pointer-events: none;
   }
@@ -89,12 +88,12 @@
     pointer-events: auto;
   }
 
-  /* ── Body layer – pinned to bottom ── */
+  /* ── Body layer – subtitle zone, slightly below center ── */
   .body-layer {
     position: absolute;
+    top: 58%;
     left: 96px;
     right: 96px;
-    bottom: 350px;
     z-index: 2;
   }
 
@@ -161,13 +160,13 @@
   <!-- Noise texture -->
   <div class="noise"></div>
 
-  <!-- Heading – always centered -->
+  <!-- Heading – pinned to top -->
   <div class="heading-layer">
     <div class="rule"></div>
     <h1 class="heading">{{heading}}</h1>
   </div>
 
-  <!-- Body – always at bottom -->
+  <!-- Body – subtitle zone in middle -->
   {{#if body}}
   <div class="body-layer">
     <p class="body">{{body}}</p>
