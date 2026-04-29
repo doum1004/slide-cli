@@ -108,6 +108,23 @@
     opacity: 0.85;
     text-wrap: pretty;
     text-align: center;
+    white-space: pre-line;
+  }
+
+  .body.body--bullets {
+    list-style: disc;
+    list-style-position: outside;
+    padding-left: 1.15em;
+    text-align: left;
+    white-space: normal;
+  }
+
+  .body.body--bullets li {
+    margin-bottom: 0.35em;
+  }
+
+  .body.body--bullets li:last-child {
+    margin-bottom: 0;
   }
 
   /* ── Footer bar ── */
@@ -163,7 +180,15 @@
   {{#if body}}
   <div class="body-area">
     <div class="body-bar">
+      {{#if body_to_bullet}}
+      <ul class="body body--bullets">
+        {{#each (bodyBulletLines body)}}
+        <li>{{this}}</li>
+        {{/each}}
+      </ul>
+      {{else}}
       <p class="body">{{body}}</p>
+      {{/if}}
     </div>
   </div>
   {{/if}}

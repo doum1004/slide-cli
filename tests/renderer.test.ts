@@ -55,6 +55,13 @@ describe("Handlebars helpers", () => {
     expect(fn({})).toBe("no title");
     expect(fn({ title: "Hi" })).toBe("");
   });
+
+  it("bodyBulletLines splits on newlines and trims", () => {
+    const fn = Handlebars.compile("{{#each (bodyBulletLines body)}}[{{this}}]{{/each}}");
+    expect(fn({ body: "a\nb\nc" })).toBe("[a][b][c]");
+    expect(fn({ body: "  x  \n\ny" })).toBe("[x][y]");
+    expect(fn({ body: "" })).toBe("");
+  });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────

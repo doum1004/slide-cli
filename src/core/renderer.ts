@@ -10,6 +10,13 @@ Handlebars.registerHelper("or", (a, b) => a || b);
 Handlebars.registerHelper("default", (val, fallback) => val || fallback);
 Handlebars.registerHelper("upper", (s) => String(s).toUpperCase());
 Handlebars.registerHelper("lower", (s) => String(s).toLowerCase());
+/** Non-empty trimmed lines from body (for bullet lists). */
+Handlebars.registerHelper("bodyBulletLines", (body: unknown) =>
+  String(body ?? "")
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0)
+);
 
 // ── Image resolution ─────────────────────────────────────────────────────────
 const MIME: Record<string, string> = {

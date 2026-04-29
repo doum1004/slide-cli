@@ -109,6 +109,22 @@
     overflow-wrap: break-word;
     word-break: keep-all;
     line-break: loose;
+    white-space: pre-line;
+  }
+
+  .body.body--bullets {
+    list-style: disc;
+    list-style-position: outside;
+    padding-left: 1.15em;
+    white-space: normal;
+  }
+
+  .body.body--bullets li {
+    margin-bottom: 0.35em;
+  }
+
+  .body.body--bullets li:last-child {
+    margin-bottom: 0;
   }
 
   /* ── Footer area ── */
@@ -169,7 +185,15 @@
   <!-- Body – subtitle zone in middle -->
   {{#if body}}
   <div class="body-layer">
+    {{#if body_to_bullet}}
+    <ul class="body body--bullets">
+      {{#each (bodyBulletLines body)}}
+      <li>{{this}}</li>
+      {{/each}}
+    </ul>
+    {{else}}
     <p class="body">{{body}}</p>
+    {{/if}}
   </div>
   {{/if}}
 
