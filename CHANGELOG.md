@@ -9,6 +9,19 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 <!-- New entries are prepended automatically by the publish workflow -->
 
+## v1.1.3 — 2026-05-06
+
+### Changes
+
+- fix: update output path format and add check for existing directory (bab0211)
+- fix: replace program.parse with program.parseAsync for better async handling fix: add process.exit(0) to ensure graceful termination in commands (ab9a41a)
+- feat: add support for rendering body as bulleted lists in insight templates (b1d5c38)
+
+**Full diff:** [v1.1.2...v1.1.3](https://github.com/doum1004/slide-cli/compare/v1.1.2...v1.1.3)
+
+---
+
+
 ## v1.1.2 — 2026-04-27
 
 ### Changes
