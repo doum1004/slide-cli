@@ -21,13 +21,13 @@ function slugify(title: string): string {
 }
 
 /**
- * Build an auto output path: output/<YYYY-MM-DD_HH-MM>-<slug>
- * e.g. output/2025-06-03_14-22-my-great-deck
+ * Build an auto output path: output/<YYYY-MM-DD_HH-MM-SS>-<slug>
+ * e.g. output/2025-06-03_14-22-07-my-great-deck
  */
 function buildAutoOutDir(title: string): string {
   const now = new Date();
   const date = now.toISOString().slice(0, 10);                          // 2025-06-03
-  const time = now.toTimeString().slice(0, 5).replace(":", "-");        // 14-22
+  const time = now.toTimeString().slice(0, 8).replace(/:/g, "-");       // 14-22-07
   return join("output", `${date}_${time}-${slugify(title)}`);
 }
 
@@ -90,6 +90,11 @@ export async function createCommand(opts: CreateOptions) {
   const outDir = resolve(rawOut ? rawOut : buildAutoOutDir(data.title ?? "presentation"));
 
   if (!rawOut) {
+    if (existsSync(outDir)) {
+      console.error(chalk.red(`✖ Output directory already exists: ${outDir}`));
+      console.error(chalk.red(`  Use --out to specify a different path, or remove the existing directory.`));
+      process.exit(1);
+    }
     console.log(chalk.dim(`  No --out specified. Writing to auto-generated directory:`));
     console.log(`  ${chalk.cyan(outDir)}\n`);
   }
