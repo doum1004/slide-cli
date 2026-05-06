@@ -113,4 +113,6 @@ export async function previewCommand(opts: PreviewOptions) {
 
   console.log(`\n${chalk.green("✔")} ${succeeded} preview${succeeded !== 1 ? "s" : ""} generated` +
     (skipped > 0 ? chalk.dim(`, ${skipped} skipped`) : ""));
+
+  process.exit(0);
 }

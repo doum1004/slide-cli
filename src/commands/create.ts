@@ -229,4 +229,6 @@ ${skippedNote}
 
   Open the viewer:  ${chalk.cyan(`open ${join(outDir, "index.html")}`)}
 `);
+
+  process.exit(0);
 }
